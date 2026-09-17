@@ -1,0 +1,293 @@
+version: "1.0"
+
+semantic_model:
+  - name: boeing_customer_experience_semantic_model
+    description: >-
+      Semantic model for Boeing Customer Experience domain containing baseline records
+      that document customer feedback handling standards, complaint resolution processes,
+      and related operational guidelines. This model provides analytical access to
+      baseline documentation metadata including section references, titles, topics,
+      and sensitivity classifications.
+    
+    ai_context:
+      instructions: >-
+        This semantic model represents the Boeing Customer Experience baseline record system.
+        
+        
+        DATASET GRAIN:
+        
+        - baseline_record: One row per baseline record document. Each record represents a unique
+          baseline documentation entry identified by baseline_id (primary key).
+        
+        
+        ANALYTICAL DIMENSIONS:
+        
+        - section_ref: Reference code identifying the related section. Use for grouping and
+          filtering baseline records by section.
+        
+        - topic: Subject area covered by the baseline record. Use for topic-based analysis
+          and categorization.
+        
+        - sensitivity: Sensitivity level classification (e.g., Internal, Confidential, Public).
+          Use for security-based filtering and compliance reporting.
+        
+        - title: Descriptive title of the baseline record. Use for search and identification.
+        
+        
+        METRICS AND MEASURES:
+        
+        - Baseline Record Count: Count of baseline records. Use COUNT(baseline_id) or
+          COUNT(DISTINCT baseline_id) depending on analytical grain.
+        
+        - Records by Section: Count of baseline records grouped by section_ref.
+        
+        - Records by Topic: Count of baseline records grouped by topic.
+        
+        - Records by Sensitivity: Count of baseline records grouped by sensitivity level.
+        
+        
+        QUERY GUIDANCE:
+        
+        - When counting baseline records, use baseline_id as the counting field.
+        
+        - When filtering by section, use section_ref field.
+        
+        - When analyzing by topic or subject area, use the topic field.
+        
+        - When applying security or sensitivity filters, use the sensitivity field.
+        
+        - All text fields (section_ref, title, topic, sensitivity) support pattern matching
+          and text search operations in SQL Server.
+        
+        
+        SQL SERVER SPECIFIC GUIDANCE:
+        
+        - Use LIKE operator for pattern matching on varchar fields.
+        
+        - Use LEN() function for string length calculations.
+        
+        - Use UPPER() or LOWER() for case-insensitive comparisons.
+        
+        - Use CONCAT() or + operator for string concatenation.
+        
+        - Identity column baseline_id is auto-generated; do not include in INSERT statements.
+        
+        
+        BUSINESS CONTEXT:
+        
+        This dataset contains customer experience baseline documentation including feedback
+        handling standards, complaint resolution processes, and escalation paths. Records
+        are classified by sensitivity level and organized by section and topic for
+        operational reference and compliance tracking.
+
+    datasets:
+      - name: baseline_record
+        business_name: Baseline Record
+        description: >-
+          Contains baseline record data for customer experience documentation.
+          Each row represents a unique baseline record identified by baseline_id.
+          Records document customer feedback handling standards, complaint resolution
+          processes, escalation paths, and related operational guidelines.
+          Records are organized by section reference, categorized by topic, and
+          classified by sensitivity level for security and compliance purposes.
+          
+          Grain: One row per baseline record document.
+        
+        source: dbo.BASELINE_RECORD
+        
+        primary_key:
+          - baseline_id
+        
+        fields:
+          - name: baseline_id
+            business_name: Baseline Identifier
+            description: >-
+              Unique identifier for the baseline record. Auto-generated identity
+              column serving as the primary key. Uniquely identifies each baseline
+              documentation entry in the system.
+            sql_type: int
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+              - AUTO_INCREMENT
+              - IDENTITY
+          
+          - name: section_ref
+            business_name: Section Reference
+            description: >-
+              Reference code identifying the related section for the baseline record.
+              Used to organize and categorize baseline records by section. Required field.
+            sql_type: varchar(20)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: title
+            business_name: Title
+            description: >-
+              Title describing the baseline record. Provides a descriptive name for
+              the baseline documentation entry. Required field.
+            sql_type: varchar(200)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: topic
+            business_name: Topic
+            description: >-
+              Topic or subject area covered by the baseline record. Describes the
+              subject matter such as complaint resolution process, escalation paths,
+              or other customer experience operational areas. Required field.
+            sql_type: varchar(300)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: sensitivity
+            business_name: Sensitivity
+            description: >-
+              Indicates the sensitivity level of the baseline record content.
+              Classification used for security, access control, and compliance purposes.
+              Examples include Internal, Confidential, Public. Required field.
+            sql_type: varchar(50)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+
+    relationships: []
+
+    metrics:
+      - name: total_baseline_records
+        business_name: Total Baseline Records
+        description: >-
+          Total count of baseline records in the system. Represents the complete
+          inventory of baseline documentation entries.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(br.baseline_id) AS total_baseline_records
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_section
+        business_name: Baseline Records by Section
+        description: >-
+          Count of baseline records grouped by section reference. Shows the
+          distribution of baseline documentation across different sections.
+        return_type: integer
+        result_grain: one row per section
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.section_ref,
+                    COUNT(br.baseline_id) AS record_count
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.section_ref
+              columns_used:
+                - baseline_record.section_ref
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_topic
+        business_name: Baseline Records by Topic
+        description: >-
+          Count of baseline records grouped by topic or subject area. Provides
+          insight into the distribution of documentation across different customer
+          experience topics.
+        return_type: integer
+        result_grain: one row per topic
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.topic,
+                    COUNT(br.baseline_id) AS record_count
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.topic
+              columns_used:
+                - baseline_record.topic
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_sensitivity
+        business_name: Baseline Records by Sensitivity Level
+        description: >-
+          Count of baseline records grouped by sensitivity classification.
+          Used for security compliance reporting and access control analysis.
+        return_type: integer
+        result_grain: one row per sensitivity level
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.sensitivity,
+                    COUNT(br.baseline_id) AS record_count
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.sensitivity
+              columns_used:
+                - baseline_record.sensitivity
+                - baseline_record.baseline_id
+      
+      - name: distinct_sections
+        business_name: Distinct Section Count
+        description: >-
+          Count of distinct section references in the baseline record system.
+          Represents the number of unique sections containing baseline documentation.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.section_ref) AS distinct_sections
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.section_ref
+      
+      - name: distinct_topics
+        business_name: Distinct Topic Count
+        description: >-
+          Count of distinct topics covered in the baseline record system.
+          Represents the breadth of subject areas documented in the customer
+          experience baseline records.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.topic) AS distinct_topics
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.topic
+      
+      - name: distinct_sensitivity_levels
+        business_name: Distinct Sensitivity Level Count
+        description: >-
+          Count of distinct sensitivity classifications used in the baseline
+          record system. Represents the number of unique sensitivity levels
+          applied to baseline documentation.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.sensitivity) AS distinct_sensitivity_levels
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.sensitivity
