@@ -1,0 +1,284 @@
+version: "1.0"
+
+semantic_model:
+  - name: supply_chain_baseline_semantic_model
+    description: >-
+      Semantic model for Supply Chain baseline record management system.
+      This model provides analytical capabilities for baseline records including
+      inventory policies, warehouse procedures, and supply chain documentation.
+      The model is designed to support analytical queries on baseline record metadata,
+      categorization, and sensitivity classification.
+    
+    ai_context:
+      instructions: >-
+        ## Dataset Grain
+        
+        **baseline_record**: One row per baseline record. Each record represents a unique
+        baseline document or policy within the supply chain domain. The grain is defined
+        by the baseline_id primary key.
+        
+        ## Metric Selection and Aggregation
+        
+        When analyzing baseline records:
+        - Use COUNT(DISTINCT baseline_id) for counting unique baseline records
+        - Use COUNT(*) for total record count when no duplicates exist
+        - Group by section_ref to analyze records by supply chain section
+        - Group by topic to analyze records by subject area
+        - Group by sensitivity to analyze records by information classification
+        
+        ## Dimension Analysis
+        
+        **Section Reference (section_ref)**: Use this dimension to analyze baseline records
+        by supply chain section. This is a categorical dimension representing organizational
+        structure or functional areas within the supply chain.
+        
+        **Topic**: Use this dimension to analyze baseline records by subject area or theme.
+        This enables content-based analysis and categorization of baseline documentation.
+        
+        **Sensitivity**: Use this dimension to analyze baseline records by information
+        sensitivity level. This supports compliance, security, and access control analytics.
+        
+        **Title**: Descriptive dimension providing human-readable identification of baseline
+        records. Useful for filtering and detailed reporting.
+        
+        ## Query Guidance
+        
+        When querying baseline_record:
+        - Always use baseline_id as the unique identifier
+        - Filter by section_ref when analyzing specific supply chain sections
+        - Filter by sensitivity when analyzing information classification
+        - Use topic for content-based filtering and categorization
+        - All fields are NOT NULL, so no special NULL handling is required
+        
+        ## Analytical Use Cases
+        
+        Supported analytical queries include:
+        - Count of baseline records by section
+        - Count of baseline records by topic
+        - Count of baseline records by sensitivity level
+        - Distribution analysis of records across sections
+        - Distribution analysis of records across sensitivity levels
+        - Identification of most common topics
+        - Section-level baseline record inventory
+        
+        ## Data Quality Considerations
+        
+        - baseline_id is an auto-incrementing identity column and serves as the primary key
+        - All columns have NOT NULL constraints ensuring data completeness
+        - No PII fields are present in this dataset
+        - Exposure index is 0.0%, indicating no sensitive personal information
+    
+    datasets:
+      - name: baseline_record
+        business_name: Baseline Record
+        description: >-
+          Contains baseline record data information for supply chain management.
+          Each row represents a unique baseline record identified by baseline_id.
+          Baseline records document policies, procedures, and standards within the
+          supply chain domain. Records are categorized by section reference, topic,
+          and sensitivity level. This dataset supports analytical queries for baseline
+          record inventory, categorization, and sensitivity classification analysis.
+          Grain: One row per baseline record.
+        source: dbo.BASELINE_RECORD
+        primary_key:
+          - baseline_id
+        fields:
+          - name: baseline_id
+            business_name: Baseline Identifier
+            description: >-
+              Unique identifier for a baseline record. This is an auto-incrementing
+              identity column that serves as the primary key for the baseline_record
+              dataset. Each baseline_id uniquely identifies a single baseline record
+              within the supply chain system.
+            sql_type: int
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+              - AUTO_INCREMENT
+              - IDENTITY
+          
+          - name: section_ref
+            business_name: Section Reference
+            description: >-
+              Reference code identifying the related supply chain section. This field
+              categorizes baseline records by organizational structure or functional
+              area within the supply chain. Used for section-level analysis and filtering.
+            sql_type: varchar(20)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: title
+            business_name: Title
+            description: >-
+              Descriptive title for the baseline record. Provides human-readable
+              identification of the baseline record content. Used for filtering,
+              searching, and detailed reporting.
+            sql_type: varchar(200)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: topic
+            business_name: Topic
+            description: >-
+              Topic or subject area covered by the baseline record. Categorizes
+              baseline records by content theme or subject matter. Enables content-based
+              analysis and categorization of baseline documentation.
+            sql_type: varchar(300)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: sensitivity
+            business_name: Sensitivity
+            description: >-
+              Indicates the information sensitivity level of the baseline record.
+              Classifies records by information security and access control requirements.
+              Supports compliance, security, and access control analytics.
+            sql_type: varchar(50)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+    
+    relationships: []
+    
+    metrics:
+      - name: total_baseline_records
+        business_name: Total Baseline Records
+        description: >-
+          Total count of baseline records in the system. This metric provides
+          the overall inventory count of baseline records across all sections,
+          topics, and sensitivity levels.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(*) AS total_baseline_records
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_section
+        business_name: Baseline Records by Section
+        description: >-
+          Count of baseline records grouped by supply chain section reference.
+          This metric enables section-level analysis of baseline record distribution
+          and inventory management.
+        return_type: integer
+        result_grain: one row per section
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.section_ref,
+                    COUNT(*) AS baseline_records_by_section
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.section_ref
+              columns_used:
+                - baseline_record.section_ref
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_topic
+        business_name: Baseline Records by Topic
+        description: >-
+          Count of baseline records grouped by topic or subject area. This metric
+          enables content-based analysis of baseline record distribution and
+          identification of most common topics.
+        return_type: integer
+        result_grain: one row per topic
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.topic,
+                    COUNT(*) AS baseline_records_by_topic
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.topic
+              columns_used:
+                - baseline_record.topic
+                - baseline_record.baseline_id
+      
+      - name: baseline_records_by_sensitivity
+        business_name: Baseline Records by Sensitivity Level
+        description: >-
+          Count of baseline records grouped by information sensitivity level.
+          This metric supports compliance, security, and access control analytics
+          by showing the distribution of records across sensitivity classifications.
+        return_type: integer
+        result_grain: one row per sensitivity level
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    br.sensitivity,
+                    COUNT(*) AS baseline_records_by_sensitivity
+                FROM dbo.BASELINE_RECORD AS br
+                GROUP BY br.sensitivity
+              columns_used:
+                - baseline_record.sensitivity
+                - baseline_record.baseline_id
+      
+      - name: distinct_sections
+        business_name: Distinct Section Count
+        description: >-
+          Count of distinct supply chain sections represented in baseline records.
+          This metric provides insight into the organizational coverage of baseline
+          documentation across supply chain functional areas.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.section_ref) AS distinct_sections
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.section_ref
+      
+      - name: distinct_topics
+        business_name: Distinct Topic Count
+        description: >-
+          Count of distinct topics or subject areas covered by baseline records.
+          This metric provides insight into the content diversity and subject
+          coverage of baseline documentation.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.topic) AS distinct_topics
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.topic
+      
+      - name: distinct_sensitivity_levels
+        business_name: Distinct Sensitivity Level Count
+        description: >-
+          Count of distinct information sensitivity levels used in baseline records.
+          This metric provides insight into the information classification structure
+          and security categorization scheme.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(DISTINCT br.sensitivity) AS distinct_sensitivity_levels
+                FROM dbo.BASELINE_RECORD AS br
+              columns_used:
+                - baseline_record.sensitivity
