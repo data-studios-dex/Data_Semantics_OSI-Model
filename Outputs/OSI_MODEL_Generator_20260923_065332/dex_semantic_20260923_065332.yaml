@@ -1,0 +1,1066 @@
+version: "1.0"
+
+semantic_model:
+  - name: boeing_customer_experience_semantic_model
+    description: >-
+      Semantic model for Boeing Customer Experience domain covering modification management,
+      baseline requirements, impact analysis, task execution, and audit tracking.
+      This model supports analytical queries across modification lifecycle, compliance tracking,
+      task management, and audit event analysis.
+    
+    ai_context:
+      instructions: >-
+        ## Dataset Grain
+        
+        - **mod_record**: One row per modification. Each modification represents a change request
+          or process improvement initiative within the Customer Experience domain. Primary key: mod_id.
+        
+        - **baseline_record**: One row per baseline section. Each baseline section represents a
+          requirement, standard, or policy section that modifications may impact. Primary key: baseline_id.
+        
+        - **impact_record**: One row per impact assessment. Each impact record links a modification
+          to a baseline section and describes the rationale and change type. Primary key: impact_id.
+          Multiple impact records may exist for a single modification.
+        
+        - **task_record**: One row per task. Each task represents an execution step or deliverable
+          associated with a modification. Primary key: task_id. Multiple tasks may exist for a single modification.
+        
+        - **audit_event**: One row per audit event. Each audit event captures a change or action
+          performed on a business record. Primary key: audit_id.
+        
+        ## Join Guidance
+        
+        ### Modification to Impact
+        Join mod_record to impact_record using mod_id (one-to-many).
+        One modification may have multiple impact records.
+        
+        ### Modification to Task
+        Join mod_record to task_record using mod_id (one-to-many).
+        One modification may have multiple tasks.
+        
+        ### Impact to Baseline
+        Join impact_record to baseline_record using baseline_ref = section_ref (many-to-one).
+        Multiple impact records may reference the same baseline section.
+        
+        ## Double Counting Prevention
+        
+        - When analyzing modification-level metrics (e.g., total modifications, modification count by status),
+          query mod_record directly. Do not join to impact_record or task_record unless filtering or grouping
+          by impact or task attributes.
+        
+        - When counting tasks per modification, join mod_record to task_record and count task_id.
+        
+        - When counting impacts per modification, join mod_record to impact_record and count impact_id.
+        
+        - Do not sum modification-level attributes (e.g., mod_id) after joining to impact_record or task_record,
+          as this will duplicate modification counts.
+        
+        ## Time Analysis
+        
+        - Use mod_record.created_date for modification creation time analysis.
+        - Use mod_record.updated_date for modification update time analysis.
+        - Use task_record.created_date for task creation time analysis.
+        - Use task_record.updated_date for task update time analysis.
+        - Use audit_event.event_ts for audit event time analysis.
+        
+        ## Metric Selection
+        
+        - For modification-level counts and status analysis, use mod_record.
+        - For task-level counts and status analysis, use task_record.
+        - For impact-level counts and change type analysis, use impact_record.
+        - For baseline section counts and sensitivity analysis, use baseline_record.
+        - For audit event counts and action analysis, use audit_event.
+        
+        ## Query Restrictions
+        
+        - The owner_name field in impact_record contains PII and has been redacted in sample data.
+          Use with appropriate data governance controls.
+        
+        - The checklist field in task_record is stored as JSONB. Use PostgreSQL JSON functions
+          to query checklist contents.
+        
+        - Boolean fields (is_active, is_selected) use PostgreSQL BOOL type. Filter using true/false values.
+
+    datasets:
+      - name: mod_record
+        business_name: Modification Record
+        description: >-
+          Contains modification records representing change requests, process improvements,
+          or updates within the Customer Experience domain. Each modification has a unique
+          identifier (mod_id) and business reference (mod_ref). Modifications track approval
+          status, classification, applicability, associated documentation, safety classification,
+          certification basis, release authorities, target revision, active status, and
+          creation/update timestamps. Grain: one row per modification.
+        source: transformed.mod_record
+        primary_key:
+          - mod_id
+        fields:
+          - name: mod_id
+            business_name: Modification Identifier
+            description: >-
+              Unique identifier for a modification record. Auto-incremented integer serving
+              as the primary key.
+            sql_type: INT4
+            constraints:
+              - PK
+              - NOT NULL
+              - AUTO_INCREMENT
+          
+          - name: mod_ref
+            business_name: Modification Reference
+            description: >-
+              Unique business reference code for the modification. Used for external
+              identification and tracking.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: title
+            business_name: Title
+            description: >-
+              Title summarizing the modification purpose and scope.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: mod_class
+            business_name: Modification Class
+            description: >-
+              Classification of the modification type or category (e.g., Process Change,
+              System Update, Policy Revision).
+            sql_type: VARCHAR(50)
+            dimension:
+              is_time: false
+          
+          - name: applicability
+            business_name: Applicability
+            description: >-
+              Text describing where and how the modification is applicable (e.g., geographic
+              regions, business units, customer segments).
+            sql_type: TEXT
+          
+          - name: approved_data_ref
+            business_name: Approved Data Reference
+            description: >-
+              Reference to the approved data or documentation for the modification.
+            sql_type: VARCHAR(200)
+          
+          - name: approval_status
+            business_name: Approval Status
+            description: >-
+              Indicates the current approval status of the modification (e.g., Draft, Pending,
+              Approved, Rejected).
+            sql_type: VARCHAR(100)
+            dimension:
+              is_time: false
+          
+          - name: drawing_ref
+            business_name: Drawing Reference
+            description: >-
+              Reference to an associated drawing or design document.
+            sql_type: VARCHAR(200)
+          
+          - name: ica_ref
+            business_name: ICA Reference
+            description: >-
+              Reference to an associated impact or implementation control document.
+            sql_type: VARCHAR(200)
+          
+          - name: change_desc
+            business_name: Change Description
+            description: >-
+              Detailed description of the change introduced by the modification.
+            sql_type: TEXT
+          
+          - name: safety_classification
+            business_name: Safety Classification
+            description: >-
+              Indicates the safety classification associated with the modification
+              (e.g., Safety Critical, Non-Safety Critical).
+            sql_type: VARCHAR(150)
+            dimension:
+              is_time: false
+          
+          - name: cert_basis
+            business_name: Certification Basis
+            description: >-
+              Text describing the certification basis or regulatory foundation for the modification.
+            sql_type: TEXT
+          
+          - name: release_authorities
+            business_name: Release Authorities
+            description: >-
+              List of authorities or roles responsible for releasing the modification.
+            sql_type: VARCHAR(300)
+          
+          - name: target_revision
+            business_name: Target Revision
+            description: >-
+              Target document or baseline revision associated with the modification.
+            sql_type: VARCHAR(100)
+          
+          - name: is_active
+            business_name: Is Active
+            description: >-
+              Indicates whether the modification record is currently active. Boolean field
+              with default value true.
+            sql_type: BOOL
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: false
+          
+          - name: created_date
+            business_name: Created Date
+            description: >-
+              Timestamp recording when the modification record was created.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: true
+          
+          - name: updated_date
+            business_name: Updated Date
+            description: >-
+              Timestamp recording when the modification record was last updated.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: true
+
+      - name: baseline_record
+        business_name: Baseline Record
+        description: >-
+          Contains baseline requirement and policy sections that serve as the foundation
+          for impact analysis. Each baseline section has a unique identifier (baseline_id)
+          and section reference code (section_ref). Baseline sections describe requirements,
+          standards, or policies organized by topic and sensitivity level. Grain: one row
+          per baseline section.
+        source: transformed.baseline_record
+        primary_key:
+          - baseline_id
+        fields:
+          - name: baseline_id
+            business_name: Baseline Identifier
+            description: >-
+              Unique identifier for a baseline record. Auto-incremented integer serving
+              as the primary key.
+            sql_type: INT4
+            constraints:
+              - PK
+              - NOT NULL
+              - AUTO_INCREMENT
+          
+          - name: section_ref
+            business_name: Section Reference
+            description: >-
+              Unique section reference code for the baseline record. Used for cross-referencing
+              from impact records.
+            sql_type: VARCHAR(20)
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: title
+            business_name: Title
+            description: >-
+              Title describing the baseline section content and purpose.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+          
+          - name: topic
+            business_name: Topic
+            description: >-
+              Topic area covered by the baseline section (e.g., Customer Feedback Management,
+              Data Privacy, Service Quality).
+            sql_type: VARCHAR(300)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: sensitivity
+            business_name: Sensitivity
+            description: >-
+              Indicates the sensitivity level associated with the baseline section
+              (e.g., High, Medium, Low).
+            sql_type: VARCHAR(20)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+
+      - name: impact_record
+        business_name: Impact Record
+        description: >-
+          Contains impact assessment records linking modifications to baseline sections.
+          Each impact record describes the rationale, change type, owner, and selection
+          status for a specific modification-baseline relationship. Grain: one row per
+          impact assessment. Multiple impact records may exist for a single modification.
+        source: transformed.impact_record
+        primary_key:
+          - impact_id
+        fields:
+          - name: impact_id
+            business_name: Impact Identifier
+            description: >-
+              Unique identifier for an impact record. Auto-incremented integer serving
+              as the primary key.
+            sql_type: INT4
+            constraints:
+              - PK
+              - NOT NULL
+              - AUTO_INCREMENT
+          
+          - name: mod_id
+            business_name: Modification Identifier
+            description: >-
+              References the related modification record. Foreign key to mod_record.mod_id.
+            sql_type: INT4
+            constraints:
+              - FK
+              - NOT NULL
+          
+          - name: baseline_ref
+            business_name: Baseline Reference
+            description: >-
+              References the related baseline section by its reference code. Foreign key
+              to baseline_record.section_ref.
+            sql_type: VARCHAR(20)
+            constraints:
+              - FK
+              - NOT NULL
+          
+          - name: rationale
+            business_name: Rationale
+            description: >-
+              Text explanation describing the rationale for the impact and why the baseline
+              section is affected by the modification.
+            sql_type: TEXT
+          
+          - name: change_type
+            business_name: Change Type
+            description: >-
+              Indicates the type of change being applied (e.g., Revise, Add, Delete, Clarify).
+            sql_type: VARCHAR(30)
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: false
+          
+          - name: owner_name
+            business_name: Owner Name
+            description: >-
+              Name of the person responsible for the impact record. Contains PII.
+            sql_type: VARCHAR(150)
+            constraints:
+              - PII
+          
+          - name: is_selected
+            business_name: Is Selected
+            description: >-
+              Indicates whether the impact record has been selected for implementation.
+              Boolean field with default value false.
+            sql_type: BOOL
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: false
+
+      - name: task_record
+        business_name: Task Record
+        description: >-
+          Contains task execution records associated with modifications. Each task represents
+          a specific deliverable, action, or execution step required to implement a modification.
+          Tasks track status, effectivity, requirements, safety considerations, and execution
+          checklists. Grain: one row per task. Multiple tasks may exist for a single modification.
+        source: transformed.task_record
+        primary_key:
+          - task_id
+        fields:
+          - name: task_id
+            business_name: Task Identifier
+            description: >-
+              Unique identifier for a task record. Auto-incremented integer serving as
+              the primary key.
+            sql_type: INT4
+            constraints:
+              - PK
+              - NOT NULL
+              - AUTO_INCREMENT
+          
+          - name: mod_id
+            business_name: Modification Identifier
+            description: >-
+              References the related modification record for the task. Foreign key to
+              mod_record.mod_id.
+            sql_type: INT4
+            constraints:
+              - FK
+              - NOT NULL
+          
+          - name: task_ref
+            business_name: Task Reference
+            description: >-
+              Reference code used to identify the task within the modification.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+          
+          - name: title
+            business_name: Title
+            description: >-
+              Title summarizing the task to be performed.
+            sql_type: VARCHAR(300)
+            constraints:
+              - NOT NULL
+          
+          - name: source_ref
+            business_name: Source Reference
+            description: >-
+              Reference back to the original source requirement or document for the task.
+            sql_type: VARCHAR(20)
+          
+          - name: status
+            business_name: Status
+            description: >-
+              Indicates the current status of the task (e.g., Draft, In Progress, Completed,
+              Cancelled).
+            sql_type: VARCHAR(30)
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: false
+          
+          - name: effectivity
+            business_name: Effectivity
+            description: >-
+              Text describing where and from when the task is effective.
+            sql_type: TEXT
+          
+          - name: preliminary_requirements
+            business_name: Preliminary Requirements
+            description: >-
+              Text describing prerequisite requirements that must be met before executing
+              the task.
+            sql_type: TEXT
+          
+          - name: safety_text
+            business_name: Safety Text
+            description: >-
+              Text capturing any safety-related considerations for executing the task.
+            sql_type: TEXT
+          
+          - name: checklist
+            business_name: Checklist
+            description: >-
+              JSON checklist containing merged task steps and readiness gates. Stored as
+              JSONB for structured querying.
+            sql_type: JSONB
+            constraints:
+              - NOT NULL
+              - DEFAULT
+          
+          - name: created_date
+            business_name: Created Date
+            description: >-
+              Timestamp recording when the task record was created.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: true
+          
+          - name: updated_date
+            business_name: Updated Date
+            description: >-
+              Timestamp recording when the task record was last updated.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: true
+
+      - name: audit_event
+        business_name: Audit Event
+        description: >-
+          Contains audit event records tracking changes and actions performed on business
+          records. Each audit event captures the timestamp, action type, record reference,
+          and detailed description of the audited activity. Grain: one row per audit event.
+        source: transformed.audit_event
+        primary_key:
+          - audit_id
+        fields:
+          - name: audit_id
+            business_name: Audit Identifier
+            description: >-
+              Unique identifier for an audit event record. Auto-incremented integer serving
+              as the primary key.
+            sql_type: INT4
+            constraints:
+              - PK
+              - NOT NULL
+              - AUTO_INCREMENT
+          
+          - name: event_ts
+            business_name: Event Timestamp
+            description: >-
+              Timestamp recording when the audit event occurred.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+              - DEFAULT
+            dimension:
+              is_time: true
+          
+          - name: action
+            business_name: Action
+            description: >-
+              Describes the type of action that was audited (e.g., Status Updated, Record Created,
+              Record Deleted, Field Modified).
+            sql_type: VARCHAR(150)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: record_ref
+            business_name: Record Reference
+            description: >-
+              Reference identifier for the business record associated with the audit event.
+            sql_type: VARCHAR(150)
+          
+          - name: details
+            business_name: Details
+            description: >-
+              Text description providing additional details about the audit event.
+            sql_type: TEXT
+
+    relationships:
+      - name: mod_record_to_impact_record
+        left_dataset: mod_record
+        right_dataset: impact_record
+        relationship_type: one_to_many
+        join:
+          left:
+            - mod_id
+          right:
+            - mod_id
+        join_type: one_to_many
+        resolution: >-
+          One modification may have multiple impact records. Join mod_record to impact_record
+          using mod_id. When analyzing modification-level metrics after joining to impact_record,
+          use DISTINCT or GROUP BY to avoid double counting modifications.
+
+      - name: mod_record_to_task_record
+        left_dataset: mod_record
+        right_dataset: task_record
+        relationship_type: one_to_many
+        join:
+          left:
+            - mod_id
+          right:
+            - mod_id
+        join_type: one_to_many
+        resolution: >-
+          One modification may have multiple tasks. Join mod_record to task_record using mod_id.
+          When analyzing modification-level metrics after joining to task_record, use DISTINCT
+          or GROUP BY to avoid double counting modifications.
+
+      - name: impact_record_to_baseline_record
+        left_dataset: impact_record
+        right_dataset: baseline_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - baseline_ref
+          right:
+            - section_ref
+        join_type: many_to_one
+        resolution: >-
+          Multiple impact records may reference the same baseline section. Join impact_record
+          to baseline_record using baseline_ref = section_ref. This relationship enables
+          analysis of which baseline sections are most frequently impacted by modifications.
+
+    metrics:
+      - name: total_modifications
+        business_name: Total Modifications
+        description: >-
+          Total count of modification records in the system. Represents the complete inventory
+          of change requests and process improvements.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(mod_record.mod_id) AS total_modifications
+                FROM transformed.mod_record AS mod_record
+              columns_used:
+                - mod_record.mod_id
+
+      - name: active_modifications
+        business_name: Active Modifications
+        description: >-
+          Count of modification records where is_active is true. Represents modifications
+          currently in scope for tracking and execution.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(mod_record.mod_id) AS active_modifications
+                FROM transformed.mod_record AS mod_record
+                WHERE mod_record.is_active = true
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.is_active
+
+      - name: modifications_by_approval_status
+        business_name: Modifications by Approval Status
+        description: >-
+          Count of modifications grouped by approval status. Enables analysis of modification
+          pipeline and approval bottlenecks.
+        return_type: integer
+        result_grain: one row per approval status
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    mod_record.approval_status,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM transformed.mod_record AS mod_record
+                GROUP BY mod_record.approval_status
+              columns_used:
+                - mod_record.approval_status
+                - mod_record.mod_id
+
+      - name: modifications_by_class
+        business_name: Modifications by Class
+        description: >-
+          Count of modifications grouped by modification class. Enables analysis of modification
+          type distribution.
+        return_type: integer
+        result_grain: one row per modification class
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    mod_record.mod_class,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM transformed.mod_record AS mod_record
+                GROUP BY mod_record.mod_class
+              columns_used:
+                - mod_record.mod_class
+                - mod_record.mod_id
+
+      - name: modifications_by_safety_classification
+        business_name: Modifications by Safety Classification
+        description: >-
+          Count of modifications grouped by safety classification. Enables analysis of
+          safety-critical vs non-safety-critical modifications.
+        return_type: integer
+        result_grain: one row per safety classification
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    mod_record.safety_classification,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM transformed.mod_record AS mod_record
+                GROUP BY mod_record.safety_classification
+              columns_used:
+                - mod_record.safety_classification
+                - mod_record.mod_id
+
+      - name: total_tasks
+        business_name: Total Tasks
+        description: >-
+          Total count of task records in the system. Represents the complete inventory
+          of execution tasks across all modifications.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(task_record.task_id) AS total_tasks
+                FROM transformed.task_record AS task_record
+              columns_used:
+                - task_record.task_id
+
+      - name: tasks_by_status
+        business_name: Tasks by Status
+        description: >-
+          Count of tasks grouped by status. Enables analysis of task execution progress
+          and completion rates.
+        return_type: integer
+        result_grain: one row per task status
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    task_record.status,
+                    COUNT(task_record.task_id) AS task_count
+                FROM transformed.task_record AS task_record
+                GROUP BY task_record.status
+              columns_used:
+                - task_record.status
+                - task_record.task_id
+
+      - name: tasks_per_modification
+        business_name: Tasks per Modification
+        description: >-
+          Average number of tasks per modification. Calculated as total task count divided
+          by total modification count. Provides insight into modification complexity.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT mod_record.mod_id) = 0 THEN 0
+                        ELSE
+                            COUNT(task_record.task_id)::DECIMAL
+                            / NULLIF(COUNT(DISTINCT mod_record.mod_id), 0)
+                    END AS tasks_per_modification
+                FROM transformed.mod_record AS mod_record
+                LEFT JOIN transformed.task_record AS task_record
+                    ON mod_record.mod_id = task_record.mod_id
+              columns_used:
+                - mod_record.mod_id
+                - task_record.task_id
+
+      - name: total_impacts
+        business_name: Total Impacts
+        description: >-
+          Total count of impact records in the system. Represents the complete inventory
+          of impact assessments linking modifications to baseline sections.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(impact_record.impact_id) AS total_impacts
+                FROM transformed.impact_record AS impact_record
+              columns_used:
+                - impact_record.impact_id
+
+      - name: selected_impacts
+        business_name: Selected Impacts
+        description: >-
+          Count of impact records where is_selected is true. Represents impacts approved
+          for implementation.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(impact_record.impact_id) AS selected_impacts
+                FROM transformed.impact_record AS impact_record
+                WHERE impact_record.is_selected = true
+              columns_used:
+                - impact_record.impact_id
+                - impact_record.is_selected
+
+      - name: impacts_by_change_type
+        business_name: Impacts by Change Type
+        description: >-
+          Count of impact records grouped by change type. Enables analysis of change type
+          distribution (e.g., Revise, Add, Delete).
+        return_type: integer
+        result_grain: one row per change type
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    impact_record.change_type,
+                    COUNT(impact_record.impact_id) AS impact_count
+                FROM transformed.impact_record AS impact_record
+                GROUP BY impact_record.change_type
+              columns_used:
+                - impact_record.change_type
+                - impact_record.impact_id
+
+      - name: impacts_per_modification
+        business_name: Impacts per Modification
+        description: >-
+          Average number of impact records per modification. Calculated as total impact
+          count divided by total modification count. Provides insight into modification
+          scope and baseline coverage.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT mod_record.mod_id) = 0 THEN 0
+                        ELSE
+                            COUNT(impact_record.impact_id)::DECIMAL
+                            / NULLIF(COUNT(DISTINCT mod_record.mod_id), 0)
+                    END AS impacts_per_modification
+                FROM transformed.mod_record AS mod_record
+                LEFT JOIN transformed.impact_record AS impact_record
+                    ON mod_record.mod_id = impact_record.mod_id
+              columns_used:
+                - mod_record.mod_id
+                - impact_record.impact_id
+
+      - name: total_baseline_sections
+        business_name: Total Baseline Sections
+        description: >-
+          Total count of baseline section records in the system. Represents the complete
+          inventory of requirement and policy sections.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(baseline_record.baseline_id) AS total_baseline_sections
+                FROM transformed.baseline_record AS baseline_record
+              columns_used:
+                - baseline_record.baseline_id
+
+      - name: baseline_sections_by_sensitivity
+        business_name: Baseline Sections by Sensitivity
+        description: >-
+          Count of baseline sections grouped by sensitivity level. Enables analysis of
+          requirement sensitivity distribution.
+        return_type: integer
+        result_grain: one row per sensitivity level
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    baseline_record.sensitivity,
+                    COUNT(baseline_record.baseline_id) AS baseline_count
+                FROM transformed.baseline_record AS baseline_record
+                GROUP BY baseline_record.sensitivity
+              columns_used:
+                - baseline_record.sensitivity
+                - baseline_record.baseline_id
+
+      - name: baseline_sections_by_topic
+        business_name: Baseline Sections by Topic
+        description: >-
+          Count of baseline sections grouped by topic. Enables analysis of requirement
+          coverage across business topics.
+        return_type: integer
+        result_grain: one row per topic
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    baseline_record.topic,
+                    COUNT(baseline_record.baseline_id) AS baseline_count
+                FROM transformed.baseline_record AS baseline_record
+                GROUP BY baseline_record.topic
+              columns_used:
+                - baseline_record.topic
+                - baseline_record.baseline_id
+
+      - name: total_audit_events
+        business_name: Total Audit Events
+        description: >-
+          Total count of audit event records in the system. Represents the complete audit
+          trail of changes and actions.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(audit_event.audit_id) AS total_audit_events
+                FROM transformed.audit_event AS audit_event
+              columns_used:
+                - audit_event.audit_id
+
+      - name: audit_events_by_action
+        business_name: Audit Events by Action
+        description: >-
+          Count of audit events grouped by action type. Enables analysis of audit activity
+          distribution and change patterns.
+        return_type: integer
+        result_grain: one row per action type
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    audit_event.action,
+                    COUNT(audit_event.audit_id) AS event_count
+                FROM transformed.audit_event AS audit_event
+                GROUP BY audit_event.action
+              columns_used:
+                - audit_event.action
+                - audit_event.audit_id
+
+      - name: modifications_created_by_month
+        business_name: Modifications Created by Month
+        description: >-
+          Count of modifications created grouped by month. Enables time-series analysis
+          of modification creation trends.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    DATE_TRUNC('month', mod_record.created_date) AS month,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM transformed.mod_record AS mod_record
+                GROUP BY DATE_TRUNC('month', mod_record.created_date)
+                ORDER BY month
+              columns_used:
+                - mod_record.created_date
+                - mod_record.mod_id
+
+      - name: tasks_created_by_month
+        business_name: Tasks Created by Month
+        description: >-
+          Count of tasks created grouped by month. Enables time-series analysis of task
+          creation trends.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    DATE_TRUNC('month', task_record.created_date) AS month,
+                    COUNT(task_record.task_id) AS task_count
+                FROM transformed.task_record AS task_record
+                GROUP BY DATE_TRUNC('month', task_record.created_date)
+                ORDER BY month
+              columns_used:
+                - task_record.created_date
+                - task_record.task_id
+
+      - name: audit_events_by_month
+        business_name: Audit Events by Month
+        description: >-
+          Count of audit events grouped by month. Enables time-series analysis of audit
+          activity trends.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    DATE_TRUNC('month', audit_event.event_ts) AS month,
+                    COUNT(audit_event.audit_id) AS event_count
+                FROM transformed.audit_event AS audit_event
+                GROUP BY DATE_TRUNC('month', audit_event.event_ts)
+                ORDER BY month
+              columns_used:
+                - audit_event.event_ts
+                - audit_event.audit_id
+
+      - name: most_impacted_baseline_sections
+        business_name: Most Impacted Baseline Sections
+        description: >-
+          Baseline sections ranked by number of associated impact records. Identifies
+          which baseline sections are most frequently affected by modifications.
+        return_type: integer
+        result_grain: one row per baseline section
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    baseline_record.section_ref,
+                    baseline_record.title,
+                    baseline_record.topic,
+                    baseline_record.sensitivity,
+                    COUNT(impact_record.impact_id) AS impact_count
+                FROM transformed.baseline_record AS baseline_record
+                LEFT JOIN transformed.impact_record AS impact_record
+                    ON baseline_record.section_ref = impact_record.baseline_ref
+                GROUP BY
+                    baseline_record.section_ref,
+                    baseline_record.title,
+                    baseline_record.topic,
+                    baseline_record.sensitivity
+                ORDER BY impact_count DESC
+              columns_used:
+                - baseline_record.section_ref
+                - baseline_record.title
+                - baseline_record.topic
+                - baseline_record.sensitivity
+                - impact_record.impact_id
+
+      - name: modification_task_completion_rate
+        business_name: Modification Task Completion Rate
+        description: >-
+          Percentage of tasks in completed status per modification. Calculated as count
+          of completed tasks divided by total task count for each modification. Provides
+          insight into modification execution progress.
+        return_type: percentage
+        result_grain: one row per modification
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    mod_record.mod_id,
+                    mod_record.mod_ref,
+                    mod_record.title,
+                    COUNT(task_record.task_id) AS total_tasks,
+                    COUNT(CASE WHEN task_record.status = 'Completed' THEN 1 END) AS completed_tasks,
+                    CASE
+                        WHEN COUNT(task_record.task_id) = 0 THEN 0
+                        ELSE
+                            (COUNT(CASE WHEN task_record.status = 'Completed' THEN 1 END)::DECIMAL
+                            / NULLIF(COUNT(task_record.task_id), 0)) * 100
+                    END AS completion_rate_pct
+                FROM transformed.mod_record AS mod_record
+                LEFT JOIN transformed.task_record AS task_record
+                    ON mod_record.mod_id = task_record.mod_id
+                GROUP BY
+                    mod_record.mod_id,
+                    mod_record.mod_ref,
+                    mod_record.title
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.mod_ref
+                - mod_record.title
+                - task_record.task_id
+                - task_record.status
