@@ -1,0 +1,1375 @@
+version: "1.0"
+
+semantic_model:
+  - name: pharma_bronze_semantic_model
+    description: >-
+      Comprehensive semantic model for pharmaceutical prescription and dispensing analytics.
+      This model covers the complete prescription lifecycle from prescriber authorization through
+      pharmacy fulfillment, including drug catalog management, patient demographics, and financial
+      transactions. The model supports analytical use cases including prescription volume analysis,
+      drug utilization patterns, prescriber behavior analysis, pharmacy performance metrics,
+      patient adherence tracking, and revenue/copay analysis across multiple business dimensions
+      including therapeutic class, drug form, insurance type, pharmacy channel, prescriber specialty,
+      and geographic distribution.
+
+    ai_context:
+      instructions: >-
+        ## Dataset Grain and Analytical Foundation
+        
+        **PRESCRIPTION** (Fact Table - Grain: One row per prescription fill/refill)
+        - Primary analytical grain for prescription volume, revenue, and copay metrics
+        - Each row represents a single prescription fill or refill event
+        - Contains foreign keys to PATIENT, PRESCRIBER, DRUG, and PHARMACY dimensions
+        - Supports time-series analysis via rx_timestamp
+        - Key measures: quantity, days_supply, total_amount, copay_amount
+        
+        **DRUG** (Dimension - Grain: One row per drug product)
+        - Drug catalog dimension with therapeutic classification
+        - Supports drug-level analysis by name, generic_name, therapeutic_class, form, strength
+        - Contains unit_price for drug cost analysis
+        - Regulatory attributes: schedule, requires_prior_auth
+        
+        **PATIENT** (Dimension - Grain: One row per patient)
+        - Patient demographic and insurance dimension
+        - Supports patient-level aggregation and cohort analysis
+        - Contains PII fields (name, dob, gender, email, phone, chronic_condition)
+        - Key attributes: insurance_type, registration_date, chronic_condition
+        - Contains cumulative measure: total_copay_paid
+        
+        **PRESCRIBER** (Dimension - Grain: One row per prescriber)
+        - Healthcare provider dimension
+        - Supports prescriber behavior and specialty analysis
+        - Contains PII fields (name, npi_number, specialty, license_state)
+        - Key attributes: specialty, years_experience, active_flag
+        
+        **PHARMACY** (Dimension - Grain: One row per pharmacy location)
+        - Pharmacy location and channel dimension
+        - Supports geographic and channel analysis
+        - Key attributes: city, state, channel, open_date, daily_capacity
+        
+        ## Join Guidance and Relationship Rules
+        
+        **Standard Dimensional Joins:**
+        
+        PRESCRIPTION → DRUG
+        - Join: prescription.drug_id = drug.drug_id
+        - Cardinality: Many prescriptions to one drug
+        - Use for: Drug-level analysis, therapeutic class analysis, drug utilization
+        
+        PRESCRIPTION → PATIENT
+        - Join: prescription.patient_id = patient.patient_id
+        - Cardinality: Many prescriptions to one patient
+        - Use for: Patient-level analysis, adherence tracking, patient cohort analysis
+        
+        PRESCRIPTION → PRESCRIBER
+        - Join: prescription.prescriber_id = prescriber.prescriber_id
+        - Cardinality: Many prescriptions to one prescriber
+        - Use for: Prescriber behavior analysis, specialty-based analysis
+        
+        PRESCRIPTION → PHARMACY
+        - Join: prescription.pharmacy_id = pharmacy.pharmacy_id
+        - Cardinality: Many prescriptions to one pharmacy
+        - Use for: Pharmacy performance analysis, geographic analysis, channel analysis
+        
+        ## Measure Selection and Aggregation Rules
+        
+        **Prescription-Level Measures (from PRESCRIPTION table):**
+        - quantity: SUM for total units dispensed
+        - days_supply: SUM for total days of therapy
+        - total_amount: SUM for total prescription revenue
+        - copay_amount: SUM for total patient copay
+        - prescription_id: COUNT DISTINCT for prescription count
+        
+        **Patient-Level Measures (from PATIENT table):**
+        - total_copay_paid: Use directly for patient-level analysis, DO NOT SUM after joining to PRESCRIPTION
+        - patient_id: COUNT DISTINCT for unique patient count
+        
+        **Drug-Level Measures (from DRUG table):**
+        - unit_price: Use for drug cost analysis, DO NOT SUM after joining to PRESCRIPTION
+        
+        **Pharmacy-Level Measures (from PHARMACY table):**
+        - daily_capacity: Use for pharmacy capacity analysis, DO NOT SUM after joining to PRESCRIPTION
+        
+        ## Double-Counting Prevention
+        
+        **CRITICAL: Grain Mismatch Protection**
+        
+        When joining PRESCRIPTION to dimension tables (DRUG, PATIENT, PRESCRIBER, PHARMACY),
+        the prescription-level measures (quantity, days_supply, total_amount, copay_amount) can be
+        safely summed because the join is many-to-one and does not duplicate prescription records.
+        
+        **DO NOT sum dimension-level attributes after joining:**
+        - patient.total_copay_paid: This is a patient-level cumulative measure. Use it only for
+          patient-level analysis. Do not sum it after joining to PRESCRIPTION as it will multiply
+          the patient's total copay by the number of prescriptions.
+        - drug.unit_price: This is a drug-level unit price. Do not sum it after joining to PRESCRIPTION.
+        - pharmacy.daily_capacity: This is a pharmacy-level capacity. Do not sum it after joining to PRESCRIPTION.
+        
+        **Safe aggregation patterns:**
+        - Total prescription revenue: SUM(prescription.total_amount)
+        - Total copay collected: SUM(prescription.copay_amount)
+        - Total units dispensed: SUM(prescription.quantity)
+        - Unique patients: COUNT(DISTINCT prescription.patient_id)
+        - Unique prescribers: COUNT(DISTINCT prescription.prescriber_id)
+        - Unique drugs: COUNT(DISTINCT prescription.drug_id)
+        - Unique pharmacies: COUNT(DISTINCT prescription.pharmacy_id)
+        
+        ## Time-Based Analysis
+        
+        **Primary Time Dimension: prescription.rx_timestamp**
+        - Use rx_timestamp for all prescription transaction time-series analysis
+        - Supports daily, monthly, quarterly, yearly aggregation
+        - Use for: prescription volume trends, revenue trends, seasonal analysis
+        
+        **Secondary Time Dimensions:**
+        - patient.registration_date: Use for patient acquisition and cohort analysis
+        - pharmacy.open_date: Use for pharmacy lifecycle and maturity analysis
+        
+        **Time-based metric guidance:**
+        - Period-over-period growth: Compare current period to previous period using rx_timestamp
+        - Running totals: Use rx_timestamp ordering for cumulative calculations
+        - Trend analysis: Use rx_timestamp for time-series regression
+        
+        ## Analytical Use Cases and Query Patterns
+        
+        **Prescription Volume Analysis:**
+        - Count prescriptions by therapeutic_class, drug, prescriber specialty, pharmacy channel
+        - Analyze refill patterns using refill_number and refills_allowed
+        - Track prescription status distribution
+        
+        **Revenue and Financial Analysis:**
+        - Total revenue: SUM(prescription.total_amount)
+        - Total copay: SUM(prescription.copay_amount)
+        - Insurance portion: SUM(prescription.total_amount - prescription.copay_amount)
+        - Average prescription value: AVG(prescription.total_amount)
+        - Revenue by insurance_type, therapeutic_class, pharmacy channel
+        
+        **Drug Utilization Analysis:**
+        - Units dispensed by drug, therapeutic_class, form
+        - Days of therapy supplied: SUM(prescription.days_supply)
+        - Generic vs brand analysis using drug.name vs drug.generic_name
+        - Prior authorization impact: Filter by drug.requires_prior_auth
+        - Controlled substance analysis: Filter by drug.schedule
+        
+        **Patient Analysis:**
+        - Patient count: COUNT(DISTINCT prescription.patient_id)
+        - Prescriptions per patient: COUNT(prescription_id) / COUNT(DISTINCT patient_id)
+        - Patient segmentation by insurance_type, chronic_condition
+        - Patient adherence: Analyze days_supply and refill patterns
+        
+        **Prescriber Analysis:**
+        - Prescriptions by specialty, years_experience
+        - Active vs inactive prescriber analysis using active_flag
+        - Geographic prescriber distribution by license_state
+        
+        **Pharmacy Performance:**
+        - Prescriptions by pharmacy, city, state, channel
+        - Pharmacy utilization: Compare prescription volume to daily_capacity
+        - Geographic market analysis
+        - Retail vs Mail Order vs Specialty channel comparison
+        
+        ## Business Rules and Constraints
+        
+        **Prescription Status:**
+        - Status values indicate prescription lifecycle stage
+        - Filter by status for active, filled, or cancelled prescription analysis
+        
+        **Refill Logic:**
+        - refill_number indicates current refill (1 = original fill)
+        - refills_allowed indicates total authorized refills
+        - Remaining refills = refills_allowed - refill_number
+        
+        **Drug Regulatory Constraints:**
+        - schedule: Controlled substance classification (Schedule II = high control)
+        - requires_prior_auth: Prior authorization requirement flag
+        - Filter controlled substances: WHERE drug.schedule IS NOT NULL
+        
+        **Patient Privacy:**
+        - Multiple PII fields exist across PATIENT and PRESCRIBER tables
+        - Apply appropriate data masking and access controls for PII fields
+        - Aggregate analysis should avoid exposing individual patient/prescriber identity
+        
+        ## Metric Interpretation
+        
+        **Average Prescription Value:**
+        - Calculate as: SUM(total_amount) / COUNT(prescription_id)
+        - Represents average revenue per prescription transaction
+        
+        **Copay Percentage:**
+        - Calculate as: SUM(copay_amount) / NULLIF(SUM(total_amount), 0) * 100
+        - Represents patient cost-sharing percentage
+        
+        **Days Supply per Prescription:**
+        - Calculate as: SUM(days_supply) / COUNT(prescription_id)
+        - Represents average therapy duration per prescription
+        
+        **Prescriptions per Patient:**
+        - Calculate as: COUNT(prescription_id) / COUNT(DISTINCT patient_id)
+        - Represents average prescription frequency per patient
+        
+        **Generic Dispensing Rate:**
+        - Requires logic to identify generic vs brand drugs
+        - May use drug.generic_name presence or naming conventions
+        
+        ## Query Restrictions and Limitations
+        
+        **No Direct Patient-to-Prescriber Relationship:**
+        - Patient and Prescriber are connected only through PRESCRIPTION
+        - Patient-Prescriber analysis requires joining through PRESCRIPTION fact table
+        
+        **No Direct Drug-to-Pharmacy Relationship:**
+        - Drug and Pharmacy are connected only through PRESCRIPTION
+        - Drug availability by pharmacy requires joining through PRESCRIPTION
+        
+        **No Historical Tracking:**
+        - Dimension tables (DRUG, PATIENT, PRESCRIBER, PHARMACY) do not contain historical versions
+        - No effective-date or valid-from/valid-to fields for slowly changing dimensions
+        - Current state only - no temporal dimension tracking
+        
+        **No Explicit Hierarchy Fields:**
+        - No parent-child relationships in dimension tables
+        - No organizational hierarchies for pharmacies or prescribers
+        - Geographic hierarchy must be constructed from city/state fields
+        
+        **Cumulative Patient Measure:**
+        - patient.total_copay_paid is a cumulative measure across all patient history
+        - This measure is independent of the prescription-level copay_amount
+        - Use patient.total_copay_paid for patient lifetime value analysis
+        - Use prescription.copay_amount for transaction-level copay analysis
+
+    datasets:
+      - name: drug
+        business_name: Drug Catalog
+        description: >-
+          Drug catalog dimension containing pharmaceutical product information.
+          Grain: One row per drug product.
+          Contains drug identification, therapeutic classification, dosage form and strength,
+          pricing, regulatory schedule, manufacturer, and prior authorization requirements.
+          Supports drug-level analysis, therapeutic class analysis, and drug utilization reporting.
+        source: pharma_bronze.drug
+        primary_key:
+          - drug_id
+        fields:
+          - name: drug_id
+            business_name: Drug Identifier
+            description: >-
+              Unique identifier for a drug record. Primary key.
+            sql_type: VARCHAR(50)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: name
+            business_name: Brand Name
+            description: >-
+              Brand name of the drug. Commercial product name used for marketing and identification.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+
+          - name: generic_name
+            business_name: Generic Name
+            description: >-
+              Generic or non-brand name of the drug. Scientific or common name independent of manufacturer.
+            sql_type: VARCHAR(200)
+
+          - name: therapeutic_class
+            business_name: Therapeutic Class
+            description: >-
+              Therapeutic class or category describing the primary clinical use of the drug.
+              Used for drug classification and utilization analysis by therapeutic area.
+            sql_type: VARCHAR(100)
+            dimension:
+              is_time: false
+
+          - name: form
+            business_name: Dosage Form
+            description: >-
+              Dosage form in which the drug is administered (e.g., Tablet, Capsule, Injection, Liquid).
+              Enumerated type from drug_form_enum.
+            sql_type: pharma_bronze.drug_form_enum
+            dimension:
+              is_time: false
+
+          - name: strength
+            business_name: Drug Strength
+            description: >-
+              Labeled strength or concentration of the drug (e.g., 20 mg, 500 mg, 10 mg/mL).
+            sql_type: VARCHAR(50)
+
+          - name: unit_price
+            business_name: Unit Price
+            description: >-
+              Monetary amount representing the unit price of the drug in USD.
+              Used for drug cost analysis and pricing comparisons.
+            sql_type: NUMERIC(10,2)
+            measure:
+              aggregation: none
+
+          - name: schedule
+            business_name: Regulatory Schedule
+            description: >-
+              Regulatory schedule classification for the drug (e.g., Schedule II, Schedule III).
+              Indicates controlled substance status and regulatory restrictions.
+              Enumerated type from drug_schedule_enum.
+            sql_type: pharma_bronze.drug_schedule_enum
+            dimension:
+              is_time: false
+
+          - name: manufacturer
+            business_name: Manufacturer
+            description: >-
+              Name of the organization that manufactures the drug.
+              Used for manufacturer analysis and supply chain tracking.
+            sql_type: VARCHAR(200)
+            dimension:
+              is_time: false
+
+          - name: requires_prior_auth
+            business_name: Requires Prior Authorization
+            description: >-
+              Indicates whether prior authorization is required before the drug can be dispensed.
+              Boolean flag used for authorization workflow and utilization management.
+            sql_type: BOOLEAN
+            constraints:
+              - DEFAULT false
+
+      - name: patient
+        business_name: Patient
+        description: >-
+          Patient demographic and insurance dimension.
+          Grain: One row per patient.
+          Contains patient identification, demographics (name, date of birth, gender),
+          contact information (email, phone), insurance type, registration date,
+          chronic condition information, and cumulative copay paid.
+          Supports patient-level analysis, cohort analysis, and patient segmentation by insurance and condition.
+        source: pharma_bronze.patient
+        primary_key:
+          - patient_id
+        fields:
+          - name: patient_id
+            business_name: Patient Identifier
+            description: >-
+              Unique identifier for a patient record. Primary key.
+            sql_type: VARCHAR(50)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+              - PII
+
+          - name: name
+            business_name: Patient Name
+            description: >-
+              Full name of the patient. PII field requiring data protection and access controls.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+              - PII
+
+          - name: dob
+            business_name: Date of Birth
+            description: >-
+              Date of birth of the patient. PII field used for age calculation and cohort analysis.
+            sql_type: DATE
+            constraints:
+              - PII
+            dimension:
+              is_time: true
+
+          - name: gender
+            business_name: Gender
+            description: >-
+              Gender of the patient as recorded in the system. PII field.
+              Enumerated type from gender_enum.
+            sql_type: pharma_bronze.gender_enum
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: email
+            business_name: Email Address
+            description: >-
+              Email address used to contact the patient. PII field requiring data protection.
+            sql_type: VARCHAR(255)
+            constraints:
+              - PII
+
+          - name: phone
+            business_name: Phone Number
+            description: >-
+              Telephone number for contacting the patient. PII field requiring data protection.
+            sql_type: VARCHAR(30)
+            constraints:
+              - PII
+
+          - name: insurance_type
+            business_name: Insurance Type
+            description: >-
+              Type of insurance coverage held by the patient (e.g., Commercial, Medicare, Medicaid).
+              PII field. Enumerated type from insurance_type_enum.
+              Used for patient segmentation and payer analysis.
+            sql_type: pharma_bronze.insurance_type_enum
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: registration_date
+            business_name: Registration Date
+            description: >-
+              Date when the patient was registered in the system.
+              Used for patient acquisition analysis and cohort definition.
+            sql_type: DATE
+            dimension:
+              is_time: true
+
+          - name: chronic_condition
+            business_name: Chronic Condition
+            description: >-
+              Description of any chronic condition associated with the patient.
+              PII field requiring data protection. Used for patient condition analysis and care management.
+            sql_type: VARCHAR(100)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: total_copay_paid
+            business_name: Total Copay Paid
+            description: >-
+              Cumulative monetary amount of copayments paid by the patient across all prescriptions.
+              PII field. Patient-level cumulative measure representing lifetime copay contribution.
+              DO NOT sum this field after joining to PRESCRIPTION table as it will multiply the value.
+            sql_type: NUMERIC(12,2)
+            constraints:
+              - DEFAULT 0
+              - PII
+            measure:
+              aggregation: none
+
+      - name: pharmacy
+        business_name: Pharmacy
+        description: >-
+          Pharmacy location and channel dimension.
+          Grain: One row per pharmacy location.
+          Contains pharmacy identification, name, geographic location (city, state),
+          business channel (Retail, Mail Order, Specialty), opening date, and daily processing capacity.
+          Supports pharmacy performance analysis, geographic market analysis, and channel comparison.
+        source: pharma_bronze.pharmacy
+        primary_key:
+          - pharmacy_id
+        fields:
+          - name: pharmacy_id
+            business_name: Pharmacy Identifier
+            description: >-
+              Unique identifier for a pharmacy. Primary key.
+            sql_type: VARCHAR(50)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: name
+            business_name: Pharmacy Name
+            description: >-
+              Registered name of the pharmacy. Business name used for identification and reporting.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+
+          - name: city
+            business_name: City
+            description: >-
+              City where the pharmacy is located. Used for geographic analysis and market segmentation.
+            sql_type: VARCHAR(100)
+            dimension:
+              is_time: false
+
+          - name: state
+            business_name: State
+            description: >-
+              State or province where the pharmacy operates. Used for state-level geographic analysis.
+            sql_type: VARCHAR(10)
+            dimension:
+              is_time: false
+
+          - name: channel
+            business_name: Business Channel
+            description: >-
+              Business channel through which the pharmacy operates (e.g., Retail, Mail Order, Specialty).
+              Enumerated type from channel_enum. Used for channel performance comparison.
+            sql_type: pharma_bronze.channel_enum
+            dimension:
+              is_time: false
+
+          - name: open_date
+            business_name: Opening Date
+            description: >-
+              Date when the pharmacy opened for business.
+              Used for pharmacy lifecycle analysis and maturity segmentation.
+            sql_type: DATE
+            dimension:
+              is_time: true
+
+          - name: daily_capacity
+            business_name: Daily Capacity
+            description: >-
+              Estimated number of prescriptions the pharmacy can process per day.
+              Used for capacity utilization analysis and operational planning.
+              DO NOT sum this field after joining to PRESCRIPTION table.
+            sql_type: INTEGER
+            measure:
+              aggregation: none
+
+      - name: prescriber
+        business_name: Prescriber
+        description: >-
+          Healthcare provider dimension containing prescriber information.
+          Grain: One row per prescriber.
+          Contains prescriber identification, name, medical specialty, National Provider Identifier (NPI),
+          license state, years of experience, and active status.
+          Supports prescriber behavior analysis, specialty-based analysis, and provider network management.
+        source: pharma_bronze.prescriber
+        primary_key:
+          - prescriber_id
+        fields:
+          - name: prescriber_id
+            business_name: Prescriber Identifier
+            description: >-
+              Unique identifier for a prescriber. Primary key. PII field.
+            sql_type: VARCHAR(50)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+              - PII
+
+          - name: name
+            business_name: Prescriber Name
+            description: >-
+              Full name of the prescriber. PII field requiring data protection and access controls.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+              - PII
+
+          - name: specialty
+            business_name: Medical Specialty
+            description: >-
+              Medical specialty of the prescriber (e.g., Cardiology, Endocrinology, Family Medicine).
+              PII field. Enumerated type from specialty_enum.
+              Used for specialty-based prescribing pattern analysis.
+            sql_type: pharma_bronze.specialty_enum
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: npi_number
+            business_name: National Provider Identifier
+            description: >-
+              National Provider Identifier assigned to the prescriber.
+              PII field. Unique federal identifier for healthcare providers.
+            sql_type: VARCHAR(20)
+            constraints:
+              - PII
+
+          - name: license_state
+            business_name: License State
+            description: >-
+              State in which the prescriber is licensed to practice.
+              PII field. Used for geographic prescriber distribution analysis.
+            sql_type: VARCHAR(10)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: years_experience
+            business_name: Years of Experience
+            description: >-
+              Number of years the prescriber has been practicing.
+              Used for experience-based analysis and prescriber segmentation.
+            sql_type: INTEGER
+
+          - name: active_flag
+            business_name: Active Status
+            description: >-
+              Indicates whether the prescriber is currently active in the network.
+              Boolean flag used for active provider filtering and network management.
+            sql_type: BOOLEAN
+            constraints:
+              - DEFAULT true
+
+      - name: prescription
+        business_name: Prescription
+        description: >-
+          Prescription transaction fact table containing prescription fill and refill events.
+          Grain: One row per prescription fill or refill.
+          Contains prescription identification, transaction timestamp, references to patient, prescriber,
+          drug, and pharmacy dimensions, quantity dispensed, days supply, refill information,
+          financial amounts (total amount and copay), and prescription status.
+          Primary fact table for prescription volume analysis, drug utilization, revenue analysis,
+          and operational reporting across all business dimensions.
+        source: pharma_bronze.prescription
+        primary_key:
+          - prescription_id
+        fields:
+          - name: prescription_id
+            business_name: Prescription Identifier
+            description: >-
+              Unique identifier for a prescription record. Primary key.
+            sql_type: VARCHAR(50)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: rx_timestamp
+            business_name: Prescription Timestamp
+            description: >-
+              Timestamp recording when the prescription was created or issued.
+              Primary time dimension for prescription transaction analysis.
+              Supports daily, monthly, quarterly, and yearly time-series analysis.
+            sql_type: TIMESTAMP
+            dimension:
+              is_time: true
+
+          - name: patient_id
+            business_name: Patient Reference
+            description: >-
+              References the related patient record associated with the prescription.
+              Foreign key to patient.patient_id. PII field.
+            sql_type: VARCHAR(50)
+            constraints:
+              - FOREIGN KEY
+              - PII
+
+          - name: prescriber_id
+            business_name: Prescriber Reference
+            description: >-
+              References the related prescriber who wrote the prescription.
+              Foreign key to prescriber.prescriber_id. PII field.
+            sql_type: VARCHAR(50)
+            constraints:
+              - FOREIGN KEY
+              - PII
+
+          - name: drug_id
+            business_name: Drug Reference
+            description: >-
+              References the related drug that was prescribed.
+              Foreign key to drug.drug_id.
+            sql_type: VARCHAR(50)
+            constraints:
+              - FOREIGN KEY
+
+          - name: pharmacy_id
+            business_name: Pharmacy Reference
+            description: >-
+              References the related pharmacy where the prescription is filled.
+              Foreign key to pharmacy.pharmacy_id.
+            sql_type: VARCHAR(50)
+            constraints:
+              - FOREIGN KEY
+
+          - name: quantity
+            business_name: Quantity Dispensed
+            description: >-
+              Number of units of the drug dispensed for the prescription.
+              Quantitative measure used for drug utilization and inventory analysis.
+            sql_type: INTEGER
+            measure:
+              aggregation: sum
+
+          - name: days_supply
+            business_name: Days Supply
+            description: >-
+              Number of days the dispensed quantity is intended to cover.
+              Quantitative measure used for therapy duration and adherence analysis.
+            sql_type: INTEGER
+            measure:
+              aggregation: sum
+
+          - name: refills_allowed
+            business_name: Refills Allowed
+            description: >-
+              Total number of refills authorized for the prescription.
+              Used for refill authorization analysis and prescription lifecycle tracking.
+            sql_type: INTEGER
+
+          - name: refill_number
+            business_name: Refill Number
+            description: >-
+              Sequence number indicating the current refill of the prescription.
+              Value of 1 indicates original fill. Used for refill pattern analysis.
+            sql_type: INTEGER
+
+          - name: total_amount
+            business_name: Total Prescription Amount
+            description: >-
+              Monetary amount representing the total cost of the prescription in USD.
+              Primary revenue measure for prescription financial analysis.
+            sql_type: NUMERIC(10,2)
+            measure:
+              aggregation: sum
+
+          - name: copay_amount
+            business_name: Copay Amount
+            description: >-
+              Monetary amount representing the copay the patient must pay for the prescription in USD.
+              PII field. Patient cost-sharing measure used for copay analysis and patient financial burden.
+            sql_type: NUMERIC(10,2)
+            constraints:
+              - PII
+            measure:
+              aggregation: sum
+
+          - name: status
+            business_name: Prescription Status
+            description: >-
+              Indicates the current status of the prescription (e.g., Filled, Pending, Cancelled).
+              Enumerated type from rx_status_enum. Used for prescription lifecycle and workflow analysis.
+            sql_type: pharma_bronze.rx_status_enum
+            dimension:
+              is_time: false
+
+    relationships:
+      - name: prescription_to_drug
+        left_dataset: prescription
+        right_dataset: drug
+        relationship_type: many_to_one
+        join:
+          left:
+            - drug_id
+          right:
+            - drug_id
+        join_type: inner
+        resolution: >-
+          Many prescriptions reference one drug product.
+          Standard foreign key relationship from prescription.drug_id to drug.drug_id.
+          Use this relationship for drug-level analysis including therapeutic class, dosage form,
+          manufacturer, and drug pricing analysis.
+
+      - name: prescription_to_patient
+        left_dataset: prescription
+        right_dataset: patient
+        relationship_type: many_to_one
+        join:
+          left:
+            - patient_id
+          right:
+            - patient_id
+        join_type: inner
+        resolution: >-
+          Many prescriptions belong to one patient.
+          Standard foreign key relationship from prescription.patient_id to patient.patient_id.
+          Use this relationship for patient-level analysis including demographics, insurance type,
+          chronic condition, and patient segmentation.
+          IMPORTANT: Do not sum patient.total_copay_paid after this join as it will multiply
+          the patient's cumulative copay by the number of prescriptions.
+
+      - name: prescription_to_prescriber
+        left_dataset: prescription
+        right_dataset: prescriber
+        relationship_type: many_to_one
+        join:
+          left:
+            - prescriber_id
+          right:
+            - prescriber_id
+        join_type: inner
+        resolution: >-
+          Many prescriptions are written by one prescriber.
+          Standard foreign key relationship from prescription.prescriber_id to prescriber.prescriber_id.
+          Use this relationship for prescriber behavior analysis including specialty-based prescribing
+          patterns, experience-based analysis, and active provider filtering.
+
+      - name: prescription_to_pharmacy
+        left_dataset: prescription
+        right_dataset: pharmacy
+        relationship_type: many_to_one
+        join:
+          left:
+            - pharmacy_id
+          right:
+            - pharmacy_id
+        join_type: inner
+        resolution: >-
+          Many prescriptions are filled at one pharmacy location.
+          Standard foreign key relationship from prescription.pharmacy_id to pharmacy.pharmacy_id.
+          Use this relationship for pharmacy performance analysis including geographic distribution,
+          channel comparison, and capacity utilization.
+          IMPORTANT: Do not sum pharmacy.daily_capacity after this join as it will multiply
+          the pharmacy's capacity by the number of prescriptions.
+
+    metrics:
+      - name: total_prescription_count
+        business_name: Total Prescription Count
+        description: >-
+          Total number of prescription fill and refill transactions.
+          Counts all prescription records regardless of status.
+          Primary volume metric for prescription activity analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(prescription.prescription_id) AS total_prescription_count
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.prescription_id
+
+      - name: total_prescription_revenue
+        business_name: Total Prescription Revenue
+        description: >-
+          Total revenue from all prescriptions in USD.
+          Sum of total_amount across all prescription transactions.
+          Primary financial metric for revenue analysis.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    SUM(prescription.total_amount) AS total_prescription_revenue
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.total_amount
+
+      - name: total_copay_collected
+        business_name: Total Copay Collected
+        description: >-
+          Total copay amount collected from patients across all prescriptions in USD.
+          Sum of copay_amount representing patient cost-sharing.
+          Key metric for patient financial burden and cost-sharing analysis.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    SUM(prescription.copay_amount) AS total_copay_collected
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.copay_amount
+
+      - name: total_insurance_paid
+        business_name: Total Insurance Paid
+        description: >-
+          Total amount paid by insurance across all prescriptions in USD.
+          Calculated as total prescription amount minus patient copay.
+          Represents insurance portion of prescription costs.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    SUM(prescription.total_amount - prescription.copay_amount) AS total_insurance_paid
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.total_amount
+                - prescription.copay_amount
+
+      - name: average_prescription_value
+        business_name: Average Prescription Value
+        description: >-
+          Average total amount per prescription in USD.
+          Calculated as total prescription revenue divided by prescription count.
+          Represents average transaction value for prescription analysis.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(prescription.prescription_id) = 0 THEN 0
+                        ELSE SUM(prescription.total_amount) / COUNT(prescription.prescription_id)
+                    END AS average_prescription_value
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.total_amount
+                - prescription.prescription_id
+
+      - name: average_copay_amount
+        business_name: Average Copay Amount
+        description: >-
+          Average copay amount per prescription in USD.
+          Calculated as total copay divided by prescription count.
+          Represents average patient out-of-pocket cost per prescription.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(prescription.prescription_id) = 0 THEN 0
+                        ELSE SUM(prescription.copay_amount) / COUNT(prescription.prescription_id)
+                    END AS average_copay_amount
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.copay_amount
+                - prescription.prescription_id
+
+      - name: copay_percentage
+        business_name: Copay Percentage
+        description: >-
+          Patient copay as a percentage of total prescription cost.
+          Calculated as total copay divided by total prescription revenue times 100.
+          Represents patient cost-sharing rate across all prescriptions.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN SUM(prescription.total_amount) = 0 THEN 0
+                        ELSE (SUM(prescription.copay_amount) / NULLIF(SUM(prescription.total_amount), 0)) * 100
+                    END AS copay_percentage
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.copay_amount
+                - prescription.total_amount
+
+      - name: total_units_dispensed
+        business_name: Total Units Dispensed
+        description: >-
+          Total number of drug units dispensed across all prescriptions.
+          Sum of quantity representing total drug volume.
+          Primary utilization metric for drug dispensing analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    SUM(prescription.quantity) AS total_units_dispensed
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.quantity
+
+      - name: total_days_supply
+        business_name: Total Days Supply
+        description: >-
+          Total days of therapy supplied across all prescriptions.
+          Sum of days_supply representing total therapy duration.
+          Key metric for adherence and therapy coverage analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    SUM(prescription.days_supply) AS total_days_supply
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.days_supply
+
+      - name: average_days_supply_per_prescription
+        business_name: Average Days Supply per Prescription
+        description: >-
+          Average number of days of therapy per prescription.
+          Calculated as total days supply divided by prescription count.
+          Represents average therapy duration per prescription transaction.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(prescription.prescription_id) = 0 THEN 0
+                        ELSE SUM(prescription.days_supply)::DECIMAL / COUNT(prescription.prescription_id)
+                    END AS average_days_supply_per_prescription
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.days_supply
+                - prescription.prescription_id
+
+      - name: unique_patient_count
+        business_name: Unique Patient Count
+        description: >-
+          Total number of unique patients with prescriptions.
+          Count distinct of patient_id.
+          Primary metric for patient population analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT prescription.patient_id) AS unique_patient_count
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.patient_id
+
+      - name: unique_prescriber_count
+        business_name: Unique Prescriber Count
+        description: >-
+          Total number of unique prescribers who wrote prescriptions.
+          Count distinct of prescriber_id.
+          Primary metric for prescriber network analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT prescription.prescriber_id) AS unique_prescriber_count
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.prescriber_id
+
+      - name: unique_drug_count
+        business_name: Unique Drug Count
+        description: >-
+          Total number of unique drugs dispensed.
+          Count distinct of drug_id.
+          Primary metric for drug formulary utilization analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT prescription.drug_id) AS unique_drug_count
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.drug_id
+
+      - name: unique_pharmacy_count
+        business_name: Unique Pharmacy Count
+        description: >-
+          Total number of unique pharmacies that filled prescriptions.
+          Count distinct of pharmacy_id.
+          Primary metric for pharmacy network utilization analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT prescription.pharmacy_id) AS unique_pharmacy_count
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.pharmacy_id
+
+      - name: prescriptions_per_patient
+        business_name: Prescriptions per Patient
+        description: >-
+          Average number of prescriptions per patient.
+          Calculated as total prescription count divided by unique patient count.
+          Represents average prescription frequency per patient.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT prescription.patient_id) = 0 THEN 0
+                        ELSE COUNT(prescription.prescription_id)::DECIMAL / COUNT(DISTINCT prescription.patient_id)
+                    END AS prescriptions_per_patient
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.prescription_id
+                - prescription.patient_id
+
+      - name: prescriptions_per_prescriber
+        business_name: Prescriptions per Prescriber
+        description: >-
+          Average number of prescriptions per prescriber.
+          Calculated as total prescription count divided by unique prescriber count.
+          Represents average prescribing volume per prescriber.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT prescription.prescriber_id) = 0 THEN 0
+                        ELSE COUNT(prescription.prescription_id)::DECIMAL / COUNT(DISTINCT prescription.prescriber_id)
+                    END AS prescriptions_per_prescriber
+                FROM pharma_bronze.prescription AS prescription
+              columns_used:
+                - prescription.prescription_id
+                - prescription.prescriber_id
+
+      - name: revenue_by_therapeutic_class
+        business_name: Revenue by Therapeutic Class
+        description: >-
+          Total prescription revenue grouped by drug therapeutic class.
+          Aggregates total_amount by therapeutic_class.
+          Supports therapeutic area revenue analysis and portfolio management.
+        return_type: decimal
+        result_grain: one row per therapeutic class
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    drug.therapeutic_class,
+                    SUM(prescription.total_amount) AS revenue_by_therapeutic_class
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.drug AS drug
+                    ON prescription.drug_id = drug.drug_id
+                GROUP BY drug.therapeutic_class
+              columns_used:
+                - prescription.total_amount
+                - prescription.drug_id
+                - drug.drug_id
+                - drug.therapeutic_class
+
+      - name: prescription_count_by_insurance_type
+        business_name: Prescription Count by Insurance Type
+        description: >-
+          Total prescription count grouped by patient insurance type.
+          Counts prescriptions by insurance_type.
+          Supports payer mix analysis and insurance segment reporting.
+        return_type: integer
+        result_grain: one row per insurance type
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    patient.insurance_type,
+                    COUNT(prescription.prescription_id) AS prescription_count_by_insurance_type
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.patient AS patient
+                    ON prescription.patient_id = patient.patient_id
+                GROUP BY patient.insurance_type
+              columns_used:
+                - prescription.prescription_id
+                - prescription.patient_id
+                - patient.patient_id
+                - patient.insurance_type
+
+      - name: prescription_count_by_pharmacy_channel
+        business_name: Prescription Count by Pharmacy Channel
+        description: >-
+          Total prescription count grouped by pharmacy business channel.
+          Counts prescriptions by channel (Retail, Mail Order, Specialty).
+          Supports channel performance comparison and distribution strategy analysis.
+        return_type: integer
+        result_grain: one row per pharmacy channel
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    pharmacy.channel,
+                    COUNT(prescription.prescription_id) AS prescription_count_by_pharmacy_channel
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.pharmacy AS pharmacy
+                    ON prescription.pharmacy_id = pharmacy.pharmacy_id
+                GROUP BY pharmacy.channel
+              columns_used:
+                - prescription.prescription_id
+                - prescription.pharmacy_id
+                - pharmacy.pharmacy_id
+                - pharmacy.channel
+
+      - name: prescription_count_by_prescriber_specialty
+        business_name: Prescription Count by Prescriber Specialty
+        description: >-
+          Total prescription count grouped by prescriber medical specialty.
+          Counts prescriptions by specialty.
+          Supports specialty-based prescribing pattern analysis and provider network management.
+        return_type: integer
+        result_grain: one row per prescriber specialty
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    prescriber.specialty,
+                    COUNT(prescription.prescription_id) AS prescription_count_by_prescriber_specialty
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.prescriber AS prescriber
+                    ON prescription.prescriber_id = prescriber.prescriber_id
+                GROUP BY prescriber.specialty
+              columns_used:
+                - prescription.prescription_id
+                - prescription.prescriber_id
+                - prescriber.prescriber_id
+                - prescriber.specialty
+
+      - name: monthly_prescription_count
+        business_name: Monthly Prescription Count
+        description: >-
+          Total prescription count by month.
+          Aggregates prescription count by month using rx_timestamp.
+          Supports monthly trend analysis and seasonal pattern identification.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    DATE_TRUNC('month', prescription.rx_timestamp) AS month,
+                    COUNT(prescription.prescription_id) AS monthly_prescription_count
+                FROM pharma_bronze.prescription AS prescription
+                GROUP BY DATE_TRUNC('month', prescription.rx_timestamp)
+                ORDER BY month
+              columns_used:
+                - prescription.rx_timestamp
+                - prescription.prescription_id
+
+      - name: monthly_prescription_revenue
+        business_name: Monthly Prescription Revenue
+        description: >-
+          Total prescription revenue by month in USD.
+          Aggregates total_amount by month using rx_timestamp.
+          Supports monthly revenue trend analysis and financial forecasting.
+        return_type: decimal
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    DATE_TRUNC('month', prescription.rx_timestamp) AS month,
+                    SUM(prescription.total_amount) AS monthly_prescription_revenue
+                FROM pharma_bronze.prescription AS prescription
+                GROUP BY DATE_TRUNC('month', prescription.rx_timestamp)
+                ORDER BY month
+              columns_used:
+                - prescription.rx_timestamp
+                - prescription.total_amount
+
+      - name: refill_prescription_count
+        business_name: Refill Prescription Count
+        description: >-
+          Total count of refill prescriptions (excluding original fills).
+          Counts prescriptions where refill_number is greater than 1.
+          Supports refill behavior analysis and adherence tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(prescription.prescription_id) AS refill_prescription_count
+                FROM pharma_bronze.prescription AS prescription
+                WHERE prescription.refill_number > 1
+              columns_used:
+                - prescription.prescription_id
+                - prescription.refill_number
+
+      - name: original_fill_prescription_count
+        business_name: Original Fill Prescription Count
+        description: >-
+          Total count of original fill prescriptions (first fills only).
+          Counts prescriptions where refill_number equals 1.
+          Supports new prescription analysis and prescribing behavior tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(prescription.prescription_id) AS original_fill_prescription_count
+                FROM pharma_bronze.prescription AS prescription
+                WHERE prescription.refill_number = 1
+              columns_used:
+                - prescription.prescription_id
+                - prescription.refill_number
+
+      - name: prescription_count_by_state
+        business_name: Prescription Count by State
+        description: >-
+          Total prescription count grouped by pharmacy state.
+          Counts prescriptions by state.
+          Supports state-level geographic analysis and market penetration reporting.
+        return_type: integer
+        result_grain: one row per state
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    pharmacy.state,
+                    COUNT(prescription.prescription_id) AS prescription_count_by_state
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.pharmacy AS pharmacy
+                    ON prescription.pharmacy_id = pharmacy.pharmacy_id
+                GROUP BY pharmacy.state
+              columns_used:
+                - prescription.prescription_id
+                - prescription.pharmacy_id
+                - pharmacy.pharmacy_id
+                - pharmacy.state
+
+      - name: revenue_by_drug
+        business_name: Revenue by Drug
+        description: >-
+          Total prescription revenue grouped by drug.
+          Aggregates total_amount by drug name.
+          Supports drug-level revenue analysis and product performance tracking.
+        return_type: decimal
+        result_grain: one row per drug
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    drug.name AS drug_name,
+                    SUM(prescription.total_amount) AS revenue_by_drug
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.drug AS drug
+                    ON prescription.drug_id = drug.drug_id
+                GROUP BY drug.name
+              columns_used:
+                - prescription.total_amount
+                - prescription.drug_id
+                - drug.drug_id
+                - drug.name
+
+      - name: units_dispensed_by_drug
+        business_name: Units Dispensed by Drug
+        description: >-
+          Total units dispensed grouped by drug.
+          Aggregates quantity by drug name.
+          Supports drug utilization analysis and inventory management.
+        return_type: integer
+        result_grain: one row per drug
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    drug.name AS drug_name,
+                    SUM(prescription.quantity) AS units_dispensed_by_drug
+                FROM pharma_bronze.prescription AS prescription
+                INNER JOIN pharma_bronze.drug AS drug
+                    ON prescription.drug_id = drug.drug_id
+                GROUP BY drug.name
+              columns_used:
+                - prescription.quantity
+                - prescription.drug_id
+                - drug.drug_id
+                - drug.name
