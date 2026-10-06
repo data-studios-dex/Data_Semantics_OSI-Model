@@ -1,0 +1,120 @@
+{
+  "overall_validation_score": 33.33,
+  "accuracy_score": 20.0,
+  "efficiency_score": 70.0,
+  "completeness_score": 10.0,
+  "overall_status": "FAIL",
+  "scoring_thresholds": {
+    "pass": "≥ 85%",
+    "pass_with_warnings": "60-84%",
+    "fail": "< 60%"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "High",
+      "area": "Column Metadata Coverage",
+      "issue": "Data Glossary shows 0 documented columns across all 6 tables (DRUG, PATIENT, PHARMACY, PRESCRIBER, PRESCRIPTION, PRODUCT). All column detail rows are empty with no business terms, descriptions, types, PII flags, constraints, or sample values.",
+      "recommendation": "Populate complete column-level metadata in the Data Glossary for all tables. Each column must have: business term, description, data type, PII classification, constraints (PK/FK/NOT NULL/UNIQUE), and sample values."
+    },
+    {
+      "severity": "High",
+      "area": "Primary Key Coverage",
+      "issue": "Semantic model shows empty primary_key arrays (primary_key: []) for all 6 datasets (drug, patient, pharmacy, prescriber, prescription, product).",
+      "recommendation": "Define primary key columns for each dataset. At minimum, identify the unique identifier column(s) for each entity table."
+    },
+    {
+      "severity": "High",
+      "area": "Field Definition Coverage",
+      "issue": "Semantic model shows empty fields arrays (fields: []) for all 6 datasets. No column-level metadata is defined in the semantic model.",
+      "recommendation": "Populate the fields array for each dataset with complete column definitions including name, business_name, description, data_type, and semantic attributes."
+    },
+    {
+      "severity": "High",
+      "area": "Relationship Coverage",
+      "issue": "Semantic model shows empty relationships array (relationships: []) despite ai_context describing multiple join relationships between PRESCRIPTION and dimension tables (PATIENT, PRESCRIBER, PHARMACY, DRUG, PRODUCT).",
+      "recommendation": "Formalize all relationships described in ai_context into the relationships section. Define join keys, cardinality, and relationship types for PRESCRIPTION → PATIENT, PRESCRIPTION → PRESCRIBER, PRESCRIPTION → PHARMACY, PRESCRIPTION → DRUG, and PRESCRIPTION → PRODUCT."
+    },
+    {
+      "severity": "High",
+      "area": "Foreign Key Documentation",
+      "issue": "Data Glossary shows no FK or PK constraints in the Constraints column for any table, yet the semantic model's ai_context implies foreign key relationships for prescription joins.",
+      "recommendation": "Document all primary key and foreign key constraints in the Data Glossary. Mark identifier columns used in joins as PK (in dimension tables) or FK (in PRESCRIPTION fact table)."
+    },
+    {
+      "severity": "Medium",
+      "area": "Metric Column Reference Coverage",
+      "issue": "Metrics reference columns (patient_id, prescriber_id, pharmacy_id, drug_id) in their expressions, but these columns are not documented in the Data Glossary, making it impossible to verify their existence or data types.",
+      "recommendation": "Ensure all columns referenced in metric expressions are documented in the Data Glossary with complete metadata."
+    },
+    {
+      "severity": "Medium",
+      "area": "Documentation Coverage",
+      "issue": "While dataset-level descriptions exist in the semantic model and table-level descriptions exist in the glossary, the absence of column-level documentation creates a critical gap for understanding data structure and usage.",
+      "recommendation": "Add detailed column-level descriptions in both the semantic model (fields array) and the Data Glossary to enable proper data understanding and governance."
+    },
+    {
+      "severity": "Low",
+      "area": "Constraint Documentation",
+      "issue": "No NOT NULL, UNIQUE, or DEFAULT constraints are documented in the Data Glossary for any column.",
+      "recommendation": "Review and document all applicable constraints (NOT NULL, UNIQUE, DEFAULT, CHECK) for each column to ensure data quality rules are explicit."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "High",
+      "area": "Relationship Accuracy",
+      "issue": "The ai_context describes specific join relationships (e.g., 'PRESCRIPTION links to PATIENT via patient identifier') but these are not formalized in the relationships section, creating a disconnect between documented guidance and structured metadata.",
+      "recommendation": "Ensure all relationships described in ai_context are accurately reflected in the relationships section with correct join columns, cardinality (1:M for dimension to fact), and relationship types."
+    },
+    {
+      "severity": "High",
+      "area": "Metadata Verification Impossible",
+      "issue": "Cannot verify technical accuracy of column data types, FK/PK consistency, or metric column references because the Data Glossary contains no column-level metadata.",
+      "recommendation": "Populate column metadata in the Data Glossary to enable accuracy validation of types, constraints, and metric expressions."
+    },
+    {
+      "severity": "Medium",
+      "area": "Metric Column Reference Accuracy",
+      "issue": "Metrics reference columns (patient_id, prescriber_id, pharmacy_id, drug_id) that are not documented anywhere in the Data Glossary. Cannot verify these columns exist or have appropriate types for the operations performed (COUNT DISTINCT).",
+      "recommendation": "Document all columns in the Data Glossary and verify that columns used in metrics exist with compatible data types. Ensure identifier columns are marked as such."
+    },
+    {
+      "severity": "Medium",
+      "area": "Join Cardinality Consistency",
+      "issue": "The ai_context states 'PRESCRIPTION is at transaction level, while dimension tables are at entity level' implying 1:M relationships, but without formalized relationships or PK/FK constraints in the glossary, this cannot be verified.",
+      "recommendation": "Define cardinality explicitly in the relationships section and ensure PK/FK constraints in the glossary support the stated cardinality."
+    },
+    {
+      "severity": "Low",
+      "area": "Business Definition Consistency",
+      "issue": "Dataset descriptions in the semantic model state grain (e.g., 'one row per drug entity') but without primary key definitions or column metadata, the actual grain cannot be verified against the glossary.",
+      "recommendation": "Align grain statements in descriptions with documented primary keys and ensure the glossary's constraint documentation supports the stated grain."
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Convention Consistency",
+      "issue": "Cannot assess naming convention consistency (e.g., snake_case, ID suffix patterns) because no column names are documented in the Data Glossary.",
+      "recommendation": "Once columns are documented, review and standardize naming conventions across all tables (e.g., consistent use of _id suffix for identifiers, snake_case throughout)."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Redundant Expression Pattern",
+      "issue": "Three metrics (prescriptions_per_patient, prescriptions_per_prescriber, prescriptions_per_pharmacy) use identical CASE WHEN ... NULLIF pattern for division-by-zero protection: 'CASE WHEN COUNT(DISTINCT x) = 0 THEN 0 ELSE COUNT(*)::DECIMAL / NULLIF(COUNT(DISTINCT x), 0) END'.",
+      "recommendation": "Create a reusable SQL function or macro for safe division to eliminate redundant CASE/NULLIF logic. Alternatively, document this as a standard pattern in a shared CTE or expression library."
+    },
+    {
+      "severity": "Low",
+      "area": "Repeated COUNT DISTINCT Logic",
+      "issue": "Multiple metrics perform COUNT(DISTINCT x) on the same columns (patient_id, prescriber_id, pharmacy_id, drug_id). In a complex query combining multiple metrics, these could be computed once in a CTE.",
+      "recommendation": "For queries that compute multiple metrics simultaneously, consider a shared CTE that pre-computes distinct counts for reuse across metric calculations."
+    },
+    {
+      "severity": "Low",
+      "area": "Metric Generalization Opportunity",
+      "issue": "The 'per entity' metrics (prescriptions_per_patient, prescriptions_per_prescriber, prescriptions_per_pharmacy) follow an identical pattern differing only in the grouping column.",
+      "recommendation": "Consider a parameterized metric definition or template that accepts the dimension column as a parameter, reducing duplication in metric definitions."
+    }
+  ]
+}
