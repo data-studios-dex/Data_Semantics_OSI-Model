@@ -1,0 +1,88 @@
+version: "1.0"
+
+semantic_model:
+  - name: healthcare_analytics
+    description: >-
+      Healthcare Analytics Semantic Model derived from the ANALYTICS schema.
+      This model represents the analytical data structures available for healthcare business intelligence and reporting.
+      
+      Note: The source Data Glossary contains minimal column-level metadata. This semantic model represents
+      only the documented table structure. Additional semantic enrichment requires detailed column definitions,
+      primary keys, foreign keys, data types, and business terminology.
+    
+    ai_context:
+      instructions: >-
+        ## Healthcare Analytics Semantic Model
+        
+        ### Data Availability
+        
+        This semantic model is derived from a Data Glossary with limited metadata documentation.
+        The source glossary documents the existence of the FACT_SALES table but does not provide:
+        - Column definitions
+        - Primary key information
+        - Foreign key relationships
+        - Data types
+        - Business terminology
+        - Constraints
+        - Sample values
+        
+        ### Query Guidance
+        
+        Due to the absence of column-level metadata, this semantic model cannot provide:
+        - Field-level query guidance
+        - Measure definitions
+        - Dimension definitions
+        - Metric calculations
+        - Join relationships
+        - Aggregation guidance
+        - Grain analysis
+        
+        ### Recommendations
+        
+        To enable comprehensive semantic querying, the Data Glossary should be enriched with:
+        
+        1. **Column Definitions**: Document all columns in FACT_SALES with business names and descriptions
+        2. **Primary Keys**: Identify the primary key or composite key that defines the grain
+        3. **Foreign Keys**: Document relationships to dimension tables (customers, products, dates, etc.)
+        4. **Data Types**: Specify SQL data types for all columns
+        5. **Business Measures**: Identify quantitative fields (revenue, cost, quantity, etc.)
+        6. **Business Dimensions**: Identify categorical and temporal fields
+        7. **Computed Fields**: Document any derived or calculated columns
+        8. **Constraints**: Document NOT NULL, UNIQUE, CHECK constraints
+        9. **Sample Values**: Provide representative sample data
+        
+        ### Database Type
+        
+        Target Database: PostgreSQL
+        
+        All SQL expressions in this model use PostgreSQL syntax and functions.
+    
+    datasets:
+      - name: fact_sales
+        business_name: Sales Facts
+        description: >-
+          Contains fact_sales data information.
+          
+          This dataset represents sales transaction data within the healthcare analytics domain.
+          
+          **Grain**: Unknown - requires primary key documentation
+          
+          **Source**: ANALYTICS.FACT_SALES
+          
+          **Column Metadata**: Not documented in the source Data Glossary.
+          
+          To enable analytical querying, this dataset requires:
+          - Column definitions with business names and descriptions
+          - Primary key identification
+          - Foreign key relationships to dimension tables
+          - Measure identification (revenue, cost, quantity, etc.)
+          - Dimension identification (dates, customers, products, etc.)
+          - Data type specifications
+        
+        source: ANALYTICS.FACT_SALES
+        
+        fields: []
+    
+    relationships: []
+    
+    metrics: []
