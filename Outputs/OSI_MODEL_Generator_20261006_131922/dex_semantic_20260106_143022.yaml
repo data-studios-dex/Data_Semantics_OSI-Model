@@ -1,0 +1,1566 @@
+version: "1.0"
+
+semantic_model:
+  - name: retail_customer_order_analytics
+    description: >-
+      Comprehensive semantic model for retail customer order analytics.
+      This model represents the complete order-to-cash business process including
+      customers, orders, order items, products, payments, and shipments.
+      The model supports analytical queries across customer behavior, order fulfillment,
+      product performance, payment processing, and shipment tracking.
+      
+      Primary analytical grains:
+      - Customer level: one row per customer
+      - Order level: one row per order
+      - Order item level: one row per order line item
+      - Product level: one row per product
+      - Payment level: one row per payment transaction
+      - Shipment level: one row per shipment
+      
+      The model enables analysis of revenue, profitability, customer segmentation,
+      product performance, fulfillment efficiency, and payment processing.
+
+    ai_context:
+      instructions: >-
+        ## Semantic Model Query Guidance
+        
+        ### Dataset Grain Understanding
+        
+        **CUSTOMER**: One row per customer. Use for customer-level analysis, customer counts, and customer segmentation.
+        
+        **ORDERS**: One row per order. Use for order-level metrics such as order count, total order value, average order value.
+        The order contains aggregated monetary amounts (subtotal, tax_amount, shipping_fee, total_amount) that represent
+        the complete order value. Do NOT sum these fields after joining to ORDER_ITEM as this will cause double counting.
+        
+        **ORDER_ITEM**: One row per order line item. Multiple items can belong to one order.
+        Use for product-level analysis, units sold, line-level revenue and discounts.
+        The line_total represents revenue for that specific line item.
+        
+        **PRODUCT**: One row per product. Use for product-level analysis, product catalog queries, inventory analysis.
+        
+        **PAYMENT**: One row per payment transaction. Use for payment analysis, payment method analysis, transaction tracking.
+        
+        **SHIPMENT**: One row per shipment. Use for fulfillment analysis, carrier performance, delivery tracking.
+        
+        ### Measure Selection by Grain
+        
+        **Order-Level Revenue**: Use orders.total_amount or orders.subtotal. Query directly from ORDERS dataset.
+        Do NOT join to ORDER_ITEM and sum order-level amounts as this will multiply the revenue by the number of items.
+        
+        **Order-Item-Level Revenue**: Use order_item.line_total. This is the correct measure when analyzing by product,
+        category, or line-item attributes. Sum order_item.line_total to get product-level or category-level revenue.
+        
+        **Product Unit Sales**: Use SUM(order_item.quantity) from ORDER_ITEM dataset.
+        
+        **Customer Metrics**: For customer counts, use COUNT(DISTINCT customer.customer_id).
+        For revenue per customer, use SUM(orders.total_amount) grouped by customer.
+        
+        ### Join Guidance
+        
+        **ORDERS to CUSTOMER**: Many orders to one customer. Join on orders.customer_id = customer.customer_id.
+        This is a many-to-one relationship. Safe to aggregate order metrics after this join.
+        
+        **ORDER_ITEM to ORDERS**: Many order items to one order. Join on order_item.order_id = orders.order_id.
+        This is a many-to-one relationship. CRITICAL: Do NOT sum order-level monetary fields (total_amount, subtotal, tax_amount, shipping_fee)
+        after this join. Use order_item.line_total for item-level revenue instead.
+        
+        **ORDER_ITEM to PRODUCT**: Many order items to one product. Join on order_item.product_id = product.product_id.
+        This is a many-to-one relationship. Safe to aggregate item-level metrics after this join.
+        
+        **PAYMENT to ORDERS**: Many payments to one order (theoretically). Join on payment.order_id = orders.order_id.
+        Typically one payment per order, but model supports multiple payments.
+        
+        **SHIPMENT to ORDERS**: Many shipments to one order (theoretically). Join on shipment.order_id = orders.order_id.
+        Typically one shipment per order, but model supports multiple shipments.
+        
+        ### Double-Counting Prevention
+        
+        **CRITICAL**: When joining ORDERS to ORDER_ITEM, do NOT sum order-level monetary amounts.
+        
+        INCORRECT:
+        SELECT SUM(orders.total_amount)
+        FROM orders
+        JOIN order_item ON orders.order_id = order_item.order_id
+        -- This will multiply order total by number of items
+        
+        CORRECT for order-level revenue:
+        SELECT SUM(orders.total_amount)
+        FROM orders
+        -- No join to order_item
+        
+        CORRECT for product-level revenue:
+        SELECT SUM(order_item.line_total)
+        FROM order_item
+        JOIN product ON order_item.product_id = product.product_id
+        
+        ### Time Analysis
+        
+        **Order Date**: Use orders.order_date for order placement timing, order trends, period-over-period order analysis.
+        
+        **Payment Date**: Use payment.paid_at for payment timing, cash collection analysis.
+        
+        **Shipment Date**: Use shipment.shipped_at for fulfillment timing, shipment.delivered_at for delivery analysis.
+        
+        **Customer Date**: Use customer.created_at for customer acquisition analysis, cohort analysis.
+        
+        For revenue trending, use orders.order_date as the primary time dimension.
+        
+        ### Metrics and Formulas
+        
+        **Total Revenue**: SUM(orders.total_amount) from ORDERS dataset. Represents complete order value including tax and shipping.
+        
+        **Subtotal Revenue**: SUM(orders.subtotal) from ORDERS dataset. Represents order value before tax and shipping.
+        
+        **Product Revenue**: SUM(order_item.line_total) from ORDER_ITEM dataset. Use when analyzing by product or category.
+        
+        **Gross Profit**: SUM(order_item.line_total) - SUM(order_item.quantity * product.cost_price).
+        Requires joining ORDER_ITEM to PRODUCT. Uses line-level revenue minus product cost.
+        
+        **Gross Margin %**: (Gross Profit / Product Revenue) * 100. Calculate as ratio of aggregates, not average of ratios.
+        
+        **Average Order Value**: SUM(orders.total_amount) / COUNT(DISTINCT orders.order_id). Calculate from ORDERS dataset.
+        
+        **Units Sold**: SUM(order_item.quantity) from ORDER_ITEM dataset.
+        
+        **Average Selling Price**: SUM(order_item.line_total) / SUM(order_item.quantity). Weighted average, not simple average.
+        
+        **Discount Amount**: SUM(order_item.quantity * order_item.unit_price * order_item.discount_pct / 100.0).
+        
+        **Order Count**: COUNT(DISTINCT orders.order_id).
+        
+        **Customer Count**: COUNT(DISTINCT customer.customer_id).
+        
+        **Active Customer Count**: COUNT(DISTINCT customer.customer_id) WHERE customer.is_active = TRUE.
+        
+        ### Query Restrictions
+        
+        - Always consider dataset grain before aggregating measures
+        - Use appropriate date field for time-based analysis
+        - Handle NULL values in optional fields (tax_amount, shipping_fee, discount_pct)
+        - Respect PII fields - do not expose in non-secure contexts
+        - Use currency field to ensure monetary amounts are in expected currency
+        - Filter by is_active flags where appropriate for current-state analysis
+        - Consider order_status, payment_status, shipment_status for operational queries
+
+    datasets:
+      - name: customer
+        business_name: Customer
+        description: >-
+          Customer master dataset containing one row per customer.
+          Represents individual customers who place orders.
+          Includes customer demographic information, contact details, address, and segmentation.
+          The customer_id is the unique identifier and primary key.
+          Supports customer-level analysis, customer segmentation, and customer behavior analytics.
+        source: BRONZE.CUSTOMER
+        primary_key:
+          - customer_id
+        fields:
+          - name: customer_id
+            business_name: Customer Identifier
+            description: >-
+              Unique identifier for a customer. Primary key for the customer dataset.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: first_name
+            business_name: First Name
+            description: >-
+              Given name of the customer. Contains personally identifiable information.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+              - PII
+
+          - name: last_name
+            business_name: Last Name
+            description: >-
+              Family name of the customer. Contains personally identifiable information.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+              - PII
+
+          - name: email
+            business_name: Email
+            description: >-
+              Email address used to contact the customer. Contains personally identifiable information.
+            sql_type: VARCHAR(120)
+            constraints:
+              - PII
+
+          - name: phone
+            business_name: Phone
+            description: >-
+              Primary phone number for the customer. Contains personally identifiable information.
+            sql_type: VARCHAR(20)
+            constraints:
+              - PII
+
+          - name: date_of_birth
+            business_name: Date Of Birth
+            description: >-
+              Customer's date of birth. Contains personally identifiable information.
+              Can be used for age-based segmentation and demographic analysis.
+            sql_type: DATE
+            constraints:
+              - PII
+
+          - name: gender
+            business_name: Gender
+            description: >-
+              Reported gender of the customer. Contains personally identifiable information.
+              Can be used for demographic segmentation.
+            sql_type: VARCHAR(10)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: address_line
+            business_name: Address Line
+            description: >-
+              Street address line for the customer's primary residence or mailing address.
+              Contains personally identifiable information.
+            sql_type: VARCHAR(150)
+            constraints:
+              - PII
+
+          - name: city
+            business_name: City
+            description: >-
+              City of the customer's address. Contains personally identifiable information.
+              Can be used for geographic analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: state
+            business_name: State
+            description: >-
+              State or province of the customer's address. Contains personally identifiable information.
+              Can be used for geographic analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: country
+            business_name: Country
+            description: >-
+              Country of the customer's address. Contains personally identifiable information.
+              Can be used for geographic analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: postal_code
+            business_name: Postal Code
+            description: >-
+              Postal or ZIP code for the customer's address. Contains personally identifiable information.
+            sql_type: VARCHAR(15)
+            constraints:
+              - PII
+
+          - name: customer_segment
+            business_name: Customer Segment
+            description: >-
+              Marketing or business segment classification for the customer.
+              Used for customer segmentation and targeted analysis.
+              Example values: Premium, Standard, Budget.
+            sql_type: VARCHAR(20)
+            dimension:
+              is_time: false
+
+          - name: is_active
+            business_name: Is Active
+            description: >-
+              Indicates whether the customer record is currently active.
+              TRUE for active customers, FALSE for inactive.
+              Use to filter for current active customer base.
+            sql_type: BOOLEAN
+            constraints:
+              - DEFAULT TRUE
+
+          - name: created_at
+            business_name: Created At
+            description: >-
+              Timestamp when the customer record was created.
+              Represents customer acquisition date.
+              Use for customer acquisition analysis and cohort analysis.
+            sql_type: TIMESTAMP_NTZ
+            constraints:
+              - DEFAULT CURRENT_TIMESTAMP
+            dimension:
+              is_time: true
+
+          - name: updated_at
+            business_name: Updated At
+            description: >-
+              Timestamp of the most recent update to the customer record.
+              Tracks when customer information was last modified.
+            sql_type: TIMESTAMP_NTZ
+            constraints:
+              - DEFAULT CURRENT_TIMESTAMP
+            dimension:
+              is_time: true
+
+      - name: orders
+        business_name: Orders
+        description: >-
+          Orders dataset containing one row per customer order.
+          Represents the order header with aggregated monetary amounts for the complete order.
+          Includes order status, order date, customer reference, monetary totals, tax, shipping, and delivery address.
+          The order_id is the unique identifier and primary key.
+          Contains foreign key to customer dataset.
+          IMPORTANT: The monetary fields (subtotal, tax_amount, shipping_fee, total_amount) represent
+          the complete order value. Do NOT sum these fields after joining to order_item as this will
+          cause double counting. Use order_item.line_total for product-level revenue analysis.
+        source: BRONZE.ORDERS
+        primary_key:
+          - order_id
+        fields:
+          - name: order_id
+            business_name: Order Identifier
+            description: >-
+              Unique identifier for a customer order. Primary key for the orders dataset.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: customer_id
+            business_name: Customer Reference
+            description: >-
+              References the related customer record placing the order.
+              Foreign key to customer.customer_id.
+              Establishes many-to-one relationship from orders to customer.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: order_date
+            business_name: Order Date
+            description: >-
+              Timestamp when the order was placed.
+              Primary time dimension for order analysis.
+              Use for order trending, period-over-period analysis, and time-based aggregations.
+            sql_type: TIMESTAMP_NTZ
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+
+          - name: order_status
+            business_name: Order Status
+            description: >-
+              Indicates the current processing status of the order.
+              Example values: Completed, Pending, Cancelled, Processing.
+              Use for order status analysis and operational reporting.
+            sql_type: VARCHAR(20)
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+
+          - name: subtotal
+            business_name: Subtotal
+            description: >-
+              Monetary amount representing the sum of item prices before tax and shipping.
+              Represents order-level subtotal revenue.
+              Do NOT sum after joining to order_item.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - DEFAULT 0
+
+          - name: tax_amount
+            business_name: Tax Amount
+            description: >-
+              Monetary amount representing tax applied to the order.
+              Order-level tax amount. May be NULL if tax is not applicable.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - DEFAULT 0
+              - PII
+
+          - name: shipping_fee
+            business_name: Shipping Fee
+            description: >-
+              Monetary amount charged for shipping.
+              Order-level shipping cost.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - DEFAULT 0
+
+          - name: total_amount
+            business_name: Total Amount
+            description: >-
+              Total monetary amount for the order including tax and shipping.
+              Represents complete order value: subtotal + tax_amount + shipping_fee.
+              This is the primary order-level revenue measure.
+              Do NOT sum after joining to order_item.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - DEFAULT 0
+
+          - name: currency
+            business_name: Currency
+            description: >-
+              ISO currency code used for monetary amounts on the order.
+              Example: USD, EUR, GBP.
+              Use to filter or convert monetary amounts.
+            sql_type: VARCHAR(3)
+            constraints:
+              - DEFAULT 'USD'
+            dimension:
+              is_time: false
+
+          - name: shipping_city
+            business_name: Shipping City
+            description: >-
+              City of the shipping destination for the order.
+              Contains personally identifiable information.
+              Use for delivery location analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: shipping_state
+            business_name: Shipping State
+            description: >-
+              State or province of the shipping destination for the order.
+              Contains personally identifiable information.
+              Use for delivery location analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: shipping_country
+            business_name: Shipping Country
+            description: >-
+              Country of the shipping destination for the order.
+              Contains personally identifiable information.
+              Use for delivery location analysis.
+            sql_type: VARCHAR(60)
+            constraints:
+              - PII
+            dimension:
+              is_time: false
+
+          - name: created_at
+            business_name: Created At
+            description: >-
+              Timestamp when the order record was created.
+              Typically close to order_date but may differ due to system processing.
+            sql_type: TIMESTAMP_NTZ
+            constraints:
+              - DEFAULT CURRENT_TIMESTAMP
+            dimension:
+              is_time: true
+
+      - name: order_item
+        business_name: Order Item
+        description: >-
+          Order item dataset containing one row per order line item.
+          Represents individual products purchased within an order.
+          Multiple order items can belong to a single order.
+          Includes product reference, quantity, unit price, discount, and line total.
+          The order_item_id is the unique identifier and primary key.
+          Contains foreign keys to orders and product datasets.
+          Use this dataset for product-level revenue analysis and units sold.
+        source: BRONZE.ORDER_ITEM
+        primary_key:
+          - order_item_id
+        fields:
+          - name: order_item_id
+            business_name: Order Item Identifier
+            description: >-
+              Unique identifier for an order line item. Primary key for the order_item dataset.
+            sql_type: NUMBER(12,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: order_id
+            business_name: Order Reference
+            description: >-
+              References the related order header record.
+              Foreign key to orders.order_id.
+              Establishes many-to-one relationship from order_item to orders.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: product_id
+            business_name: Product Reference
+            description: >-
+              References the product being sold on the line item.
+              Foreign key to product.product_id.
+              Establishes many-to-one relationship from order_item to product.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: quantity
+            business_name: Quantity
+            description: >-
+              Number of units of the product ordered on this line.
+              Use to calculate units sold and inventory impact.
+            sql_type: NUMBER(5,0)
+            constraints:
+              - NOT NULL
+
+          - name: unit_price
+            business_name: Unit Price
+            description: >-
+              Monetary price per single unit of the product at the time of order.
+              Represents the selling price per unit for this specific transaction.
+              May differ from product.unit_price due to promotions or pricing changes.
+            sql_type: NUMBER(10,2)
+            constraints:
+              - NOT NULL
+
+          - name: discount_pct
+            business_name: Discount Pct
+            description: >-
+              Percentage discount applied to the line item.
+              Expressed as a percentage (e.g., 10.00 means 10% discount).
+              Use to calculate discount amount and analyze promotional effectiveness.
+            sql_type: NUMBER(5,2)
+            constraints:
+              - DEFAULT 0
+
+          - name: line_total
+            business_name: Line Total
+            description: >-
+              Monetary total for the line item after discounts.
+              Calculated as: quantity * unit_price * (1 - discount_pct / 100).
+              This is the primary measure for product-level revenue analysis.
+              Sum this field to get product revenue, category revenue, or total item revenue.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - NOT NULL
+
+      - name: product
+        business_name: Product
+        description: >-
+          Product master dataset containing one row per product.
+          Represents the product catalog with product details, pricing, cost, and inventory.
+          Includes product category reference, SKU, brand, pricing, and stock information.
+          The product_id is the unique identifier and primary key.
+          Contains foreign key to product category (category_id).
+          Supports product-level analysis, inventory analysis, and profitability analysis.
+        source: BRONZE.PRODUCT
+        primary_key:
+          - product_id
+        fields:
+          - name: product_id
+            business_name: Product Identifier
+            description: >-
+              Unique identifier for a product. Primary key for the product dataset.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: category_id
+            business_name: Category Reference
+            description: >-
+              References the product category classification.
+              Foreign key to product category dimension (not included in this glossary).
+              Use for product category analysis and hierarchical product grouping.
+            sql_type: NUMBER(5,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: sku
+            business_name: SKU
+            description: >-
+              Stock keeping unit code used to uniquely identify the product in inventory.
+              Alternative unique identifier for the product.
+            sql_type: VARCHAR(20)
+
+          - name: product_name
+            business_name: Product Name
+            description: >-
+              Descriptive name of the product.
+              Use for product identification and reporting.
+            sql_type: VARCHAR(120)
+            dimension:
+              is_time: false
+
+          - name: brand
+            business_name: Brand
+            description: >-
+              Brand associated with the product.
+              Use for brand-level analysis and brand performance reporting.
+            sql_type: VARCHAR(50)
+            dimension:
+              is_time: false
+
+          - name: unit_price
+            business_name: Unit Price
+            description: >-
+              Standard selling price per unit of the product.
+              Represents the current list price.
+              Actual transaction price may differ (see order_item.unit_price).
+            sql_type: NUMBER(10,2)
+            constraints:
+              - NOT NULL
+
+          - name: cost_price
+            business_name: Cost Price
+            description: >-
+              Cost per unit incurred by the retailer for the product.
+              Contains sensitive pricing information.
+              Use to calculate gross profit and gross margin.
+            sql_type: NUMBER(10,2)
+            constraints:
+              - PII
+
+          - name: stock_quantity
+            business_name: Stock Quantity
+            description: >-
+              Current quantity of the product available in stock.
+              Represents current inventory level.
+              Use for inventory analysis and stock availability reporting.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - DEFAULT 0
+
+          - name: is_active
+            business_name: Is Active
+            description: >-
+              Indicates whether the product is active and available for sale.
+              TRUE for active products, FALSE for discontinued or inactive products.
+              Use to filter for current product catalog.
+            sql_type: BOOLEAN
+            constraints:
+              - DEFAULT TRUE
+
+          - name: created_at
+            business_name: Created At
+            description: >-
+              Timestamp when the product record was created.
+              Represents product introduction date.
+            sql_type: TIMESTAMP_NTZ
+            constraints:
+              - DEFAULT CURRENT_TIMESTAMP
+            dimension:
+              is_time: true
+
+      - name: payment
+        business_name: Payment
+        description: >-
+          Payment dataset containing one row per payment transaction.
+          Represents payment transactions applied to orders.
+          Includes payment method, payment status, amount, currency, and transaction reference.
+          The payment_id is the unique identifier and primary key.
+          Contains foreign key to orders dataset.
+          Supports payment analysis, payment method analysis, and cash collection tracking.
+        source: BRONZE.PAYMENT
+        primary_key:
+          - payment_id
+        fields:
+          - name: payment_id
+            business_name: Payment Identifier
+            description: >-
+              Unique identifier for a payment transaction. Primary key for the payment dataset.
+            sql_type: NUMBER(12,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: order_id
+            business_name: Order Reference
+            description: >-
+              References the order that the payment is applied to.
+              Foreign key to orders.order_id.
+              Establishes many-to-one relationship from payment to orders.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: payment_method
+            business_name: Payment Method
+            description: >-
+              Indicates the method used to make the payment.
+              Example values: Credit Card, Debit Card, PayPal, Bank Transfer.
+              Use for payment method analysis and payment channel reporting.
+            sql_type: VARCHAR(20)
+            dimension:
+              is_time: false
+
+          - name: payment_status
+            business_name: Payment Status
+            description: >-
+              Indicates the current status of the payment.
+              Example values: Settled, Pending, Failed, Refunded.
+              Use for payment status tracking and reconciliation.
+            sql_type: VARCHAR(20)
+            dimension:
+              is_time: false
+
+          - name: amount
+            business_name: Amount
+            description: >-
+              Monetary amount of the payment.
+              Represents the payment transaction amount.
+              Should typically match orders.total_amount for full payment.
+            sql_type: NUMBER(12,2)
+            constraints:
+              - NOT NULL
+
+          - name: currency
+            business_name: Currency
+            description: >-
+              ISO currency code of the payment amount.
+              Example: USD, EUR, GBP.
+              Should typically match orders.currency.
+            sql_type: VARCHAR(3)
+            constraints:
+              - DEFAULT 'USD'
+            dimension:
+              is_time: false
+
+          - name: transaction_ref
+            business_name: Transaction Ref
+            description: >-
+              Reference identifier from the payment processor for the transaction.
+              Contains personally identifiable information.
+              Use for payment reconciliation and dispute resolution.
+            sql_type: VARCHAR(30)
+            constraints:
+              - PII
+
+          - name: paid_at
+            business_name: Paid At
+            description: >-
+              Timestamp when the payment was completed.
+              Use for payment timing analysis and cash collection reporting.
+            sql_type: TIMESTAMP_NTZ
+            dimension:
+              is_time: true
+
+      - name: shipment
+        business_name: Shipment
+        description: >-
+          Shipment dataset containing one row per shipment record.
+          Represents shipments dispatched to fulfill orders.
+          Includes carrier information, tracking number, shipment timing, and delivery status.
+          The shipment_id is the unique identifier and primary key.
+          Contains foreign key to orders dataset.
+          Supports fulfillment analysis, carrier performance analysis, and delivery tracking.
+        source: BRONZE.SHIPMENT
+        primary_key:
+          - shipment_id
+        fields:
+          - name: shipment_id
+            business_name: Shipment Identifier
+            description: >-
+              Unique identifier for a shipment record. Primary key for the shipment dataset.
+            sql_type: NUMBER(12,0)
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+
+          - name: order_id
+            business_name: Order Reference
+            description: >-
+              References the order associated with the shipment.
+              Foreign key to orders.order_id.
+              Establishes many-to-one relationship from shipment to orders.
+            sql_type: NUMBER(10,0)
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+
+          - name: carrier
+            business_name: Carrier
+            description: >-
+              Name of the shipping carrier handling the shipment.
+              Example values: UPS, FedEx, USPS, DHL.
+              Use for carrier performance analysis and carrier selection optimization.
+            sql_type: VARCHAR(30)
+            dimension:
+              is_time: false
+
+          - name: tracking_number
+            business_name: Tracking Number
+            description: >-
+              Tracking number provided by the carrier to follow the shipment.
+              Contains personally identifiable information.
+              Use for shipment tracking and customer service.
+            sql_type: VARCHAR(30)
+            constraints:
+              - PII
+
+          - name: shipped_at
+            business_name: Shipped At
+            description: >-
+              Timestamp when the shipment was dispatched.
+              Use for fulfillment timing analysis and order-to-ship cycle time.
+            sql_type: TIMESTAMP_NTZ
+            dimension:
+              is_time: true
+
+          - name: delivered_at
+            business_name: Delivered At
+            description: >-
+              Timestamp when the shipment was delivered to the customer.
+              Use for delivery timing analysis and ship-to-delivery cycle time.
+              May be NULL if shipment is not yet delivered.
+            sql_type: TIMESTAMP_NTZ
+            dimension:
+              is_time: true
+
+          - name: shipment_status
+            business_name: Shipment Status
+            description: >-
+              Indicates the current delivery status of the shipment.
+              Example values: In Transit, Delivered, Pending, Returned.
+              Use for shipment status tracking and operational reporting.
+            sql_type: VARCHAR(20)
+            dimension:
+              is_time: false
+
+    relationships:
+      - name: orders_to_customer
+        left_dataset: orders
+        right_dataset: customer
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Many orders belong to one customer. Join orders to customer using customer_id.
+          This relationship enables customer-level analysis of order behavior.
+          Safe to aggregate order metrics after this join.
+
+      - name: order_item_to_orders
+        left_dataset: order_item
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Many order items belong to one order. Join order_item to orders using order_id.
+          This relationship enables order header information to be accessed from order line items.
+          CRITICAL: Do NOT sum order-level monetary fields (orders.total_amount, orders.subtotal,
+          orders.tax_amount, orders.shipping_fee) after this join as this will cause double counting.
+          The order-level amounts represent the complete order value and will be multiplied by the
+          number of items if summed after joining. Use order_item.line_total for product-level revenue.
+
+      - name: order_item_to_product
+        left_dataset: order_item
+        right_dataset: product
+        relationship_type: many_to_one
+        join:
+          left:
+            - product_id
+          right:
+            - product_id
+        join_type: many_to_one
+        resolution: >-
+          Many order items reference one product. Join order_item to product using product_id.
+          This relationship enables product-level analysis of sales, revenue, and profitability.
+          Safe to aggregate item-level metrics after this join.
+
+      - name: payment_to_orders
+        left_dataset: payment
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Many payments can be applied to one order (though typically one payment per order).
+          Join payment to orders using order_id.
+          This relationship enables payment analysis in the context of orders.
+
+      - name: shipment_to_orders
+        left_dataset: shipment
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Many shipments can be associated with one order (though typically one shipment per order).
+          Join shipment to orders using order_id.
+          This relationship enables fulfillment analysis in the context of orders.
+
+    metrics:
+      - name: total_revenue
+        business_name: Total Revenue
+        description: >-
+          Total revenue including tax and shipping across all orders.
+          Calculated as the sum of total_amount from the orders dataset.
+          Represents complete order value including subtotal, tax, and shipping fees.
+          Use for overall revenue reporting and trending.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(orders.total_amount) AS total_revenue
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.total_amount
+
+      - name: subtotal_revenue
+        business_name: Subtotal Revenue
+        description: >-
+          Total revenue before tax and shipping across all orders.
+          Calculated as the sum of subtotal from the orders dataset.
+          Represents order value excluding tax and shipping fees.
+          Use for revenue analysis excluding ancillary charges.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(orders.subtotal) AS subtotal_revenue
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.subtotal
+
+      - name: product_revenue
+        business_name: Product Revenue
+        description: >-
+          Total revenue at the product line item level.
+          Calculated as the sum of line_total from the order_item dataset.
+          Represents revenue after line-level discounts.
+          Use for product-level revenue analysis, category analysis, and product performance.
+          This is the correct measure when analyzing revenue by product or category.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.line_total) AS product_revenue
+                FROM BRONZE.ORDER_ITEM AS order_item
+              columns_used:
+                - order_item.line_total
+
+      - name: total_tax
+        business_name: Total Tax
+        description: >-
+          Total tax amount collected across all orders.
+          Calculated as the sum of tax_amount from the orders dataset.
+          Use for tax reporting and analysis.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(COALESCE(orders.tax_amount, 0)) AS total_tax
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.tax_amount
+
+      - name: total_shipping_fees
+        business_name: Total Shipping Fees
+        description: >-
+          Total shipping fees charged across all orders.
+          Calculated as the sum of shipping_fee from the orders dataset.
+          Use for shipping revenue analysis and logistics cost recovery.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(COALESCE(orders.shipping_fee, 0)) AS total_shipping_fees
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.shipping_fee
+
+      - name: gross_profit
+        business_name: Gross Profit
+        description: >-
+          Total gross profit calculated as product revenue minus product cost.
+          Calculated as sum of line_total minus sum of (quantity * cost_price).
+          Requires joining order_item to product to access cost_price.
+          Represents profit before operating expenses.
+          Use for profitability analysis at product and category levels.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.line_total) 
+                    - SUM(order_item.quantity * product.cost_price) AS gross_profit
+                FROM BRONZE.ORDER_ITEM AS order_item
+                JOIN BRONZE.PRODUCT AS product 
+                    ON order_item.product_id = product.product_id
+              columns_used:
+                - order_item.line_total
+                - order_item.quantity
+                - product.cost_price
+
+      - name: gross_margin_pct
+        business_name: Gross Margin Percentage
+        description: >-
+          Gross margin expressed as a percentage of product revenue.
+          Calculated as (gross profit / product revenue) * 100.
+          Represents profitability ratio before operating expenses.
+          Use for profitability analysis and pricing strategy evaluation.
+          Handles division by zero by returning 0 when revenue is zero.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    CASE
+                        WHEN SUM(order_item.line_total) = 0 THEN 0
+                        ELSE (
+                            (SUM(order_item.line_total) 
+                             - SUM(order_item.quantity * product.cost_price))
+                            / NULLIF(SUM(order_item.line_total), 0)
+                        ) * 100
+                    END AS gross_margin_pct
+                FROM BRONZE.ORDER_ITEM AS order_item
+                JOIN BRONZE.PRODUCT AS product 
+                    ON order_item.product_id = product.product_id
+              columns_used:
+                - order_item.line_total
+                - order_item.quantity
+                - product.cost_price
+
+      - name: order_count
+        business_name: Order Count
+        description: >-
+          Total number of orders.
+          Calculated as count of distinct order_id from the orders dataset.
+          Use for order volume analysis and trending.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT orders.order_id) AS order_count
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.order_id
+
+      - name: customer_count
+        business_name: Customer Count
+        description: >-
+          Total number of unique customers.
+          Calculated as count of distinct customer_id from the customer dataset.
+          Use for customer base size analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT customer.customer_id) AS customer_count
+                FROM BRONZE.CUSTOMER AS customer
+              columns_used:
+                - customer.customer_id
+
+      - name: active_customer_count
+        business_name: Active Customer Count
+        description: >-
+          Total number of active customers.
+          Calculated as count of distinct customer_id where is_active is TRUE.
+          Use for current active customer base analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT customer.customer_id) AS active_customer_count
+                FROM BRONZE.CUSTOMER AS customer
+                WHERE customer.is_active = TRUE
+              columns_used:
+                - customer.customer_id
+                - customer.is_active
+
+      - name: units_sold
+        business_name: Units Sold
+        description: >-
+          Total number of product units sold across all order items.
+          Calculated as sum of quantity from the order_item dataset.
+          Use for unit volume analysis and inventory planning.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.quantity) AS units_sold
+                FROM BRONZE.ORDER_ITEM AS order_item
+              columns_used:
+                - order_item.quantity
+
+      - name: average_order_value
+        business_name: Average Order Value
+        description: >-
+          Average monetary value per order.
+          Calculated as total revenue divided by order count.
+          Represents average order size including tax and shipping.
+          Use for order size analysis and customer value assessment.
+          Handles division by zero by using NULLIF.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(orders.total_amount) / NULLIF(COUNT(DISTINCT orders.order_id), 0) AS average_order_value
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.total_amount
+                - orders.order_id
+
+      - name: average_selling_price
+        business_name: Average Selling Price
+        description: >-
+          Average selling price per unit across all order items.
+          Calculated as product revenue divided by units sold.
+          Represents weighted average selling price after discounts.
+          Use for pricing analysis and price trend monitoring.
+          Handles division by zero by using NULLIF.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.line_total) / NULLIF(SUM(order_item.quantity), 0) AS average_selling_price
+                FROM BRONZE.ORDER_ITEM AS order_item
+              columns_used:
+                - order_item.line_total
+                - order_item.quantity
+
+      - name: total_discount_amount
+        business_name: Total Discount Amount
+        description: >-
+          Total monetary discount amount given across all order items.
+          Calculated as sum of (quantity * unit_price * discount_pct / 100).
+          Represents total promotional discount value.
+          Use for promotional effectiveness analysis and discount impact assessment.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.quantity * order_item.unit_price * COALESCE(order_item.discount_pct, 0) / 100.0) AS total_discount_amount
+                FROM BRONZE.ORDER_ITEM AS order_item
+              columns_used:
+                - order_item.quantity
+                - order_item.unit_price
+                - order_item.discount_pct
+
+      - name: average_discount_pct
+        business_name: Average Discount Percentage
+        description: >-
+          Average discount percentage across all order items.
+          Calculated as weighted average using line value as weight.
+          Represents typical discount rate applied.
+          Use for promotional analysis and pricing strategy.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(order_item.quantity * order_item.unit_price * COALESCE(order_item.discount_pct, 0)) 
+                    / NULLIF(SUM(order_item.quantity * order_item.unit_price), 0) AS average_discount_pct
+                FROM BRONZE.ORDER_ITEM AS order_item
+              columns_used:
+                - order_item.quantity
+                - order_item.unit_price
+                - order_item.discount_pct
+
+      - name: revenue_per_customer
+        business_name: Revenue Per Customer
+        description: >-
+          Average revenue per customer.
+          Calculated as total revenue divided by number of customers who placed orders.
+          Represents customer lifetime value proxy.
+          Use for customer value analysis and segmentation.
+          Handles division by zero by using NULLIF.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(orders.total_amount) / NULLIF(COUNT(DISTINCT orders.customer_id), 0) AS revenue_per_customer
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.total_amount
+                - orders.customer_id
+
+      - name: orders_per_customer
+        business_name: Orders Per Customer
+        description: >-
+          Average number of orders per customer.
+          Calculated as total orders divided by number of customers who placed orders.
+          Represents customer purchase frequency.
+          Use for customer behavior analysis and retention assessment.
+          Handles division by zero by using NULLIF.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT orders.order_id) / NULLIF(COUNT(DISTINCT orders.customer_id), 0) AS orders_per_customer
+                FROM BRONZE.ORDERS AS orders
+              columns_used:
+                - orders.order_id
+                - orders.customer_id
+
+      - name: shipment_count
+        business_name: Shipment Count
+        description: >-
+          Total number of shipments.
+          Calculated as count of distinct shipment_id from the shipment dataset.
+          Use for fulfillment volume analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT shipment.shipment_id) AS shipment_count
+                FROM BRONZE.SHIPMENT AS shipment
+              columns_used:
+                - shipment.shipment_id
+
+      - name: payment_count
+        business_name: Payment Count
+        description: >-
+          Total number of payment transactions.
+          Calculated as count of distinct payment_id from the payment dataset.
+          Use for payment transaction volume analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT payment.payment_id) AS payment_count
+                FROM BRONZE.PAYMENT AS payment
+              columns_used:
+                - payment.payment_id
+
+      - name: total_payment_amount
+        business_name: Total Payment Amount
+        description: >-
+          Total monetary amount collected through payments.
+          Calculated as sum of amount from the payment dataset.
+          Should typically match total revenue for reconciliation.
+          Use for cash collection analysis and payment reconciliation.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(payment.amount) AS total_payment_amount
+                FROM BRONZE.PAYMENT AS payment
+              columns_used:
+                - payment.amount
+
+      - name: product_count
+        business_name: Product Count
+        description: >-
+          Total number of products in the catalog.
+          Calculated as count of distinct product_id from the product dataset.
+          Use for catalog size analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT product.product_id) AS product_count
+                FROM BRONZE.PRODUCT AS product
+              columns_used:
+                - product.product_id
+
+      - name: active_product_count
+        business_name: Active Product Count
+        description: >-
+          Total number of active products available for sale.
+          Calculated as count of distinct product_id where is_active is TRUE.
+          Use for current catalog size analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    COUNT(DISTINCT product.product_id) AS active_product_count
+                FROM BRONZE.PRODUCT AS product
+                WHERE product.is_active = TRUE
+              columns_used:
+                - product.product_id
+                - product.is_active
+
+      - name: total_inventory_value
+        business_name: Total Inventory Value
+        description: >-
+          Total value of inventory at cost.
+          Calculated as sum of (stock_quantity * cost_price) from the product dataset.
+          Represents total inventory investment at cost.
+          Use for inventory valuation and working capital analysis.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    SUM(product.stock_quantity * product.cost_price) AS total_inventory_value
+                FROM BRONZE.PRODUCT AS product
+              columns_used:
+                - product.stock_quantity
+                - product.cost_price
+
+      - name: monthly_revenue
+        business_name: Monthly Revenue
+        description: >-
+          Total revenue aggregated by month.
+          Calculated as sum of total_amount grouped by month from order_date.
+          Use for monthly revenue trending and period-over-period analysis.
+          Returns one row per month.
+        return_type: currency_usd
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    DATE_TRUNC('MONTH', orders.order_date) AS order_month,
+                    SUM(orders.total_amount) AS monthly_revenue
+                FROM BRONZE.ORDERS AS orders
+                GROUP BY DATE_TRUNC('MONTH', orders.order_date)
+                ORDER BY order_month
+              columns_used:
+                - orders.order_date
+                - orders.total_amount
+
+      - name: revenue_by_customer_segment
+        business_name: Revenue By Customer Segment
+        description: >-
+          Total revenue aggregated by customer segment.
+          Calculated as sum of total_amount grouped by customer_segment.
+          Requires joining orders to customer.
+          Use for customer segmentation analysis and segment performance.
+          Returns one row per customer segment.
+        return_type: currency_usd
+        result_grain: one row per customer segment
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    customer.customer_segment,
+                    SUM(orders.total_amount) AS segment_revenue
+                FROM BRONZE.ORDERS AS orders
+                JOIN BRONZE.CUSTOMER AS customer 
+                    ON orders.customer_id = customer.customer_id
+                GROUP BY customer.customer_segment
+                ORDER BY segment_revenue DESC
+              columns_used:
+                - orders.total_amount
+                - orders.customer_id
+                - customer.customer_id
+                - customer.customer_segment
+
+      - name: revenue_by_product
+        business_name: Revenue By Product
+        description: >-
+          Total revenue aggregated by product.
+          Calculated as sum of line_total grouped by product.
+          Requires joining order_item to product.
+          Use for product performance analysis and product ranking.
+          Returns one row per product.
+        return_type: currency_usd
+        result_grain: one row per product
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    product.product_id,
+                    product.product_name,
+                    SUM(order_item.line_total) AS product_revenue
+                FROM BRONZE.ORDER_ITEM AS order_item
+                JOIN BRONZE.PRODUCT AS product 
+                    ON order_item.product_id = product.product_id
+                GROUP BY product.product_id, product.product_name
+                ORDER BY product_revenue DESC
+              columns_used:
+                - order_item.line_total
+                - order_item.product_id
+                - product.product_id
+                - product.product_name
+
+      - name: revenue_by_brand
+        business_name: Revenue By Brand
+        description: >-
+          Total revenue aggregated by product brand.
+          Calculated as sum of line_total grouped by brand.
+          Requires joining order_item to product.
+          Use for brand performance analysis and brand portfolio management.
+          Returns one row per brand.
+        return_type: currency_usd
+        result_grain: one row per brand
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    product.brand,
+                    SUM(order_item.line_total) AS brand_revenue
+                FROM BRONZE.ORDER_ITEM AS order_item
+                JOIN BRONZE.PRODUCT AS product 
+                    ON order_item.product_id = product.product_id
+                GROUP BY product.brand
+                ORDER BY brand_revenue DESC
+              columns_used:
+                - order_item.line_total
+                - order_item.product_id
+                - product.product_id
+                - product.brand
+
+      - name: revenue_by_order_status
+        business_name: Revenue By Order Status
+        description: >-
+          Total revenue aggregated by order status.
+          Calculated as sum of total_amount grouped by order_status.
+          Use for order status analysis and operational reporting.
+          Returns one row per order status.
+        return_type: currency_usd
+        result_grain: one row per order status
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    orders.order_status,
+                    SUM(orders.total_amount) AS status_revenue
+                FROM BRONZE.ORDERS AS orders
+                GROUP BY orders.order_status
+                ORDER BY status_revenue DESC
+              columns_used:
+                - orders.order_status
+                - orders.total_amount
+
+      - name: revenue_by_payment_method
+        business_name: Revenue By Payment Method
+        description: >-
+          Total revenue aggregated by payment method.
+          Calculated as sum of payment amount grouped by payment_method.
+          Use for payment method analysis and payment channel optimization.
+          Returns one row per payment method.
+        return_type: currency_usd
+        result_grain: one row per payment method
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    payment.payment_method,
+                    SUM(payment.amount) AS payment_method_revenue
+                FROM BRONZE.PAYMENT AS payment
+                GROUP BY payment.payment_method
+                ORDER BY payment_method_revenue DESC
+              columns_used:
+                - payment.payment_method
+                - payment.amount
+
+      - name: revenue_by_carrier
+        business_name: Revenue By Carrier
+        description: >-
+          Total revenue aggregated by shipping carrier.
+          Calculated as sum of total_amount for orders with shipments, grouped by carrier.
+          Requires joining orders to shipment.
+          Use for carrier performance analysis and carrier selection.
+          Returns one row per carrier.
+        return_type: currency_usd
+        result_grain: one row per carrier
+        expression:
+          dialects:
+            - dialect: SNOWFLAKE
+              expression: |
+                SELECT
+                    shipment.carrier,
+                    SUM(orders.total_amount) AS carrier_revenue
+                FROM BRONZE.ORDERS AS orders
+                JOIN BRONZE.SHIPMENT AS shipment 
+                    ON orders.order_id = shipment.order_id
+                GROUP BY shipment.carrier
+                ORDER BY carrier_revenue DESC
+              columns_used:
+                - orders.total_amount
+                - orders.order_id
+                - shipment.order_id
+                - shipment.carrier
