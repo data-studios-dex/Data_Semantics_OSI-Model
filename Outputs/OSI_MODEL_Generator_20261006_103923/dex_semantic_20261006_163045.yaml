@@ -1,0 +1,272 @@
+version: "1.0"
+
+semantic_model:
+  - name: pharma_healthcare_model
+    description: >-
+      Pharmaceutical Healthcare Semantic Model derived from pharma_bronze schema.
+      This model represents the core analytical entities in a pharmaceutical data system,
+      including drugs, patients, prescribers, pharmacies, prescriptions, and products.
+      The model supports analytical queries for prescription analysis, patient treatment patterns,
+      prescriber behavior, pharmacy operations, and drug utilization.
+    
+    ai_context:
+      instructions: >-
+        This semantic model represents pharmaceutical healthcare data with the following key entities:
+        
+        DATASET GRAIN:
+        - DRUG: One row per drug. Contains drug master data.
+        - PATIENT: One row per patient. Contains patient demographic and profile information.
+        - PHARMACY: One row per pharmacy. Contains pharmacy location and operational data.
+        - PRESCRIBER: One row per prescriber (physician/healthcare provider). Contains prescriber profile information.
+        - PRESCRIPTION: One row per prescription transaction. This is the primary fact table representing prescription events.
+        - PRODUCT: One row per product. Contains pharmaceutical product information.
+        
+        ANALYTICAL RELATIONSHIPS:
+        The PRESCRIPTION table is the central fact table that connects to dimension tables:
+        - PRESCRIPTION links to PATIENT via patient identifier
+        - PRESCRIPTION links to PRESCRIBER via prescriber identifier
+        - PRESCRIPTION links to PHARMACY via pharmacy identifier
+        - PRESCRIPTION links to DRUG via drug identifier
+        - PRESCRIPTION may link to PRODUCT via product identifier
+        
+        METRIC GUIDANCE:
+        - Use PRESCRIPTION as the base for transaction-level metrics (prescription count, volume analysis)
+        - Aggregate prescription data by patient, prescriber, pharmacy, or drug dimensions
+        - Time-based analysis should use prescription date fields when available
+        
+        JOIN GUIDANCE:
+        - Always join PRESCRIPTION to dimension tables (PATIENT, PRESCRIBER, PHARMACY, DRUG, PRODUCT)
+        - Use appropriate foreign key relationships when joining
+        - Be aware of grain differences: PRESCRIPTION is at transaction level, while dimension tables are at entity level
+        
+        DOUBLE COUNTING PREVENTION:
+        - When analyzing prescription counts, use PRESCRIPTION table directly
+        - When analyzing unique patients, prescribers, pharmacies, or drugs, use COUNT DISTINCT on the respective identifier
+        - Do not sum prescription-level measures after joining to dimension tables without proper aggregation
+        
+        QUERY PATTERNS:
+        - Patient analysis: Aggregate prescriptions by patient attributes
+        - Prescriber analysis: Aggregate prescriptions by prescriber attributes
+        - Drug utilization: Aggregate prescriptions by drug attributes
+        - Pharmacy operations: Aggregate prescriptions by pharmacy attributes
+        - Time-series analysis: Use prescription date for temporal analysis
+    
+    datasets:
+      - name: drug
+        business_name: Drug Master
+        description: >-
+          Contains drug master data information. This dataset represents the drug dimension
+          with one row per drug entity. Used for drug classification, drug attributes,
+          and drug-level analysis in prescription analytics.
+        source: pharma_bronze.drug
+        primary_key: []
+        fields: []
+      
+      - name: patient
+        business_name: Patient Master
+        description: >-
+          Contains patient demographic and profile information. This dataset represents
+          the patient dimension with one row per patient. Used for patient segmentation,
+          patient demographics analysis, and patient-level prescription analytics.
+        source: pharma_bronze.patient
+        primary_key: []
+        fields: []
+      
+      - name: pharmacy
+        business_name: Pharmacy Master
+        description: >-
+          Contains pharmacy location and operational data. This dataset represents
+          the pharmacy dimension with one row per pharmacy location. Used for pharmacy
+          network analysis, geographic distribution, and pharmacy-level prescription analytics.
+        source: pharma_bronze.pharmacy
+        primary_key: []
+        fields: []
+      
+      - name: prescriber
+        business_name: Prescriber Master
+        description: >-
+          Contains prescriber (physician/healthcare provider) profile information.
+          This dataset represents the prescriber dimension with one row per prescriber.
+          Used for prescriber behavior analysis, specialty analysis, and prescriber-level
+          prescription analytics.
+        source: pharma_bronze.prescriber
+        primary_key: []
+        fields: []
+      
+      - name: prescription
+        business_name: Prescription Transactions
+        description: >-
+          Contains prescription transaction data. This is the primary fact table with
+          one row per prescription event. Represents the core transactional data for
+          pharmaceutical analytics, linking patients, prescribers, pharmacies, drugs,
+          and products. Used as the base for all prescription volume, utilization,
+          and trend analysis.
+        source: pharma_bronze.prescription
+        primary_key: []
+        fields: []
+      
+      - name: product
+        business_name: Product Master
+        description: >-
+          Contains pharmaceutical product information. This dataset represents the
+          product dimension with one row per product. Used for product-level analysis,
+          product classification, and product performance analytics.
+        source: pharma_bronze.product
+        primary_key: []
+        fields: []
+    
+    relationships: []
+    
+    metrics:
+      - name: total_prescription_count
+        business_name: Total Prescription Count
+        description: >-
+          Total number of prescription transactions. This metric counts all prescription
+          records in the prescription fact table. Use this metric for overall prescription
+          volume analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(*) AS total_prescription_count
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.*
+      
+      - name: unique_patient_count
+        business_name: Unique Patient Count
+        description: >-
+          Count of distinct patients who have received prescriptions. This metric
+          identifies the number of unique patients in the prescription data. Use this
+          metric for patient reach and coverage analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT patient_id) AS unique_patient_count
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.patient_id
+      
+      - name: unique_prescriber_count
+        business_name: Unique Prescriber Count
+        description: >-
+          Count of distinct prescribers who have written prescriptions. This metric
+          identifies the number of unique prescribers in the prescription data. Use
+          this metric for prescriber network and engagement analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT prescriber_id) AS unique_prescriber_count
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.prescriber_id
+      
+      - name: unique_pharmacy_count
+        business_name: Unique Pharmacy Count
+        description: >-
+          Count of distinct pharmacies that have dispensed prescriptions. This metric
+          identifies the number of unique pharmacies in the prescription data. Use
+          this metric for pharmacy network coverage analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT pharmacy_id) AS unique_pharmacy_count
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.pharmacy_id
+      
+      - name: unique_drug_count
+        business_name: Unique Drug Count
+        description: >-
+          Count of distinct drugs that have been prescribed. This metric identifies
+          the number of unique drugs in the prescription data. Use this metric for
+          drug portfolio and formulary analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    COUNT(DISTINCT drug_id) AS unique_drug_count
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.drug_id
+      
+      - name: prescriptions_per_patient
+        business_name: Average Prescriptions per Patient
+        description: >-
+          Average number of prescriptions per patient. This metric calculates the
+          mean prescription volume per patient. Use this metric to understand patient
+          prescription frequency and treatment intensity.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT patient_id) = 0 THEN 0
+                        ELSE COUNT(*)::DECIMAL / NULLIF(COUNT(DISTINCT patient_id), 0)
+                    END AS prescriptions_per_patient
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.patient_id
+      
+      - name: prescriptions_per_prescriber
+        business_name: Average Prescriptions per Prescriber
+        description: >-
+          Average number of prescriptions per prescriber. This metric calculates the
+          mean prescription volume per prescriber. Use this metric to understand prescriber
+          activity levels and prescribing patterns.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT prescriber_id) = 0 THEN 0
+                        ELSE COUNT(*)::DECIMAL / NULLIF(COUNT(DISTINCT prescriber_id), 0)
+                    END AS prescriptions_per_prescriber
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.prescriber_id
+      
+      - name: prescriptions_per_pharmacy
+        business_name: Average Prescriptions per Pharmacy
+        description: >-
+          Average number of prescriptions per pharmacy. This metric calculates the
+          mean prescription volume per pharmacy location. Use this metric to understand
+          pharmacy throughput and operational volume.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: POSTGRESQL
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT pharmacy_id) = 0 THEN 0
+                        ELSE COUNT(*)::DECIMAL / NULLIF(COUNT(DISTINCT pharmacy_id), 0)
+                    END AS prescriptions_per_pharmacy
+                FROM pharma_bronze.prescription
+              columns_used:
+                - prescription.pharmacy_id
