@@ -1,0 +1,280 @@
+version: "1.0"
+
+semantic_model:
+  - name: pharma_healthcare_analytics
+    description: >-
+      Pharmaceutical Healthcare Analytics Semantic Model.
+      This model represents the core analytical entities in a pharmaceutical data environment,
+      including drugs, patients, pharmacies, prescribers, prescriptions, and products.
+      The model is designed to support healthcare analytics, prescription analysis,
+      drug utilization studies, prescriber behavior analysis, and pharmacy operations monitoring.
+      
+      Data Domain: Healthcare
+      Schema: pharma_bronze
+      
+      The semantic model is derived from the Data Glossary metadata and represents
+      the analytical relationships between pharmaceutical business entities.
+
+    ai_context:
+      instructions: >-
+        ## Pharmaceutical Healthcare Analytics Model
+        
+        This semantic model represents pharmaceutical healthcare data with six core datasets:
+        DRUG, PATIENT, PHARMACY, PRESCRIBER, PRESCRIPTION, and PRODUCT.
+        
+        ### Dataset Grain
+        
+        - **DRUG**: One row per drug. Contains drug master data including drug identifiers,
+          names, classifications, and attributes.
+        
+        - **PATIENT**: One row per patient. Contains patient demographic and identification data.
+        
+        - **PHARMACY**: One row per pharmacy. Contains pharmacy location, identification,
+          and operational data.
+        
+        - **PRESCRIBER**: One row per prescriber (physician, healthcare provider).
+          Contains prescriber identification, credentials, and practice information.
+        
+        - **PRESCRIPTION**: One row per prescription transaction. This is the central fact table
+          representing prescription events. Contains prescription details, dates, quantities,
+          and references to drug, patient, pharmacy, and prescriber.
+        
+        - **PRODUCT**: One row per product. Contains product information which may represent
+          specific drug formulations, packages, or SKUs.
+        
+        ### Analytical Relationships
+        
+        The PRESCRIPTION dataset is the central fact table that connects to dimension tables:
+        
+        - PRESCRIPTION → DRUG: Links prescriptions to drug master data
+        - PRESCRIPTION → PATIENT: Links prescriptions to patient information
+        - PRESCRIPTION → PHARMACY: Links prescriptions to dispensing pharmacy
+        - PRESCRIPTION → PRESCRIBER: Links prescriptions to prescribing healthcare provider
+        - PRESCRIPTION → PRODUCT: Links prescriptions to specific product information
+        
+        Additional relationships may exist:
+        - PRODUCT → DRUG: Products may reference drugs for detailed drug information
+        
+        ### Query Guidance
+        
+        **Prescription Analysis**:
+        When analyzing prescription volumes, costs, or quantities, use the PRESCRIPTION dataset
+        as the primary fact table. Join to dimension tables (DRUG, PATIENT, PHARMACY, PRESCRIBER)
+        to add analytical context.
+        
+        **Drug Utilization**:
+        To analyze drug utilization patterns, join PRESCRIPTION to DRUG to aggregate
+        prescription metrics by drug attributes such as drug name, classification, or therapeutic category.
+        
+        **Patient Analysis**:
+        For patient-level analytics, join PRESCRIPTION to PATIENT. Be aware that a single patient
+        may have multiple prescriptions over time.
+        
+        **Prescriber Behavior**:
+        To analyze prescriber patterns, join PRESCRIPTION to PRESCRIBER. Aggregate prescription
+        metrics by prescriber to understand prescribing behavior.
+        
+        **Pharmacy Operations**:
+        For pharmacy-level analytics, join PRESCRIPTION to PHARMACY to analyze dispensing
+        patterns, volumes, and operational metrics by pharmacy location.
+        
+        **Time-Based Analysis**:
+        Prescription datasets typically contain prescription date, fill date, or transaction date fields.
+        Use these date fields for time-series analysis, trend analysis, and period-over-period comparisons.
+        
+        ### Double-Counting Prevention
+        
+        - PRESCRIPTION is the grain for prescription-level metrics. Do not aggregate prescription-level
+          measures after joining to dimension tables without considering the join cardinality.
+        
+        - When joining PRESCRIPTION to dimension tables (DRUG, PATIENT, PHARMACY, PRESCRIBER),
+          the relationship is typically many-to-one, which preserves prescription grain.
+        
+        - If multiple dimension tables are joined simultaneously, verify that the joins do not
+          create unintended cartesian products.
+        
+        ### Metric Interpretation
+        
+        Due to limited column-level metadata in the source Data Glossary, specific metrics
+        and measures cannot be confidently derived. When column metadata becomes available,
+        typical pharmaceutical metrics may include:
+        
+        - Prescription Count
+        - Prescription Volume (quantity dispensed)
+        - Prescription Cost/Revenue
+        - Days Supply
+        - Refill Count
+        - Patient Count
+        - Prescriber Count
+        - Drug Count
+        - Pharmacy Count
+        
+        ### Data Limitations
+        
+        The source Data Glossary provided table-level descriptions but did not contain
+        detailed column-level metadata including:
+        - Column names
+        - Data types
+        - Primary keys
+        - Foreign keys
+        - Business definitions
+        - Constraints
+        - Sample values
+        
+        As a result, this semantic model represents the high-level table structure and
+        inferred relationships based on standard pharmaceutical data modeling patterns.
+        
+        Detailed field-level semantics, measures, dimensions, and metrics cannot be
+        generated without column-level metadata.
+        
+        When detailed column metadata becomes available, this model should be enhanced with:
+        - Explicit primary and foreign key relationships
+        - Detailed field definitions and business terms
+        - Dimension classifications (time, geography, categorical)
+        - Measure definitions with aggregation behavior
+        - Derived measures and calculated fields
+        - Business metrics with complete SQL expressions
+        - Column-level lineage and dependencies
+
+    datasets:
+      - name: drug
+        business_name: Drug Master Data
+        description: >-
+          Contains drug master data information.
+          This dataset represents the drug dimension in the pharmaceutical analytics model.
+          
+          Expected grain: One row per drug.
+          
+          Typical drug attributes may include drug identifiers, drug names, generic names,
+          brand names, drug classifications, therapeutic categories, controlled substance schedules,
+          FDA approval information, and drug attributes.
+          
+          This dataset serves as a dimension table for prescription analysis.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.drug
+        primary_key: []
+        fields: []
+
+      - name: patient
+        business_name: Patient Master Data
+        description: >-
+          Contains patient data information.
+          This dataset represents the patient dimension in the pharmaceutical analytics model.
+          
+          Expected grain: One row per patient.
+          
+          Typical patient attributes may include patient identifiers, demographic information
+          (age, gender, date of birth), geographic information (address, city, state, zip),
+          insurance information, and patient status.
+          
+          This dataset serves as a dimension table for prescription analysis.
+          Patient data may contain PII (Personally Identifiable Information) and PHI
+          (Protected Health Information) and must be handled according to HIPAA regulations.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.patient
+        primary_key: []
+        fields: []
+
+      - name: pharmacy
+        business_name: Pharmacy Master Data
+        description: >-
+          Contains pharmacy data information.
+          This dataset represents the pharmacy dimension in the pharmaceutical analytics model.
+          
+          Expected grain: One row per pharmacy.
+          
+          Typical pharmacy attributes may include pharmacy identifiers (NCPDP, NPI),
+          pharmacy name, pharmacy type (retail, mail-order, specialty, hospital),
+          geographic information (address, city, state, zip), pharmacy chain affiliation,
+          and operational attributes.
+          
+          This dataset serves as a dimension table for prescription analysis.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.pharmacy
+        primary_key: []
+        fields: []
+
+      - name: prescriber
+        business_name: Prescriber Master Data
+        description: >-
+          Contains prescriber data information.
+          This dataset represents the prescriber (healthcare provider) dimension
+          in the pharmaceutical analytics model.
+          
+          Expected grain: One row per prescriber.
+          
+          Typical prescriber attributes may include prescriber identifiers (NPI, DEA, state license),
+          prescriber name, credentials, specialty, practice type, geographic information
+          (practice address, city, state, zip), and prescriber attributes.
+          
+          This dataset serves as a dimension table for prescription analysis.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.prescriber
+        primary_key: []
+        fields: []
+
+      - name: prescription
+        business_name: Prescription Transactions
+        description: >-
+          Contains prescription transaction data.
+          This dataset represents the central fact table in the pharmaceutical analytics model.
+          
+          Expected grain: One row per prescription transaction.
+          
+          A prescription transaction represents a prescription fill event at a pharmacy.
+          Typical prescription attributes may include prescription identifiers, prescription date,
+          fill date, drug identifier, product identifier, patient identifier, prescriber identifier,
+          pharmacy identifier, quantity dispensed, days supply, refill number, prescription cost,
+          copay amount, insurance paid amount, and prescription status.
+          
+          This dataset connects to dimension tables:
+          - DRUG (drug information)
+          - PATIENT (patient information)
+          - PHARMACY (dispensing pharmacy information)
+          - PRESCRIBER (prescribing provider information)
+          - PRODUCT (product/SKU information)
+          
+          This is the primary dataset for prescription volume analysis, drug utilization studies,
+          cost analysis, and prescriber/pharmacy behavior analysis.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.prescription
+        primary_key: []
+        fields: []
+
+      - name: product
+        business_name: Product Master Data
+        description: >-
+          Contains product data information.
+          This dataset represents the product dimension in the pharmaceutical analytics model.
+          
+          Expected grain: One row per product.
+          
+          A product typically represents a specific drug formulation, strength, package size,
+          or SKU (Stock Keeping Unit). Products may reference drugs for detailed drug information.
+          
+          Typical product attributes may include product identifiers (NDC - National Drug Code),
+          product name, drug identifier (reference to DRUG table), manufacturer, package size,
+          package type, strength, dosage form, and product attributes.
+          
+          This dataset serves as a dimension table for prescription analysis and may provide
+          more granular product-level detail than the DRUG dimension.
+          
+          Data Domain: Healthcare
+          Schema: pharma_bronze
+        source: pharma_bronze.product
+        primary_key: []
+        fields: []
+
+    relationships: []
+
+    metrics: []
