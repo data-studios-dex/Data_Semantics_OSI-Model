@@ -1,0 +1,40 @@
+{
+  "overall_validation_score": 96.67,
+  "accuracy_score": 95.00,
+  "efficiency_score": 95.00,
+  "completeness_score": 100.00,
+  "overall_status": "PASS",
+  "scoring_methodology": {
+    "completeness_checks_passed": "6/6",
+    "accuracy_checks_passed": "19/20",
+    "efficiency_checks_passed": "19/20",
+    "overall_calculation": "Average of three category scores",
+    "pass_threshold": ">=90% with no High-severity issues",
+    "pass_with_warnings_threshold": ">=75% with no High-severity issues",
+    "fail_threshold": "<75% or any High-severity issue"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation",
+      "issue": "All required metadata elements are present and complete across both artifacts",
+      "recommendation": "Continue maintaining comprehensive documentation standards"
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Type Notation",
+      "issue": "Minor notation difference between YAML (TIMESTAMP_NTZ) and glossary (TIMESTAMPNTZ) for timestamp fields - both refer to the same Snowflake data type",
+      "recommendation": "Standardize timestamp type notation to use consistent format (recommend TIMESTAMP_NTZ with underscore) across all documentation"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Metric Definitions",
+      "issue": "Multiple \"revenue by X\" metrics (revenue_by_product, revenue_by_brand, revenue_by_carrier, revenue_by_customer_segment, revenue_by_order_status, revenue_by_payment_method) follow similar structural patterns with repeated GROUP BY logic",
+      "recommendation": "Consider creating a parameterized revenue aggregation template or macro that accepts dimension parameter to reduce code duplication and improve maintainability"
+    }
+  ]
+}
