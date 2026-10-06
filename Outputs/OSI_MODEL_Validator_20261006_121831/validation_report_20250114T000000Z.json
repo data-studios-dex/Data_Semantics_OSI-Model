@@ -1,0 +1,168 @@
+{
+  "overall_validation_score": 15.0,
+  "accuracy_score": 20.0,
+  "efficiency_score": 25.0,
+  "completeness_score": 0.0,
+  "overall_status": "FAIL",
+  "scoring_thresholds": {
+    "pass": "Overall Score >= 85%, no High-severity issues",
+    "pass_with_warnings": "Overall Score 60-84%, no High-severity issues",
+    "fail": "Overall Score < 60% or any High-severity issue present"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "High",
+      "area": "Column Metadata Coverage",
+      "issue": "The Data Glossary documents ANALYTICS.FACT_SALES table but provides zero column definitions. The table shows 0 documented columns.",
+      "recommendation": "Populate the Data Glossary with complete column-level metadata including column names, business terms, descriptions, data types, constraints, and sample values for all columns in FACT_SALES."
+    },
+    {
+      "severity": "High",
+      "area": "Semantic Model Fields Coverage",
+      "issue": "The OSI Semantic Model dataset 'fact_sales' contains an empty fields array (fields: []). No columns are defined in the semantic model.",
+      "recommendation": "Define all fields in the semantic model's fact_sales dataset with appropriate business names, descriptions, data types, and semantic roles (measure/dimension)."
+    },
+    {
+      "severity": "High",
+      "area": "Primary Key Documentation",
+      "issue": "Neither the Data Glossary nor the Semantic Model documents any primary key for FACT_SALES. The grain of the fact table is unknown.",
+      "recommendation": "Identify and document the primary key or composite key that defines the grain of FACT_SALES in both the Data Glossary (Constraints column) and the Semantic Model (field-level metadata)."
+    },
+    {
+      "severity": "High",
+      "area": "Foreign Key Relationships",
+      "issue": "The Semantic Model contains an empty relationships array (relationships: []). No foreign key relationships are documented.",
+      "recommendation": "Document all foreign key relationships between FACT_SALES and dimension tables (e.g., customers, products, dates) in both artifacts."
+    },
+    {
+      "severity": "High",
+      "area": "Metrics Coverage",
+      "issue": "The Semantic Model contains an empty metrics array (metrics: []). No business metrics are defined.",
+      "recommendation": "Define business metrics (e.g., Total Revenue, Average Order Value, Sales Quantity) that reference fact_sales measures and provide calculation logic."
+    },
+    {
+      "severity": "High",
+      "area": "Data Type Documentation",
+      "issue": "The Data Glossary Type column is empty for all columns (0 documented). No data types are specified.",
+      "recommendation": "Document SQL data types (e.g., INTEGER, NUMERIC, VARCHAR, DATE, TIMESTAMP) for all columns in the Data Glossary."
+    },
+    {
+      "severity": "High",
+      "area": "PII Field Documentation",
+      "issue": "The Data Glossary reports 0 PII fields. For a sales fact table in healthcare, this may indicate missing PII classification.",
+      "recommendation": "Review all columns for PII content (patient identifiers, member IDs, etc.) and mark PII=true in the Data Glossary where applicable."
+    },
+    {
+      "severity": "Medium",
+      "area": "Business Term Coverage",
+      "issue": "The Data Glossary Business Term column is empty for all columns. No business terminology is provided.",
+      "recommendation": "Populate business-friendly names for all technical column names (e.g., 'cust_id' → 'Customer Identifier')."
+    },
+    {
+      "severity": "Medium",
+      "area": "Description Coverage",
+      "issue": "The Data Glossary Description column is empty for all columns. Only the table-level description exists.",
+      "recommendation": "Write clear, business-focused descriptions for every column explaining its purpose, content, and usage."
+    },
+    {
+      "severity": "Medium",
+      "area": "Constraints Documentation",
+      "issue": "The Data Glossary Constraints column is empty. No constraints (NOT NULL, UNIQUE, CHECK, DEFAULT) are documented.",
+      "recommendation": "Document all constraints for each column, including nullability, uniqueness, foreign key references, and default values."
+    },
+    {
+      "severity": "Medium",
+      "area": "Sample Value Coverage",
+      "issue": "The Data Glossary Sample Value column is empty for all columns. No representative data is shown.",
+      "recommendation": "Provide realistic sample values for each column to illustrate data format, range, and content."
+    },
+    {
+      "severity": "Medium",
+      "area": "Measure Identification",
+      "issue": "The Semantic Model does not identify which fields are measures (quantitative, aggregatable).",
+      "recommendation": "Tag fields as measures (e.g., revenue_amount, quantity_sold, cost) with appropriate aggregation functions (SUM, AVG, COUNT)."
+    },
+    {
+      "severity": "Medium",
+      "area": "Dimension Identification",
+      "issue": "The Semantic Model does not identify which fields are dimensions (categorical, temporal).",
+      "recommendation": "Tag fields as dimensions (e.g., sale_date, customer_id, product_id) and document their role in slicing/filtering."
+    },
+    {
+      "severity": "Low",
+      "area": "Exposure Index",
+      "issue": "The Data Glossary reports 0.0% Exposure Index, indicating no metadata visibility.",
+      "recommendation": "Increase metadata completeness to improve the Exposure Index and enable data discovery."
+    },
+    {
+      "severity": "Low",
+      "area": "AI Context Completeness",
+      "issue": "The Semantic Model's ai_context section is primarily a list of missing metadata rather than actionable query guidance.",
+      "recommendation": "Once column metadata is available, replace the placeholder ai_context with concrete query patterns, join guidance, and aggregation rules."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "High",
+      "area": "Metadata Consistency",
+      "issue": "The Semantic Model acknowledges 'The source Data Glossary contains minimal column-level metadata' and states 'Column Metadata: Not documented in the source Data Glossary.' This is accurate—the glossary truly has zero column definitions. However, this creates a semantic model that cannot support any queries.",
+      "recommendation": "This is not an accuracy error per se, but a critical gap: both artifacts accurately reflect the absence of metadata, but that absence makes both artifacts unusable for their intended purpose. Prioritize metadata collection."
+    },
+    {
+      "severity": "Medium",
+      "area": "Table Name Consistency",
+      "issue": "The Data Glossary uses 'ANALYTICS.FACT_SALES' (uppercase), while the Semantic Model uses 'fact_sales' (lowercase) as the dataset name and 'ANALYTICS.FACT_SALES' as the source.",
+      "recommendation": "Establish and document a naming convention. If the physical table is uppercase, ensure the semantic model's source reference matches exactly. The dataset name can remain lowercase for readability, but the source field should match the database exactly."
+    },
+    {
+      "severity": "Medium",
+      "area": "Domain Context Accuracy",
+      "issue": "The Data Glossary specifies 'Domain Context: Healthcare' and the Semantic Model description states 'Healthcare Analytics Semantic Model.' However, with zero column definitions, it is impossible to verify whether FACT_SALES actually contains healthcare-specific data (e.g., patient encounters, claims, procedures).",
+      "recommendation": "Once columns are documented, verify that the domain classification is accurate. If FACT_SALES contains general sales data unrelated to healthcare, update the domain context."
+    },
+    {
+      "severity": "Low",
+      "area": "Database Type Declaration",
+      "issue": "The Semantic Model declares 'Target Database: PostgreSQL' and states 'All SQL expressions in this model use PostgreSQL syntax and functions.' However, no SQL expressions, metrics, or computed fields are present to validate this claim.",
+      "recommendation": "Once metrics and computed fields are added, ensure all SQL syntax is PostgreSQL-compliant (e.g., use PostgreSQL date functions, string functions, and aggregation syntax)."
+    },
+    {
+      "severity": "Low",
+      "area": "Grain Documentation Accuracy",
+      "issue": "The Semantic Model states '**Grain**: Unknown - requires primary key documentation.' This is an accurate statement given the absence of PK metadata.",
+      "recommendation": "Once the primary key is documented, update the grain description to specify the level of detail (e.g., 'One row per sale transaction' or 'One row per product per day per store')."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Redundant Placeholder Text",
+      "issue": "The Semantic Model's ai_context section contains a lengthy explanation of what is missing rather than actionable semantic guidance. This placeholder text will need to be entirely replaced once metadata is available.",
+      "recommendation": "Use a more concise placeholder (e.g., 'Metadata pending—see Data Glossary enrichment recommendations') to reduce maintenance overhead. Once metadata is available, replace with actual query guidance."
+    },
+    {
+      "severity": "Medium",
+      "area": "Empty Structural Elements",
+      "issue": "The Semantic Model includes empty arrays (fields: [], relationships: [], metrics: []) that serve no current purpose and will require complete population later.",
+      "recommendation": "Consider generating the semantic model only after column-level metadata is available, or use a 'draft' or 'incomplete' status flag to signal that the model is not yet ready for consumption."
+    },
+    {
+      "severity": "Low",
+      "area": "Duplicate 'Missing Metadata' Messaging",
+      "issue": "Both the Semantic Model description and the ai_context section repeat the message that column-level metadata is missing.",
+      "recommendation": "Consolidate this messaging into a single location (e.g., a top-level 'status' or 'completeness' field) to avoid redundancy."
+    },
+    {
+      "severity": "Low",
+      "area": "Overly Verbose Recommendations List",
+      "issue": "The ai_context section lists nine detailed recommendations for enriching the Data Glossary. While helpful, this content is more appropriate for a separate data governance document than for embedding in a semantic model.",
+      "recommendation": "Move the enrichment recommendations to a separate governance artifact (e.g., a metadata improvement plan) and reference it from the semantic model with a URL or document ID."
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability Opportunity",
+      "issue": "The pattern of documenting missing metadata and providing enrichment recommendations could be generalized into a reusable template for other incomplete semantic models.",
+      "recommendation": "Create a standard 'incomplete semantic model' template that can be applied to any table with missing metadata, reducing duplication across multiple models."
+    }
+  ]
+}
