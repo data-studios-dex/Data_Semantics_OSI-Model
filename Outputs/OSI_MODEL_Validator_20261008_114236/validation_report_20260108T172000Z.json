@@ -1,0 +1,31 @@
+{
+  "overall_validation_score": 91.67,
+  "accuracy_score": 100.0,
+  "efficiency_score": 75.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS",
+  "completeness_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No completeness issues found",
+      "recommendation": "All datasets, attributes, relationships, mappings, documentation, and rules are complete and properly documented."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No accuracy issues found",
+      "recommendation": "All metadata types, business definitions, relationships, naming conventions, and duplicate checks are accurate and consistent."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation",
+      "issue": "Generic table descriptions in Data Glossary",
+      "recommendation": "The Data Glossary uses generic descriptions for tables (e.g., \"Contains customer data information\", \"Contains order_tbl data information\"). Consider replacing these with more specific, differentiated descriptions that highlight the unique business purpose and analytical value of each table, similar to the detailed descriptions provided in the OSI Semantic Model."
+    }
+  ]
+}
