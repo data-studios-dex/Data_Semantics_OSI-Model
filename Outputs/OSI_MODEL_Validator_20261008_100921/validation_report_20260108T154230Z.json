@@ -1,0 +1,31 @@
+{
+  "overall_validation_score": 98.33,
+  "accuracy_score": 100.00,
+  "efficiency_score": 95.00,
+  "completeness_score": 100.00,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No issues found",
+      "recommendation": "All completeness checks passed successfully."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No issues found",
+      "recommendation": "All accuracy checks passed successfully."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation",
+      "issue": "Table descriptions in the Data Glossary are generic (e.g., \"Contains customer data information\", \"Contains order_tbl data information\") compared to the more detailed descriptions in the OSI Semantic Model.",
+      "recommendation": "Enhance Data Glossary table descriptions to match the detail level of the Semantic Model, providing business context, grain definition, and key relationships for each table."
+    }
+  ]
+}
