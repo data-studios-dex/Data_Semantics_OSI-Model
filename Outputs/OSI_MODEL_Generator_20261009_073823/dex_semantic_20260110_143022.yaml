@@ -1,0 +1,1174 @@
+version: "1.0"
+
+semantic_model:
+  - name: retail_staging_semantic_model
+    description: >-
+      Semantic model for the retail staging data domain containing modification management,
+      task tracking, impact assessment, baseline configuration, audit events, and completion gates.
+      This model supports analytical queries for modification lifecycle tracking, task management,
+      impact analysis, compliance auditing, and operational reporting.
+    
+    ai_context:
+      instructions: >-
+        This semantic model represents a retail modification and task management system.
+        
+        
+        DATASET GRAIN DEFINITIONS:
+        
+        - mod_record: One row per modification record. This is the primary business entity representing
+          configuration changes, updates, or modifications to retail systems. Grain = one modification.
+        
+        - task_record: One row per task. Tasks are work items associated with modifications.
+          Grain = one task per modification.
+        
+        - subtask: One row per subtask. Subtasks are detailed work steps within a task.
+          Grain = one subtask per task.
+        
+        - completion_gate: One row per completion gate. Gates are quality checkpoints for tasks.
+          Grain = one gate per task.
+        
+        - impact_record: One row per impact assessment. Impact records document the effects of modifications
+          on baseline configurations. Grain = one impact per modification.
+        
+        - baseline_record: One row per baseline configuration. Baselines represent standard configurations
+          or reference points. Grain = one baseline.
+        
+        - audit_event: One row per audit event. Audit events track changes and actions across all records.
+          Grain = one audit event.
+        
+        
+        RELATIONSHIP GUIDANCE:
+        
+        - mod_record is the central entity. Tasks and impacts are associated with modifications.
+        
+        - task_record.mod_id → mod_record.mod_id (many-to-one): Multiple tasks can belong to one modification.
+        
+        - subtask.task_id → task_record.task_id (many-to-one): Multiple subtasks belong to one task.
+        
+        - completion_gate.task_id → task_record.task_id (many-to-one): Multiple gates can be defined for one task.
+        
+        - impact_record.mod_id → mod_record.mod_id (many-to-one): Multiple impact assessments can be associated
+          with one modification.
+        
+        - impact_record.baseline_ref references baseline_record.section_ref (implicit relationship based on
+          business semantics): Impact records reference baseline configurations using baseline_ref.
+        
+        
+        JOIN GUIDANCE:
+        
+        - To analyze modifications with their tasks: JOIN mod_record to task_record on mod_id.
+        
+        - To analyze tasks with their subtasks: JOIN task_record to subtask on task_id.
+        
+        - To analyze tasks with their completion gates: JOIN task_record to completion_gate on task_id.
+        
+        - To analyze modifications with their impacts: JOIN mod_record to impact_record on mod_id.
+        
+        - To analyze impacts with their baseline references: JOIN impact_record to baseline_record
+          where impact_record.baseline_ref = baseline_record.section_ref.
+        
+        - audit_event is a standalone audit log. It references records via record_ref but does not have
+          explicit foreign keys. Use record_ref to correlate audit events with business entities when needed.
+        
+        
+        DOUBLE-COUNTING PREVENTION:
+        
+        - Do NOT sum modification-level measures after joining mod_record to task_record, as one modification
+          can have multiple tasks. This will duplicate modification counts.
+        
+        - Do NOT sum modification-level measures after joining mod_record to impact_record, as one modification
+          can have multiple impact assessments.
+        
+        - Do NOT sum task-level measures after joining task_record to subtask, as one task can have multiple subtasks.
+        
+        - Do NOT sum task-level measures after joining task_record to completion_gate, as one task can have
+          multiple gates.
+        
+        - When counting modifications, use COUNT(DISTINCT mod_record.mod_id) if joining to child tables.
+        
+        - When counting tasks, use COUNT(DISTINCT task_record.task_id) if joining to subtasks or gates.
+        
+        
+        TIME ANALYSIS GUIDANCE:
+        
+        - Use mod_record.created_date for modification creation time analysis.
+        
+        - Use mod_record.updated_date for modification update time analysis.
+        
+        - Use task_record.created_date for task creation time analysis.
+        
+        - Use task_record.updated_date for task update time analysis.
+        
+        - Use audit_event.event_ts for audit event time analysis.
+        
+        - For time-series analysis of modification activity, use mod_record.created_date.
+        
+        - For time-series analysis of task activity, use task_record.created_date.
+        
+        
+        METRIC SELECTION GUIDANCE:
+        
+        - Total Modification Count: Use COUNT(DISTINCT mod_record.mod_id) from mod_record.
+        
+        - Active Modification Count: Use COUNT(DISTINCT mod_record.mod_id) WHERE mod_record.is_active = 1.
+        
+        - Total Task Count: Use COUNT(DISTINCT task_record.task_id) from task_record.
+        
+        - Total Subtask Count: Use COUNT(task_record.subtask_id) from subtask.
+        
+        - Total Impact Count: Use COUNT(impact_record.impact_id) from impact_record.
+        
+        - Total Audit Event Count: Use COUNT(audit_event.audit_id) from audit_event.
+        
+        - Tasks per Modification: Join task_record to mod_record and calculate COUNT(task_id) / COUNT(DISTINCT mod_id).
+        
+        - Subtasks per Task: Join subtask to task_record and calculate COUNT(subtask_id) / COUNT(DISTINCT task_id).
+        
+        
+        STATUS AND CLASSIFICATION GUIDANCE:
+        
+        - mod_record.approval_status indicates the approval state of modifications (e.g., Approved, Pending, Rejected).
+        
+        - mod_record.mod_class indicates the classification category (e.g., Class A, Class B).
+        
+        - mod_record.safety_classification indicates safety criticality (e.g., Safety Critical, Non-Critical).
+        
+        - task_record.status indicates task progress (e.g., In Progress, Completed, Not Started).
+        
+        - impact_record.change_type indicates the magnitude of change (e.g., Major, Minor).
+        
+        - completion_gate.is_checked indicates whether a gate has been validated (1 = checked, 0 = not checked).
+        
+        - impact_record.is_selected indicates whether an impact has been selected for action (1 = selected, 0 = not selected).
+        
+        
+        PII HANDLING:
+        
+        - impact_record.owner_name contains personally identifiable information (PII). Handle according to
+          data privacy policies. The sample data shows [REDACTED_PERSON_NAME_1] indicating PII redaction.
+        
+        
+        QUERY RESTRICTIONS:
+        
+        - audit_event.record_ref is a text reference field that may point to various business entities.
+          It does not have a formal foreign key constraint. Use pattern matching or explicit filtering
+          when correlating audit events with specific records.
+        
+        - baseline_record.section_ref is referenced by impact_record.baseline_ref but there is no explicit
+          foreign key. Treat this as an implicit reference relationship.
+        
+        - Text fields such as details, rationale, change_desc, applicability, effectivity, preliminary_requirements,
+          and safety_text contain free-form business descriptions. Use full-text search or pattern matching
+          when querying these fields.
+
+    datasets:
+      - name: mod_record
+        business_name: Modification Record
+        description: >-
+          Contains modification records representing configuration changes, updates, or modifications
+          to retail systems. Each row represents one modification with its classification, approval status,
+          safety information, references to technical documentation, and lifecycle timestamps.
+          Grain: One row per modification.
+        source: staging.mod_record
+        primary_key:
+          - mod_id
+        fields:
+          - name: mod_id
+            business_name: Mod Identifier
+            description: Unique identifier for a modification record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: mod_ref
+            business_name: Mod Reference
+            description: Business reference code for the modification record.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+          
+          - name: title
+            business_name: Title
+            description: Title or name of the modification record.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+          
+          - name: mod_class
+            business_name: Mod Class
+            description: >-
+              Indicates the classification category of the modification (e.g., Class A, Class B).
+              This is a categorical dimension for modification classification analysis.
+            sql_type: VARCHAR(50)
+            dimension:
+              is_categorical: true
+          
+          - name: applicability
+            business_name: Applicability
+            description: Contains information about where the modification applies (e.g., all retail locations, specific regions).
+            sql_type: TEXT
+          
+          - name: approved_data_ref
+            business_name: Approved Data Reference
+            description: References the approved data associated with the modification.
+            sql_type: VARCHAR(200)
+          
+          - name: approval_status
+            business_name: Approval Status
+            description: >-
+              Indicates the current approval status of the modification (e.g., Approved, Pending, Rejected).
+              This is a categorical dimension for approval workflow analysis.
+            sql_type: VARCHAR(100)
+            dimension:
+              is_categorical: true
+          
+          - name: drawing_ref
+            business_name: Drawing Reference
+            description: References the technical drawing associated with the modification.
+            sql_type: VARCHAR(200)
+          
+          - name: ica_ref
+            business_name: ICA Reference
+            description: References the ICA documentation associated with the modification.
+            sql_type: VARCHAR(200)
+          
+          - name: change_desc
+            business_name: Change Description
+            description: Contains detailed description of the changes in the modification.
+            sql_type: TEXT
+          
+          - name: safety_classification
+            business_name: Safety Classification
+            description: >-
+              Indicates the safety classification level of the modification (e.g., Safety Critical, Non-Critical).
+              This is a categorical dimension for safety analysis.
+            sql_type: VARCHAR(150)
+            dimension:
+              is_categorical: true
+          
+          - name: cert_basis
+            business_name: Certification Basis
+            description: Contains the certification basis information for the modification.
+            sql_type: TEXT
+          
+          - name: release_authorities
+            business_name: Release Authorities
+            description: Indicates the authorities responsible for releasing the modification (e.g., Engineering Department).
+            sql_type: VARCHAR(300)
+          
+          - name: target_revision
+            business_name: Target Revision
+            description: Indicates the target revision number for the modification.
+            sql_type: VARCHAR(100)
+          
+          - name: is_active
+            business_name: Is Active
+            description: >-
+              Indicates whether the modification record is currently active (1 = active, 0 = inactive).
+              This is a boolean dimension for active/inactive filtering.
+            sql_type: BIT
+            dimension:
+              is_categorical: true
+          
+          - name: created_date
+            business_name: Created Date
+            description: >-
+              Date and timestamp recording when the modification record was created.
+              This is a time dimension for modification creation time analysis.
+            sql_type: DATETIME
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+          
+          - name: updated_date
+            business_name: Updated Date
+            description: >-
+              Date and timestamp recording when the modification record was last updated.
+              This is a time dimension for modification update time analysis.
+            sql_type: DATETIME
+            dimension:
+              is_time: true
+
+      - name: task_record
+        business_name: Task Record
+        description: >-
+          Contains task records representing work items associated with modifications.
+          Each row represents one task with its reference code, title, source, effectivity,
+          requirements, safety information, status, and lifecycle timestamps.
+          Grain: One row per task.
+        source: staging.task_record
+        primary_key:
+          - task_id
+        fields:
+          - name: task_id
+            business_name: Task Identifier
+            description: Unique identifier for a task record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: mod_id
+            business_name: Mod ID
+            description: >-
+              References the related modification record. Foreign key to mod_record.mod_id.
+              This establishes the relationship between tasks and modifications.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: task_ref
+            business_name: Task Reference
+            description: Business reference code for the task record.
+            sql_type: VARCHAR(50)
+            constraints:
+              - NOT NULL
+          
+          - name: title
+            business_name: Title
+            description: Title or name of the task record.
+            sql_type: VARCHAR(300)
+            constraints:
+              - NOT NULL
+          
+          - name: source_ref
+            business_name: Source Reference
+            description: References the source document or system for the task.
+            sql_type: VARCHAR(20)
+          
+          - name: effectivity
+            business_name: Effectivity
+            description: Contains information about the effectivity or applicability scope of the task.
+            sql_type: TEXT
+          
+          - name: preliminary_requirements
+            business_name: Preliminary Requirements
+            description: Contains the preliminary requirements needed before starting the task.
+            sql_type: TEXT
+          
+          - name: safety_text
+            business_name: Safety Text
+            description: Contains safety information and warnings related to the task.
+            sql_type: TEXT
+          
+          - name: status
+            business_name: Status
+            description: >-
+              Indicates the current status of the task record (e.g., In Progress, Completed, Not Started).
+              This is a categorical dimension for task status analysis.
+            sql_type: VARCHAR(30)
+            dimension:
+              is_categorical: true
+          
+          - name: created_date
+            business_name: Created Date
+            description: >-
+              Date and timestamp recording when the task record was created.
+              This is a time dimension for task creation time analysis.
+            sql_type: DATETIME
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+          
+          - name: updated_date
+            business_name: Updated Date
+            description: >-
+              Date and timestamp recording when the task record was last updated.
+              This is a time dimension for task update time analysis.
+            sql_type: DATETIME
+            dimension:
+              is_time: true
+
+      - name: subtask
+        business_name: Subtask
+        description: >-
+          Contains subtask records representing detailed work steps within tasks.
+          Each row represents one subtask with its sequence number and description.
+          Grain: One row per subtask.
+        source: staging.subtask
+        primary_key:
+          - subtask_id
+        fields:
+          - name: subtask_id
+            business_name: Subtask Identifier
+            description: Unique identifier for a subtask record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: task_id
+            business_name: Task ID
+            description: >-
+              References the related task record. Foreign key to task_record.task_id.
+              This establishes the relationship between subtasks and tasks.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: seq_no
+            business_name: Sequence Number
+            description: >-
+              Indicates the sequential order of the subtask within the task.
+              This is used for ordering subtasks within a task.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+          
+          - name: description
+            business_name: Description
+            description: Contains detailed description of the subtask activities.
+            sql_type: TEXT
+
+      - name: completion_gate
+        business_name: Completion Gate
+        description: >-
+          Contains completion gate records representing quality checkpoints for tasks.
+          Each row represents one gate with its name and validation status.
+          Grain: One row per completion gate.
+        source: staging.completion_gate
+        primary_key:
+          - gate_id
+        fields:
+          - name: gate_id
+            business_name: Gate Identifier
+            description: Unique identifier for a completion gate.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: task_id
+            business_name: Task ID
+            description: >-
+              References the related task record. Foreign key to task_record.task_id.
+              This establishes the relationship between completion gates and tasks.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: gate_name
+            business_name: Gate Name
+            description: Name or description of the completion gate (e.g., Quality Review Gate).
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+          
+          - name: is_checked
+            business_name: Is Checked
+            description: >-
+              Indicates whether the completion gate has been checked or validated (1 = checked, 0 = not checked).
+              This is a boolean dimension for gate validation status.
+            sql_type: BIT
+            dimension:
+              is_categorical: true
+
+      - name: impact_record
+        business_name: Impact Record
+        description: >-
+          Contains impact assessment records documenting the effects of modifications on baseline configurations.
+          Each row represents one impact assessment with its rationale, change type, owner, and selection status.
+          Grain: One row per impact assessment.
+        source: staging.impact_record
+        primary_key:
+          - impact_id
+        fields:
+          - name: impact_id
+            business_name: Impact Identifier
+            description: Unique identifier for an impact record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: mod_id
+            business_name: Mod ID
+            description: >-
+              References the related modification record. Foreign key to mod_record.mod_id.
+              This establishes the relationship between impact assessments and modifications.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: baseline_ref
+            business_name: Baseline Reference
+            description: >-
+              References the baseline record affected by the impact. This implicitly references
+              baseline_record.section_ref.
+            sql_type: VARCHAR(20)
+          
+          - name: rationale
+            business_name: Rationale
+            description: Contains the reasoning or justification for the impact assessment.
+            sql_type: TEXT
+          
+          - name: change_type
+            business_name: Change Type
+            description: >-
+              Indicates the category or type of change in the impact record (e.g., Major, Minor).
+              This is a categorical dimension for change magnitude analysis.
+            sql_type: VARCHAR(30)
+            dimension:
+              is_categorical: true
+          
+          - name: owner_name
+            business_name: Owner Name
+            description: >-
+              Full name of the person responsible for the impact record.
+              WARNING: This field contains personally identifiable information (PII).
+              Handle according to data privacy policies.
+            sql_type: VARCHAR(150)
+            constraints:
+              - PII
+          
+          - name: is_selected
+            business_name: Is Selected
+            description: >-
+              Indicates whether the impact record has been selected for action (1 = selected, 0 = not selected).
+              This is a boolean dimension for impact selection status.
+            sql_type: BIT
+            dimension:
+              is_categorical: true
+
+      - name: baseline_record
+        business_name: Baseline Record
+        description: >-
+          Contains baseline configuration records representing standard configurations or reference points.
+          Each row represents one baseline with its section reference, title, topic, and sensitivity classification.
+          Grain: One row per baseline.
+        source: staging.baseline_record
+        primary_key:
+          - baseline_id
+        fields:
+          - name: baseline_id
+            business_name: Baseline Identifier
+            description: Unique identifier for a baseline record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: section_ref
+            business_name: Section Reference
+            description: >-
+              References the section or category of the baseline record.
+              This field is referenced by impact_record.baseline_ref.
+            sql_type: VARCHAR(20)
+            constraints:
+              - NOT NULL
+          
+          - name: title
+            business_name: Title
+            description: Title or name of the baseline record.
+            sql_type: VARCHAR(200)
+            constraints:
+              - NOT NULL
+          
+          - name: topic
+            business_name: Topic
+            description: Indicates the subject or topic area of the baseline record.
+            sql_type: VARCHAR(300)
+          
+          - name: sensitivity
+            business_name: Sensitivity
+            description: >-
+              Indicates the sensitivity classification level of the baseline record (e.g., Confidential, Public).
+              This is a categorical dimension for sensitivity analysis.
+            sql_type: VARCHAR(50)
+            dimension:
+              is_categorical: true
+
+      - name: audit_event
+        business_name: Audit Event
+        description: >-
+          Contains audit event records tracking changes and actions across all records in the system.
+          Each row represents one audit event with its timestamp, action type, record reference, and details.
+          Grain: One row per audit event.
+        source: staging.audit_event
+        primary_key:
+          - audit_id
+        fields:
+          - name: audit_id
+            business_name: Audit Identifier
+            description: Unique identifier for an audit event record.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: event_ts
+            business_name: Event Timestamp
+            description: >-
+              Date and timestamp recording when the audit event occurred.
+              This is a time dimension for audit event time analysis.
+            sql_type: DATETIME
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+          
+          - name: action
+            business_name: Action
+            description: >-
+              Indicates the type of action performed in the audit event (e.g., UPDATE, INSERT, DELETE).
+              This is a categorical dimension for audit action analysis.
+            sql_type: VARCHAR(150)
+            dimension:
+              is_categorical: true
+          
+          - name: record_ref
+            business_name: Record Reference
+            description: >-
+              References the specific record affected by the audit event.
+              This is a text reference field without a formal foreign key constraint.
+            sql_type: VARCHAR(150)
+          
+          - name: details
+            business_name: Details
+            description: Contains detailed information about the audit event.
+            sql_type: TEXT
+
+    relationships:
+      - name: task_to_modification
+        left_dataset: task_record
+        right_dataset: mod_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - mod_id
+          right:
+            - mod_id
+        join_type: many_to_one
+        resolution: >-
+          Multiple tasks can be associated with one modification. Join task_record to mod_record
+          on task_record.mod_id = mod_record.mod_id. This is a standard many-to-one relationship
+          where the foreign key task_record.mod_id references the primary key mod_record.mod_id.
+          When analyzing tasks with their parent modifications, use this relationship.
+
+      - name: subtask_to_task
+        left_dataset: subtask
+        right_dataset: task_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - task_id
+          right:
+            - task_id
+        join_type: many_to_one
+        resolution: >-
+          Multiple subtasks belong to one task. Join subtask to task_record on subtask.task_id = task_record.task_id.
+          This is a standard many-to-one relationship where the foreign key subtask.task_id references
+          the primary key task_record.task_id. Subtasks are ordered within a task using subtask.seq_no.
+          When analyzing subtasks with their parent tasks, use this relationship.
+
+      - name: completion_gate_to_task
+        left_dataset: completion_gate
+        right_dataset: task_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - task_id
+          right:
+            - task_id
+        join_type: many_to_one
+        resolution: >-
+          Multiple completion gates can be defined for one task. Join completion_gate to task_record
+          on completion_gate.task_id = task_record.task_id. This is a standard many-to-one relationship
+          where the foreign key completion_gate.task_id references the primary key task_record.task_id.
+          When analyzing completion gates with their parent tasks, use this relationship.
+
+      - name: impact_to_modification
+        left_dataset: impact_record
+        right_dataset: mod_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - mod_id
+          right:
+            - mod_id
+        join_type: many_to_one
+        resolution: >-
+          Multiple impact assessments can be associated with one modification. Join impact_record to mod_record
+          on impact_record.mod_id = mod_record.mod_id. This is a standard many-to-one relationship
+          where the foreign key impact_record.mod_id references the primary key mod_record.mod_id.
+          When analyzing impacts with their parent modifications, use this relationship.
+
+      - name: impact_to_baseline
+        left_dataset: impact_record
+        right_dataset: baseline_record
+        relationship_type: many_to_one
+        join:
+          left:
+            - baseline_ref
+          right:
+            - section_ref
+        join_type: many_to_one
+        resolution: >-
+          Multiple impact assessments can reference one baseline configuration. Join impact_record to baseline_record
+          on impact_record.baseline_ref = baseline_record.section_ref. This is an implicit many-to-one relationship
+          based on business semantics. The Data Glossary indicates that impact_record.baseline_ref references
+          the baseline record affected by the impact, and baseline_record.section_ref is the section reference
+          for baseline records. When analyzing impacts with their referenced baseline configurations, use this relationship.
+
+    metrics:
+      - name: total_modification_count
+        business_name: Total Modification Count
+        description: >-
+          Total count of all modification records in the system. This metric counts every modification
+          regardless of status or classification.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(mod_record.mod_id) AS total_modification_count
+                FROM staging.mod_record AS mod_record
+              columns_used:
+                - mod_record.mod_id
+
+      - name: active_modification_count
+        business_name: Active Modification Count
+        description: >-
+          Count of active modification records where is_active = 1. This metric identifies modifications
+          that are currently active in the system.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(mod_record.mod_id) AS active_modification_count
+                FROM staging.mod_record AS mod_record
+                WHERE mod_record.is_active = 1
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.is_active
+
+      - name: total_task_count
+        business_name: Total Task Count
+        description: >-
+          Total count of all task records in the system. This metric counts every task
+          regardless of status.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(task_record.task_id) AS total_task_count
+                FROM staging.task_record AS task_record
+              columns_used:
+                - task_record.task_id
+
+      - name: total_subtask_count
+        business_name: Total Subtask Count
+        description: >-
+          Total count of all subtask records in the system. This metric counts every subtask
+          across all tasks.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(subtask.subtask_id) AS total_subtask_count
+                FROM staging.subtask AS subtask
+              columns_used:
+                - subtask.subtask_id
+
+      - name: total_impact_count
+        business_name: Total Impact Count
+        description: >-
+          Total count of all impact assessment records in the system. This metric counts every impact
+          regardless of selection status or change type.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(impact_record.impact_id) AS total_impact_count
+                FROM staging.impact_record AS impact_record
+              columns_used:
+                - impact_record.impact_id
+
+      - name: selected_impact_count
+        business_name: Selected Impact Count
+        description: >-
+          Count of impact assessment records that have been selected for action where is_selected = 1.
+          This metric identifies impacts that have been prioritized for implementation.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(impact_record.impact_id) AS selected_impact_count
+                FROM staging.impact_record AS impact_record
+                WHERE impact_record.is_selected = 1
+              columns_used:
+                - impact_record.impact_id
+                - impact_record.is_selected
+
+      - name: total_audit_event_count
+        business_name: Total Audit Event Count
+        description: >-
+          Total count of all audit event records in the system. This metric counts every audit event
+          across all actions and record types.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(audit_event.audit_id) AS total_audit_event_count
+                FROM staging.audit_event AS audit_event
+              columns_used:
+                - audit_event.audit_id
+
+      - name: total_baseline_count
+        business_name: Total Baseline Count
+        description: >-
+          Total count of all baseline configuration records in the system. This metric counts every baseline
+          regardless of sensitivity or topic.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(baseline_record.baseline_id) AS total_baseline_count
+                FROM staging.baseline_record AS baseline_record
+              columns_used:
+                - baseline_record.baseline_id
+
+      - name: total_completion_gate_count
+        business_name: Total Completion Gate Count
+        description: >-
+          Total count of all completion gate records in the system. This metric counts every gate
+          regardless of checked status.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(completion_gate.gate_id) AS total_completion_gate_count
+                FROM staging.completion_gate AS completion_gate
+              columns_used:
+                - completion_gate.gate_id
+
+      - name: checked_completion_gate_count
+        business_name: Checked Completion Gate Count
+        description: >-
+          Count of completion gates that have been checked or validated where is_checked = 1.
+          This metric identifies gates that have been successfully completed.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    COUNT(completion_gate.gate_id) AS checked_completion_gate_count
+                FROM staging.completion_gate AS completion_gate
+                WHERE completion_gate.is_checked = 1
+              columns_used:
+                - completion_gate.gate_id
+                - completion_gate.is_checked
+
+      - name: tasks_per_modification
+        business_name: Tasks per Modification
+        description: >-
+          Average number of tasks per modification. This metric calculates the ratio of total tasks
+          to total modifications, providing insight into task distribution across modifications.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT mod_record.mod_id) = 0 THEN 0
+                        ELSE CAST(COUNT(task_record.task_id) AS DECIMAL(18,2)) / COUNT(DISTINCT mod_record.mod_id)
+                    END AS tasks_per_modification
+                FROM staging.mod_record AS mod_record
+                LEFT JOIN staging.task_record AS task_record
+                    ON mod_record.mod_id = task_record.mod_id
+              columns_used:
+                - mod_record.mod_id
+                - task_record.task_id
+
+      - name: subtasks_per_task
+        business_name: Subtasks per Task
+        description: >-
+          Average number of subtasks per task. This metric calculates the ratio of total subtasks
+          to total tasks, providing insight into subtask distribution and task complexity.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT task_record.task_id) = 0 THEN 0
+                        ELSE CAST(COUNT(subtask.subtask_id) AS DECIMAL(18,2)) / COUNT(DISTINCT task_record.task_id)
+                    END AS subtasks_per_task
+                FROM staging.task_record AS task_record
+                LEFT JOIN staging.subtask AS subtask
+                    ON task_record.task_id = subtask.task_id
+              columns_used:
+                - task_record.task_id
+                - subtask.subtask_id
+
+      - name: impacts_per_modification
+        business_name: Impacts per Modification
+        description: >-
+          Average number of impact assessments per modification. This metric calculates the ratio of total impacts
+          to total modifications, providing insight into impact assessment coverage.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT mod_record.mod_id) = 0 THEN 0
+                        ELSE CAST(COUNT(impact_record.impact_id) AS DECIMAL(18,2)) / COUNT(DISTINCT mod_record.mod_id)
+                    END AS impacts_per_modification
+                FROM staging.mod_record AS mod_record
+                LEFT JOIN staging.impact_record AS impact_record
+                    ON mod_record.mod_id = impact_record.mod_id
+              columns_used:
+                - mod_record.mod_id
+                - impact_record.impact_id
+
+      - name: completion_gate_check_rate
+        business_name: Completion Gate Check Rate
+        description: >-
+          Percentage of completion gates that have been checked. This metric calculates the ratio of checked gates
+          to total gates, providing insight into gate validation progress.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(completion_gate.gate_id) = 0 THEN 0
+                        ELSE (CAST(SUM(CASE WHEN completion_gate.is_checked = 1 THEN 1 ELSE 0 END) AS DECIMAL(18,2)) 
+                             / COUNT(completion_gate.gate_id)) * 100
+                    END AS completion_gate_check_rate_pct
+                FROM staging.completion_gate AS completion_gate
+              columns_used:
+                - completion_gate.gate_id
+                - completion_gate.is_checked
+
+      - name: impact_selection_rate
+        business_name: Impact Selection Rate
+        description: >-
+          Percentage of impact assessments that have been selected for action. This metric calculates the ratio
+          of selected impacts to total impacts, providing insight into impact prioritization.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(impact_record.impact_id) = 0 THEN 0
+                        ELSE (CAST(SUM(CASE WHEN impact_record.is_selected = 1 THEN 1 ELSE 0 END) AS DECIMAL(18,2)) 
+                             / COUNT(impact_record.impact_id)) * 100
+                    END AS impact_selection_rate_pct
+                FROM staging.impact_record AS impact_record
+              columns_used:
+                - impact_record.impact_id
+                - impact_record.is_selected
+
+      - name: modification_count_by_approval_status
+        business_name: Modification Count by Approval Status
+        description: >-
+          Count of modifications grouped by approval status. This metric provides a breakdown of modifications
+          by their approval state (e.g., Approved, Pending, Rejected).
+        return_type: integer
+        result_grain: one row per approval status
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    mod_record.approval_status,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM staging.mod_record AS mod_record
+                GROUP BY mod_record.approval_status
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.approval_status
+
+      - name: modification_count_by_safety_classification
+        business_name: Modification Count by Safety Classification
+        description: >-
+          Count of modifications grouped by safety classification. This metric provides a breakdown of modifications
+          by their safety criticality (e.g., Safety Critical, Non-Critical).
+        return_type: integer
+        result_grain: one row per safety classification
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    mod_record.safety_classification,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM staging.mod_record AS mod_record
+                GROUP BY mod_record.safety_classification
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.safety_classification
+
+      - name: task_count_by_status
+        business_name: Task Count by Status
+        description: >-
+          Count of tasks grouped by status. This metric provides a breakdown of tasks by their current state
+          (e.g., In Progress, Completed, Not Started).
+        return_type: integer
+        result_grain: one row per task status
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    task_record.status,
+                    COUNT(task_record.task_id) AS task_count
+                FROM staging.task_record AS task_record
+                GROUP BY task_record.status
+              columns_used:
+                - task_record.task_id
+                - task_record.status
+
+      - name: impact_count_by_change_type
+        business_name: Impact Count by Change Type
+        description: >-
+          Count of impact assessments grouped by change type. This metric provides a breakdown of impacts
+          by their change magnitude (e.g., Major, Minor).
+        return_type: integer
+        result_grain: one row per change type
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    impact_record.change_type,
+                    COUNT(impact_record.impact_id) AS impact_count
+                FROM staging.impact_record AS impact_record
+                GROUP BY impact_record.change_type
+              columns_used:
+                - impact_record.impact_id
+                - impact_record.change_type
+
+      - name: audit_event_count_by_action
+        business_name: Audit Event Count by Action
+        description: >-
+          Count of audit events grouped by action type. This metric provides a breakdown of audit events
+          by the type of action performed (e.g., UPDATE, INSERT, DELETE).
+        return_type: integer
+        result_grain: one row per action type
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    audit_event.action,
+                    COUNT(audit_event.audit_id) AS audit_event_count
+                FROM staging.audit_event AS audit_event
+                GROUP BY audit_event.action
+              columns_used:
+                - audit_event.audit_id
+                - audit_event.action
+
+      - name: monthly_modification_creation_count
+        business_name: Monthly Modification Creation Count
+        description: >-
+          Count of modifications created per month. This time-series metric groups modifications by their
+          creation month, enabling trend analysis of modification creation activity over time.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    YEAR(mod_record.created_date) AS creation_year,
+                    MONTH(mod_record.created_date) AS creation_month,
+                    COUNT(mod_record.mod_id) AS modification_count
+                FROM staging.mod_record AS mod_record
+                GROUP BY YEAR(mod_record.created_date), MONTH(mod_record.created_date)
+                ORDER BY creation_year, creation_month
+              columns_used:
+                - mod_record.mod_id
+                - mod_record.created_date
+
+      - name: monthly_task_creation_count
+        business_name: Monthly Task Creation Count
+        description: >-
+          Count of tasks created per month. This time-series metric groups tasks by their creation month,
+          enabling trend analysis of task creation activity over time.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    YEAR(task_record.created_date) AS creation_year,
+                    MONTH(task_record.created_date) AS creation_month,
+                    COUNT(task_record.task_id) AS task_count
+                FROM staging.task_record AS task_record
+                GROUP BY YEAR(task_record.created_date), MONTH(task_record.created_date)
+                ORDER BY creation_year, creation_month
+              columns_used:
+                - task_record.task_id
+                - task_record.created_date
+
+      - name: monthly_audit_event_count
+        business_name: Monthly Audit Event Count
+        description: >-
+          Count of audit events per month. This time-series metric groups audit events by their event month,
+          enabling trend analysis of audit activity over time.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: SQL_SERVER
+              expression: |
+                SELECT
+                    YEAR(audit_event.event_ts) AS event_year,
+                    MONTH(audit_event.event_ts) AS event_month,
+                    COUNT(audit_event.audit_id) AS audit_event_count
+                FROM staging.audit_event AS audit_event
+                GROUP BY YEAR(audit_event.event_ts), MONTH(audit_event.event_ts)
+                ORDER BY event_year, event_month
+              columns_used:
+                - audit_event.audit_id
+                - audit_event.event_ts
