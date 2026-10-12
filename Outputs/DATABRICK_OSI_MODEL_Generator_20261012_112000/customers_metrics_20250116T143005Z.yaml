@@ -1,0 +1,83 @@
+version: 1.1
+
+source: ecom_bronze.customers
+
+comment: |-
+  Customer master data metrics for retail e-commerce analytics. One row per customer. Use for customer-level analysis and customer counts. Source is not fully qualified; confirm the catalog name before deployment.
+
+dimensions:
+  - name: customer_id
+    expr: source.customer_id
+    display_name: Customer Identifier
+    comment: Unique identifier for a retail customer.
+
+  - name: customer_code
+    expr: source.customer_code
+    display_name: Customer Code
+    comment: Business-defined code used to uniquely reference the customer.
+
+  - name: gender
+    expr: source.gender
+    display_name: Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+  - name: city
+    expr: source.city
+    display_name: City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: state
+    expr: source.state
+    display_name: State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: country
+    expr: source.country
+    display_name: Country
+    comment: Country of the customer's primary address.
+
+  - name: customer_segment
+    expr: source.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - segment
+
+  - name: registration_date
+    expr: source.registration_date
+    display_name: Registration Date
+    comment: Date when the customer registered with the retail channel.
+
+  - name: registration_month
+    expr: DATE_TRUNC('MONTH', source.registration_date)
+    display_name: Registration Month
+    comment: Customer registration date truncated to month for monthly analysis.
+
+  - name: is_active
+    expr: source.is_active
+    display_name: Is Active
+    comment: Indicates whether the customer account is currently active.
+
+measures:
+  - name: customer_count
+    expr: COUNT(DISTINCT source.customer_id)
+    display_name: Customer Count
+    comment: Total number of customers.
+    synonyms:
+      - customers
+      - number of customers
+      - customer base
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: active_customer_count
+    expr: COUNT(DISTINCT source.customer_id) FILTER (WHERE source.is_active = TRUE)
+    display_name: Active Customer Count
+    comment: Total number of active customers, where the customer account is currently active.
+    synonyms:
+      - active customers
+      - number of active customers
+    format:
+      type: number
+      decimal_places: 0
