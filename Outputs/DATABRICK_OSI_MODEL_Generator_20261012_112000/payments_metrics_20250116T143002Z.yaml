@@ -1,0 +1,150 @@
+version: 1.1
+
+source: ecom_bronze.payments
+
+comment: |-
+  Payment transaction metrics for retail e-commerce analytics. One row per payment transaction. Use for payment method and payment status analysis. CRITICAL: Do not sum order-level amounts (orders.total_amount, subtotal, discount_amount, tax_amount, shipping_fee) in this view to avoid double counting. Source is not fully qualified; confirm the catalog name before deployment.
+
+joins:
+  - name: orders
+    source: ecom_bronze.orders
+    on: source.order_id = orders.order_id
+    joins:
+      - name: customers
+        source: ecom_bronze.customers
+        on: orders.customer_id = customers.customer_id
+
+dimensions:
+  - name: payment_id
+    expr: source.payment_id
+    display_name: Payment Identifier
+    comment: Unique identifier for a payment transaction.
+
+  - name: order_id
+    expr: source.order_id
+    display_name: Order Identifier
+    comment: References the order to which the payment applies.
+
+  - name: payment_method
+    expr: source.payment_method
+    display_name: Payment Method
+    comment: Method used to settle the payment, such as card or PayPal.
+    synonyms:
+      - method
+      - payment type
+
+  - name: payment_status
+    expr: source.payment_status
+    display_name: Payment Status
+    comment: Indicates the current processing status of the payment.
+    synonyms:
+      - status
+
+  - name: payment_currency
+    expr: source.currency
+    display_name: Payment Currency
+    comment: Currency code in which the payment amount is denominated.
+
+  - name: gateway
+    expr: source.gateway
+    display_name: Gateway
+    comment: Name of the payment gateway or processor handling the transaction.
+    synonyms:
+      - payment gateway
+      - processor
+
+  - name: paid_at
+    expr: source.paid_at
+    display_name: Paid At
+    comment: Timestamp when the payment was captured or confirmed.
+
+  - name: payment_month
+    expr: DATE_TRUNC('MONTH', source.paid_at)
+    display_name: Payment Month
+    comment: Payment date truncated to month for monthly analysis.
+
+  - name: order_date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: order_status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+
+  - name: sales_channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+    synonyms:
+      - channel
+
+  - name: customer_id
+    expr: customers.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: customer_segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - segment
+
+  - name: customer_country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: customer_city
+    expr: customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: customer_state
+    expr: customers.state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: customer_gender
+    expr: customers.gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+measures:
+  - name: total_payment_amount
+    expr: SUM(source.amount)
+    display_name: Total Payment Amount
+    comment: Total monetary amount of payment transactions. Use this for payment-level revenue analysis. All amounts are in USD.
+    synonyms:
+      - payment amount
+      - payment revenue
+      - payment value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: payment_count
+    expr: COUNT(DISTINCT source.payment_id)
+    display_name: Payment Count
+    comment: Total number of payment transactions.
+    synonyms:
+      - payments
+      - number of payments
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: average_payment_amount
+    expr: SUM(source.amount) / NULLIF(COUNT(DISTINCT source.payment_id), 0)
+    display_name: Average Payment Amount
+    comment: Average payment amount calculated as total payment amount divided by payment count. All amounts are in USD.
+    synonyms:
+      - avg payment
+      - mean payment
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
