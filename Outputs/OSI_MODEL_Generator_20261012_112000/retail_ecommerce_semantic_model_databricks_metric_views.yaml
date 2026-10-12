@@ -1,0 +1,1128 @@
+# ============================================================================
+# Databricks Unity Catalog Metric Views
+# Model: retail_ecommerce_semantic_model
+# Warehouse: dex-demo
+# Number of Views: 6
+# ============================================================================
+#
+# COVERAGE MATRIX
+# ---------------
+# Relationships:
+# - orders_to_customers -> orders_metrics: join alias customers
+# - order_items_to_orders -> order_items_metrics: join alias orders (nested customers)
+# - order_items_to_products -> order_items_metrics: join alias products
+# - products_to_product_categories -> order_items_metrics: nested join product_categories under products
+# - products_to_product_categories -> products_metrics: join alias product_categories
+# - product_categories_hierarchy -> order_items_metrics: nested join parent_category under product_categories
+# - product_categories_hierarchy -> products_metrics: nested join parent_category under product_categories
+# - payments_to_orders -> payments_metrics: join alias orders (nested customers)
+# - shipments_to_orders -> shipments_metrics: join alias orders (nested customers)
+#
+# Datasets:
+# - customers -> customers_metrics
+# - orders -> orders_metrics
+# - order_items -> order_items_metrics
+# - products -> products_metrics
+# - product_categories -> used in joins (order_items_metrics, products_metrics)
+# - payments -> payments_metrics
+# - shipments -> shipments_metrics
+# - load_audit -> excluded: ETL monitoring
+#
+# Metrics:
+# - total_revenue -> Total Revenue in orders_metrics
+# - total_subtotal_revenue -> Total Subtotal Revenue in orders_metrics
+# - total_discount_amount -> Total Discount Amount in orders_metrics
+# - total_tax_amount -> Total Tax Amount in orders_metrics
+# - total_shipping_fee -> Total Shipping Fee in orders_metrics
+# - order_count -> Order Count in orders_metrics
+# - average_order_value -> Average Order Value in orders_metrics
+# - total_line_item_revenue -> Total Line Item Revenue in order_items_metrics
+# - total_units_sold -> Total Units Sold in order_items_metrics
+# - average_line_item_value -> Average Line Item Value in order_items_metrics
+# - average_discount_pct -> Average Discount Percentage in order_items_metrics
+# - gross_profit -> Gross Profit in order_items_metrics
+# - gross_margin_pct -> Gross Margin Percentage in order_items_metrics
+# - average_units_per_order -> Average Units Per Order in order_items_metrics
+# - customer_count -> Customer Count in customers_metrics
+# - active_customer_count -> Active Customer Count in customers_metrics
+# - product_count -> Product Count in products_metrics
+# - total_inventory_value -> Total Inventory Value in products_metrics
+# - delivery_time_days -> Delivery Time Days in shipments_metrics
+# - revenue_by_customer -> Total Revenue measure + Customer Identifier dimension in orders_metrics
+# - revenue_by_product -> Total Line Item Revenue measure + Product Identifier dimension in order_items_metrics
+# - revenue_by_category -> Total Line Item Revenue measure + Category Name dimension in order_items_metrics
+# - revenue_by_sales_channel -> Total Revenue measure + Sales Channel dimension in orders_metrics
+# - revenue_by_customer_segment -> Total Revenue measure + Customer Segment dimension in orders_metrics
+# - revenue_by_payment_method -> Payment Amount measure + Payment Method dimension in payments_metrics
+# - orders_by_status -> Order Count measure + Order Status dimension in orders_metrics
+# - shipments_by_status -> Shipment Count measure + Shipment Status dimension in shipments_metrics
+# - payments_by_status -> Payment Count measure + Payment Status dimension in payments_metrics
+# - revenue_by_month -> Total Revenue measure + Order Month dimension in orders_metrics
+# - orders_by_month -> Order Count measure + Order Month dimension in orders_metrics
+# - customers_by_month -> Customer Count measure + Registration Month dimension in customers_metrics
+#
+# PII Fields:
+# - customers.first_name -> not exposed
+# - customers.last_name -> not exposed
+# - customers.email -> not exposed
+# - customers.phone -> not exposed
+# - customers.gender -> exposed with PII warning in customers_metrics
+# - customers.date_of_birth -> not exposed
+# - customers.city -> exposed with PII warning in customers_metrics
+# - customers.state -> exposed with PII warning in customers_metrics
+# - customers.postal_code -> not exposed
+# - orders.ship_city -> exposed with PII warning in orders_metrics
+# - orders.ship_state -> exposed with PII warning in orders_metrics
+# - orders.ship_postal_code -> not exposed
+# - payments.transaction_ref -> not exposed
+# - shipments.tracking_number -> not exposed
+# - shipments.ship_city -> exposed with PII warning in shipments_metrics
+# - shipments.ship_state -> exposed with PII warning in shipments_metrics
+# - shipments.ship_postal_code -> not exposed
+#
+# COUNTS: relationships 7/7, datasets 7/8, metrics 36/36, fields 89/120
+# ============================================================================
+
+# view: orders_metrics
+# target: dex-demo.ecom_bronze.orders_metrics
+# grain: one row per order
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.orders
+  comment: >-
+    Order-level metrics for retail e-commerce analytics. One row per order.
+    Use for order-level revenue, order counts, and order status analysis.
+    Includes customer attributes via join. Filter candidates: order_status, sales_channel, is_active.
+
+joins:
+  - alias: customers
+    source: dex-demo.ecom_bronze.customers
+    on:
+      - source.customer_id = customers.customer_id
+    rely:
+      at_most_one_match: true
+
+dimensions:
+  - name: Order Identifier
+    expr: order_id
+    display_name: Order Identifier
+    comment: Unique identifier for a customer order.
+
+  - name: Order Number
+    expr: order_number
+    display_name: Order Number
+    comment: Business-facing order number assigned to the customer purchase.
+
+  - name: Customer Identifier
+    expr: customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: Order Date
+    expr: order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: Order Month
+    expr: DATE_TRUNC('MONTH', order_date)
+    display_name: Order Month
+    comment: Month when the order was placed, derived from order_date for monthly analysis.
+
+  - name: Order Status
+    expr: order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+    synonyms:
+      - Status
+      - Order State
+
+  - name: Sales Channel
+    expr: sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+    synonyms:
+      - Channel
+      - Order Channel
+
+  - name: Ship City
+    expr: ship_city
+    display_name: Ship City
+    comment: City component of the shipping address for the order. PII - restrict access.
+
+  - name: Ship State
+    expr: ship_state
+    display_name: Ship State
+    comment: State or province component of the shipping address for the order. PII - restrict access.
+
+  - name: Order Currency
+    expr: currency
+    display_name: Order Currency
+    comment: Currency code in which the order amounts are denominated.
+
+  - name: Customer Code
+    expr: customers.customer_code
+    display_name: Customer Code
+    comment: Business-defined code used to uniquely reference the customer.
+
+  - name: Customer Gender
+    expr: customers.gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+  - name: Customer City
+    expr: customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: Customer State
+    expr: customers.state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: Customer Country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: Customer Segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - Segment
+
+  - name: Customer Registration Date
+    expr: customers.registration_date
+    display_name: Customer Registration Date
+    comment: Date when the customer registered with the retail channel.
+
+  - name: Customer Is Active
+    expr: customers.is_active
+    display_name: Customer Is Active
+    comment: Indicates whether the customer account is currently active.
+
+measures:
+  - name: Total Revenue
+    display_name: Total Revenue
+    expr: SUM(total_amount)
+    comment: >-
+      Total revenue from all orders, calculated as the sum of the final order total amount
+      after discounts, taxes, and shipping fees. This represents the total amount payable by customers.
+    synonyms:
+      - Revenue
+      - Order Revenue
+      - Total Sales
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Subtotal Revenue
+    display_name: Total Subtotal Revenue
+    expr: SUM(subtotal)
+    comment: >-
+      Total subtotal revenue from all orders, calculated as the sum of order subtotals
+      before discounts, taxes, and shipping fees. This represents the gross merchandise value.
+    synonyms:
+      - Subtotal Revenue
+      - GMV
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Discount Amount
+    display_name: Total Discount Amount
+    expr: SUM(discount_amount)
+    comment: Total discount amount applied across all orders, calculated as the sum of order-level discounts.
+    synonyms:
+      - Discounts
+      - Total Discounts
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Tax Amount
+    display_name: Total Tax Amount
+    expr: SUM(tax_amount)
+    comment: >-
+      Total tax amount collected across all orders, calculated as the sum of order-level taxes.
+      Source tags this field as PII; possible mis-tag, confirm.
+    synonyms:
+      - Tax
+      - Total Tax
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Shipping Fee
+    display_name: Total Shipping Fee
+    expr: SUM(shipping_fee)
+    comment: Total shipping fees collected across all orders, calculated as the sum of order-level shipping fees.
+    synonyms:
+      - Shipping Fees
+      - Shipping Cost
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Order Count
+    display_name: Order Count
+    expr: COUNT(DISTINCT order_id)
+    comment: Total number of orders placed, calculated as the count of distinct order identifiers.
+    synonyms:
+      - Orders
+      - Number of Orders
+      - Total Orders
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Average Order Value
+    display_name: Average Order Value
+    expr: SUM(total_amount) / NULLIF(COUNT(DISTINCT order_id), 0)
+    comment: >-
+      Average order value, calculated as the total revenue divided by the number of orders.
+      This represents the average amount spent per order.
+    synonyms:
+      - AOV
+      - Avg Order Value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+---
+# view: order_items_metrics
+# target: dex-demo.ecom_bronze.order_items_metrics
+# grain: one row per order line item
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.order_items
+  comment: >-
+    Order line item metrics for retail e-commerce analytics. One row per order line item.
+    Use for product-level analysis within orders and line-item revenue. Includes product,
+    category, and customer attributes via joins. Category hierarchy limited to one parent level.
+
+joins:
+  - alias: orders
+    source: dex-demo.ecom_bronze.orders
+    on:
+      - source.order_id = orders.order_id
+    rely:
+      at_most_one_match: true
+    joins:
+      - alias: customers
+        source: dex-demo.ecom_bronze.customers
+        on:
+          - orders.customer_id = customers.customer_id
+        rely:
+          at_most_one_match: true
+
+  - alias: products
+    source: dex-demo.ecom_bronze.products
+    on:
+      - source.product_id = products.product_id
+    rely:
+      at_most_one_match: true
+    joins:
+      - alias: product_categories
+        source: dex-demo.ecom_bronze.product_categories
+        on:
+          - products.category_id = product_categories.category_id
+        rely:
+          at_most_one_match: true
+        joins:
+          - alias: parent_category
+            source: dex-demo.ecom_bronze.product_categories
+            on:
+              - product_categories.parent_category_id = parent_category.category_id
+            rely:
+              at_most_one_match: true
+
+dimensions:
+  - name: Order Item Identifier
+    expr: order_item_id
+    display_name: Order Item Identifier
+    comment: Unique identifier for an order line item.
+
+  - name: Order Identifier
+    expr: order_id
+    display_name: Order Identifier
+    comment: References the related customer order record.
+
+  - name: Line Number
+    expr: line_number
+    display_name: Line Number
+    comment: Sequential line number of the item within the order.
+
+  - name: Product Identifier
+    expr: product_id
+    display_name: Product Identifier
+    comment: References the product associated with the order line.
+
+  - name: Order Date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: Order Month
+    expr: DATE_TRUNC('MONTH', orders.order_date)
+    display_name: Order Month
+    comment: Month when the order was placed, derived from order_date for monthly analysis.
+
+  - name: Order Status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+
+  - name: Sales Channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+
+  - name: Order Currency
+    expr: orders.currency
+    display_name: Order Currency
+    comment: Currency code in which the order amounts are denominated.
+
+  - name: Customer Identifier
+    expr: orders.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: Customer Segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+
+  - name: Customer Country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: Product SKU
+    expr: products.sku
+    display_name: Product SKU
+    comment: Stock keeping unit code used to uniquely identify the product.
+
+  - name: Product Name
+    expr: products.product_name
+    display_name: Product Name
+    comment: Descriptive name of the product.
+
+  - name: Product Brand
+    expr: products.brand
+    display_name: Product Brand
+    comment: Brand or manufacturer of the product.
+    synonyms:
+      - Brand
+
+  - name: Product Currency
+    expr: products.currency
+    display_name: Product Currency
+    comment: Currency code in which product prices are denominated.
+
+  - name: Product Is Active
+    expr: products.is_active
+    display_name: Product Is Active
+    comment: Indicates whether the product is currently active for sale.
+
+  - name: Product Created At
+    expr: products.created_at
+    display_name: Product Created At
+    comment: Timestamp when the product record was initially created.
+
+  - name: Category Identifier
+    expr: products.category_id
+    display_name: Category Identifier
+    comment: References the category under which the product is classified.
+
+  - name: Category Name
+    expr: product_categories.category_name
+    display_name: Category Name
+    comment: Descriptive name of the product category.
+
+  - name: Category Is Active
+    expr: product_categories.is_active
+    display_name: Category Is Active
+    comment: Indicates whether the product category is currently active for use.
+
+  - name: Parent Category Name
+    expr: parent_category.category_name
+    display_name: Parent Category Name
+    comment: Descriptive name of the parent product category in the hierarchy.
+
+measures:
+  - name: Total Line Item Revenue
+    display_name: Total Line Item Revenue
+    expr: SUM(line_total)
+    comment: >-
+      Total revenue from all order line items, calculated as the sum of line totals
+      after line-level discounts. This metric is used for product-level revenue analysis.
+    synonyms:
+      - Line Item Revenue
+      - Product Revenue
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Units Sold
+    display_name: Total Units Sold
+    expr: SUM(quantity)
+    comment: >-
+      Total number of product units sold across all order line items,
+      calculated as the sum of quantities.
+    synonyms:
+      - Units Sold
+      - Quantity Sold
+      - Total Quantity
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Average Unit Price
+    display_name: Average Unit Price
+    expr: AVG(unit_price)
+    comment: Average selling price per unit of the product at the time of order.
+    synonyms:
+      - Avg Unit Price
+      - Unit Price
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Average Discount Percentage
+    display_name: Average Discount Percentage
+    expr: AVG(discount_pct)
+    comment: >-
+      Average discount percentage applied to order line items, calculated as the average
+      of line-level discount percentages. Value is already multiplied by 100.
+    synonyms:
+      - Avg Discount
+      - Discount Pct
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Average Line Item Value
+    display_name: Average Line Item Value
+    expr: SUM(line_total) / NULLIF(COUNT(order_item_id), 0)
+    comment: >-
+      Average line item value, calculated as the total line item revenue
+      divided by the number of line items.
+    synonyms:
+      - Avg Line Value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Gross Profit
+    display_name: Gross Profit
+    expr: SUM(line_total) - SUM(quantity * products.cost_price)
+    comment: >-
+      Gross profit calculated as the difference between line item revenue and line item cost.
+      Line item cost is derived as quantity multiplied by product cost price.
+    synonyms:
+      - Profit
+      - Margin
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Gross Margin Percentage
+    display_name: Gross Margin Percentage
+    expr: (SUM(line_total) - SUM(quantity * products.cost_price)) / NULLIF(SUM(line_total), 0) * 100
+    comment: >-
+      Gross margin percentage calculated as gross profit divided by line item revenue,
+      expressed as a percentage. This represents the percentage of revenue retained after
+      deducting cost of goods sold. Value is already multiplied by 100.
+    synonyms:
+      - Margin Pct
+      - Gross Margin
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Average Units Per Order
+    display_name: Average Units Per Order
+    expr: SUM(quantity) / NULLIF(COUNT(DISTINCT order_id), 0)
+    comment: >-
+      Average number of units per order, calculated as the total units sold
+      divided by the number of orders.
+    synonyms:
+      - Avg Units Per Order
+      - Units Per Order
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+---
+# view: payments_metrics
+# target: dex-demo.ecom_bronze.payments_metrics
+# grain: one row per payment transaction
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.payments
+  comment: >-
+    Payment transaction metrics for retail e-commerce analytics. One row per payment transaction.
+    Use for payment method analysis and payment status tracking. Includes order and customer
+    attributes via joins.
+
+joins:
+  - alias: orders
+    source: dex-demo.ecom_bronze.orders
+    on:
+      - source.order_id = orders.order_id
+    rely:
+      at_most_one_match: true
+    joins:
+      - alias: customers
+        source: dex-demo.ecom_bronze.customers
+        on:
+          - orders.customer_id = customers.customer_id
+        rely:
+          at_most_one_match: true
+
+dimensions:
+  - name: Payment Identifier
+    expr: payment_id
+    display_name: Payment Identifier
+    comment: Unique identifier for a payment transaction.
+
+  - name: Order Identifier
+    expr: order_id
+    display_name: Order Identifier
+    comment: References the order to which the payment applies.
+
+  - name: Payment Method
+    expr: payment_method
+    display_name: Payment Method
+    comment: Method used to settle the payment, such as card or PayPal.
+    synonyms:
+      - Method
+      - Pay Method
+
+  - name: Payment Status
+    expr: payment_status
+    display_name: Payment Status
+    comment: Indicates the current processing status of the payment.
+    synonyms:
+      - Status
+      - Payment State
+
+  - name: Payment Currency
+    expr: currency
+    display_name: Payment Currency
+    comment: Currency code in which the payment amount is denominated.
+
+  - name: Payment Gateway
+    expr: gateway
+    display_name: Payment Gateway
+    comment: Name of the payment gateway or processor handling the transaction.
+    synonyms:
+      - Gateway
+      - Processor
+
+  - name: Paid At
+    expr: paid_at
+    display_name: Paid At
+    comment: Timestamp when the payment was captured or confirmed.
+
+  - name: Paid Month
+    expr: DATE_TRUNC('MONTH', paid_at)
+    display_name: Paid Month
+    comment: Month when the payment was captured, derived from paid_at for monthly analysis.
+
+  - name: Order Date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: Order Status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+
+  - name: Sales Channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+
+  - name: Customer Identifier
+    expr: orders.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: Customer Segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+
+  - name: Customer Country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+measures:
+  - name: Payment Amount
+    display_name: Payment Amount
+    expr: SUM(amount)
+    comment: >-
+      Total monetary amount of payment transactions, calculated as the sum of payment amounts.
+      Use for payment method and payment status analysis.
+    synonyms:
+      - Total Payments
+      - Payment Total
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Payment Count
+    display_name: Payment Count
+    expr: COUNT(DISTINCT payment_id)
+    comment: Total number of payment transactions, calculated as the count of distinct payment identifiers.
+    synonyms:
+      - Payments
+      - Number of Payments
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+---
+# view: shipments_metrics
+# target: dex-demo.ecom_bronze.shipments_metrics
+# grain: one row per shipment
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.shipments
+  comment: >-
+    Shipment tracking metrics for retail e-commerce analytics. One row per shipment.
+    Use for delivery performance analysis and carrier tracking. Includes order and customer
+    attributes via joins.
+
+joins:
+  - alias: orders
+    source: dex-demo.ecom_bronze.orders
+    on:
+      - source.order_id = orders.order_id
+    rely:
+      at_most_one_match: true
+    joins:
+      - alias: customers
+        source: dex-demo.ecom_bronze.customers
+        on:
+          - orders.customer_id = customers.customer_id
+        rely:
+          at_most_one_match: true
+
+dimensions:
+  - name: Shipment Identifier
+    expr: shipment_id
+    display_name: Shipment Identifier
+    comment: Unique identifier for a shipment record.
+
+  - name: Order Identifier
+    expr: order_id
+    display_name: Order Identifier
+    comment: References the order associated with the shipment.
+
+  - name: Carrier
+    expr: carrier
+    display_name: Carrier
+    comment: Name of the shipping carrier handling the shipment.
+    synonyms:
+      - Shipping Carrier
+      - Shipper
+
+  - name: Shipment Status
+    expr: shipment_status
+    display_name: Shipment Status
+    comment: Indicates the current delivery status of the shipment.
+    synonyms:
+      - Status
+      - Delivery Status
+
+  - name: Shipped At
+    expr: shipped_at
+    display_name: Shipped At
+    comment: Timestamp when the shipment left the fulfillment location.
+
+  - name: Shipped Month
+    expr: DATE_TRUNC('MONTH', shipped_at)
+    display_name: Shipped Month
+    comment: Month when the shipment was dispatched, derived from shipped_at for monthly analysis.
+
+  - name: Delivered At
+    expr: delivered_at
+    display_name: Delivered At
+    comment: Timestamp when the shipment was delivered to the customer.
+
+  - name: Shipment City
+    expr: ship_city
+    display_name: Shipment City
+    comment: City component of the shipment destination address. PII - restrict access.
+
+  - name: Shipment State
+    expr: ship_state
+    display_name: Shipment State
+    comment: State or province component of the shipment destination address. PII - restrict access.
+
+  - name: Order Date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: Order Status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+
+  - name: Sales Channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+
+  - name: Customer Identifier
+    expr: orders.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: Customer Segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+
+  - name: Customer Country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+measures:
+  - name: Shipment Count
+    display_name: Shipment Count
+    expr: COUNT(DISTINCT shipment_id)
+    comment: Total number of shipments, calculated as the count of distinct shipment identifiers.
+    synonyms:
+      - Shipments
+      - Number of Shipments
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Delivery Time Days
+    display_name: Delivery Time Days
+    expr: AVG(DATEDIFF(delivered_at, shipped_at)) FILTER (WHERE delivered_at IS NOT NULL AND shipped_at IS NOT NULL)
+    comment: >-
+      Average delivery time in days, calculated as the average difference between delivered
+      timestamp and shipped timestamp for completed shipments.
+    synonyms:
+      - Avg Delivery Time
+      - Delivery Days
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+
+---
+# view: products_metrics
+# target: dex-demo.ecom_bronze.products_metrics
+# grain: one row per product
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.products
+  comment: >-
+    Product catalog metrics for retail e-commerce analytics. One row per product.
+    Use for product catalog analysis and inventory. Includes category and parent category
+    attributes via joins. Category hierarchy limited to one parent level.
+
+joins:
+  - alias: product_categories
+    source: dex-demo.ecom_bronze.product_categories
+    on:
+      - source.category_id = product_categories.category_id
+    rely:
+      at_most_one_match: true
+    joins:
+      - alias: parent_category
+        source: dex-demo.ecom_bronze.product_categories
+        on:
+          - product_categories.parent_category_id = parent_category.category_id
+        rely:
+          at_most_one_match: true
+
+dimensions:
+  - name: Product Identifier
+    expr: product_id
+    display_name: Product Identifier
+    comment: Unique identifier for a product.
+
+  - name: Product SKU
+    expr: sku
+    display_name: Product SKU
+    comment: Stock keeping unit code used to uniquely identify the product.
+
+  - name: Product Name
+    expr: product_name
+    display_name: Product Name
+    comment: Descriptive name of the product.
+
+  - name: Category Identifier
+    expr: category_id
+    display_name: Category Identifier
+    comment: References the category under which the product is classified.
+
+  - name: Product Brand
+    expr: brand
+    display_name: Product Brand
+    comment: Brand or manufacturer of the product.
+    synonyms:
+      - Brand
+
+  - name: Product Currency
+    expr: currency
+    display_name: Product Currency
+    comment: Currency code in which product prices are denominated.
+
+  - name: Product Is Active
+    expr: is_active
+    display_name: Product Is Active
+    comment: Indicates whether the product is currently active for sale.
+
+  - name: Product Created At
+    expr: created_at
+    display_name: Product Created At
+    comment: Timestamp when the product record was initially created.
+
+  - name: Category Name
+    expr: product_categories.category_name
+    display_name: Category Name
+    comment: Descriptive name of the product category.
+
+  - name: Category Is Active
+    expr: product_categories.is_active
+    display_name: Category Is Active
+    comment: Indicates whether the product category is currently active for use.
+
+  - name: Parent Category Name
+    expr: parent_category.category_name
+    display_name: Parent Category Name
+    comment: Descriptive name of the parent product category in the hierarchy.
+
+measures:
+  - name: Product Count
+    display_name: Product Count
+    expr: COUNT(DISTINCT product_id)
+    comment: >-
+      Total number of products in the catalog, calculated as the count of distinct
+      product identifiers.
+    synonyms:
+      - Products
+      - Number of Products
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Average Unit Price
+    display_name: Average Unit Price
+    expr: AVG(unit_price)
+    comment: Average standard selling price per unit of the product.
+    synonyms:
+      - Avg Unit Price
+      - Unit Price
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Average Cost Price
+    display_name: Average Cost Price
+    expr: AVG(cost_price)
+    comment: Average internal cost price per unit used for margin calculation.
+    synonyms:
+      - Avg Cost Price
+      - Cost Price
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+  - name: Total Stock Quantity
+    display_name: Total Stock Quantity
+    expr: SUM(stock_quantity)
+    comment: Total current on-hand inventory quantity across all products.
+    synonyms:
+      - Stock Quantity
+      - Inventory Quantity
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Total Inventory Value
+    display_name: Total Inventory Value
+    expr: SUM(stock_quantity * cost_price)
+    comment: >-
+      Total inventory value, calculated as the sum of stock quantity multiplied by
+      cost price for all products.
+    synonyms:
+      - Inventory Value
+      - Stock Value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+
+---
+# view: customers_metrics
+# target: dex-demo.ecom_bronze.customers_metrics
+# grain: one row per customer
+version: 1.1
+
+source:
+  table: dex-demo.ecom_bronze.customers
+  comment: >-
+    Customer master data metrics for retail e-commerce analytics. One row per customer.
+    Use for customer-level analysis and customer counts. Filter candidates: is_active, customer_segment.
+
+dimensions:
+  - name: Customer Identifier
+    expr: customer_id
+    display_name: Customer Identifier
+    comment: Unique identifier for a retail customer.
+
+  - name: Customer Code
+    expr: customer_code
+    display_name: Customer Code
+    comment: Business-defined code used to uniquely reference the customer.
+
+  - name: Customer Gender
+    expr: gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+  - name: Customer City
+    expr: city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: Customer State
+    expr: state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: Customer Country
+    expr: country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: Customer Segment
+    expr: customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - Segment
+
+  - name: Registration Date
+    expr: registration_date
+    display_name: Registration Date
+    comment: Date when the customer registered with the retail channel.
+
+  - name: Registration Month
+    expr: DATE_TRUNC('MONTH', registration_date)
+    display_name: Registration Month
+    comment: Month when the customer registered, derived from registration_date for monthly analysis.
+
+  - name: Customer Is Active
+    expr: is_active
+    display_name: Customer Is Active
+    comment: Indicates whether the customer account is currently active.
+
+measures:
+  - name: Customer Count
+    display_name: Customer Count
+    expr: COUNT(DISTINCT customer_id)
+    comment: >-
+      Total number of customers, calculated as the count of distinct customer identifiers.
+    synonyms:
+      - Customers
+      - Number of Customers
+      - Total Customers
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+
+  - name: Active Customer Count
+    display_name: Active Customer Count
+    expr: COUNT(DISTINCT customer_id) FILTER (WHERE is_active = TRUE)
+    comment: >-
+      Total number of active customers, calculated as the count of distinct customer
+      identifiers where the customer account is currently active.
+    synonyms:
+      - Active Customers
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
