@@ -1,0 +1,78 @@
+{
+  "overall_validation_score": 91.67,
+  "accuracy_score": 95.0,
+  "efficiency_score": 85.0,
+  "completeness_score": 95.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "scoring_methodology": {
+    "pass_threshold": "≥ 90% overall score with no High-severity issues",
+    "pass_with_warnings_threshold": "≥ 80% overall score with no High-severity issues",
+    "fail_threshold": "< 80% overall score or any High-severity issue present"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Attribute Coverage",
+      "issue": "Column 'audit_id' in table 'load_audit' is missing PRIMARY KEY constraint in glossary but is marked as PRIMARY KEY in semantic model",
+      "recommendation": "Update glossary to add PRIMARY KEY constraint for load_audit.audit_id to match semantic model definition"
+    },
+    {
+      "severity": "Low",
+      "area": "Attribute Coverage",
+      "issue": "Column 'batch_id' in table 'load_audit' is missing FOREIGN KEY constraint in glossary but is marked as FK in semantic model",
+      "recommendation": "Update glossary to add FOREIGN KEY constraint for load_audit.batch_id to maintain consistency with semantic model"
+    },
+    {
+      "severity": "Medium",
+      "area": "Documentation Coverage",
+      "issue": "Table 'load_audit' description in glossary is generic ('Contains load_audit data information') and lacks detail compared to semantic model description",
+      "recommendation": "Enhance glossary description for load_audit to match the detailed semantic model description about ETL batch load audit records"
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Type Consistency",
+      "issue": "Column 'customer_id' type mismatch: glossary shows STRING(255) for some references but BIGINT in semantic model",
+      "recommendation": "Verify and standardize customer_id type across all documentation - semantic model uses BIGINT consistently"
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Convention",
+      "issue": "Inconsistent constraint notation: glossary uses 'PK, NOT NULL' while semantic model uses array format ['PRIMARY KEY', 'NOT NULL']",
+      "recommendation": "Standardize constraint notation format across both artifacts for consistency"
+    },
+    {
+      "severity": "Medium",
+      "area": "Business Definition Accuracy",
+      "issue": "Column 'tax_amount' in orders table is marked as PII in glossary but not flagged as sensitive in semantic model PII guidance",
+      "recommendation": "Review whether tax_amount should be classified as PII - this appears to be a data classification inconsistency"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Redundant Documentation",
+      "issue": "Batch lineage relationships (order_items_batch_lineage, orders_batch_lineage, etc.) have nearly identical resolution text with only table names differing",
+      "recommendation": "Create a reusable template or reference for batch lineage relationship documentation to reduce redundancy"
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation",
+      "issue": "Multiple metrics calculate similar aggregations (e.g., total_order_revenue, total_order_subtotal, total_discount_amount) with repetitive expression patterns",
+      "recommendation": "Consider creating base metric templates or CTEs that can be reused across similar aggregation metrics"
+    },
+    {
+      "severity": "Low",
+      "area": "Structural Efficiency",
+      "issue": "The semantic model contains 40+ metrics, many with similar GROUP BY patterns (by product, by category, by segment, etc.)",
+      "recommendation": "Implement parameterized metric definitions or dimension-based metric templates to reduce code duplication"
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability Opportunity",
+      "issue": "Revenue calculation logic is repeated across multiple metrics (product_revenue_by_product, category_revenue, revenue_by_customer_segment, etc.)",
+      "recommendation": "Create a base revenue calculation CTE or view that can be referenced by multiple metrics to improve maintainability"
+    }
+  ]
+}
