@@ -1,0 +1,194 @@
+version: 1.1
+
+source: ecom_bronze.orders
+
+comment: |-
+  Order-level metrics for retail e-commerce analytics. One row per order. Use for order-level revenue, order counts, and order status analysis. This is the primary grain for order total amounts (total_amount, subtotal, discount_amount, tax_amount, shipping_fee). Source is not fully qualified; confirm the catalog name before deployment.
+
+joins:
+  - name: customers
+    source: ecom_bronze.customers
+    on: source.customer_id = customers.customer_id
+
+dimensions:
+  - name: order_id
+    expr: source.order_id
+    display_name: Order Identifier
+    comment: Unique identifier for a customer order.
+
+  - name: order_number
+    expr: source.order_number
+    display_name: Order Number
+    comment: Business-facing order number assigned to the customer purchase.
+
+  - name: customer_id
+    expr: source.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: order_date
+    expr: source.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: order_month
+    expr: DATE_TRUNC('MONTH', source.order_date)
+    display_name: Order Month
+    comment: Order date truncated to month for monthly analysis.
+
+  - name: order_status
+    expr: source.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+    synonyms:
+      - status
+      - order state
+
+  - name: sales_channel
+    expr: source.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+    synonyms:
+      - channel
+      - purchase channel
+
+  - name: ship_city
+    expr: source.ship_city
+    display_name: Ship City
+    comment: City component of the shipping address for the order. PII - restrict access.
+
+  - name: ship_state
+    expr: source.ship_state
+    display_name: Ship State
+    comment: State or province component of the shipping address for the order. PII - restrict access.
+
+  - name: currency
+    expr: source.currency
+    display_name: Currency
+    comment: Currency code in which the order amounts are denominated.
+
+  - name: customer_code
+    expr: customers.customer_code
+    display_name: Customer Code
+    comment: Business-defined code used to uniquely reference the customer.
+
+  - name: customer_segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - segment
+
+  - name: customer_country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: customer_city
+    expr: customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: customer_state
+    expr: customers.state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: customer_gender
+    expr: customers.gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+  - name: customer_is_active
+    expr: customers.is_active
+    display_name: Customer Is Active
+    comment: Indicates whether the customer account is currently active.
+
+measures:
+  - name: total_revenue
+    expr: SUM(source.total_amount)
+    display_name: Total Revenue
+    comment: Total revenue from all orders, representing the final order value after discounts, taxes, and shipping fees. This is the primary order-level revenue metric. All amounts are in USD.
+    synonyms:
+      - revenue
+      - total sales
+      - order revenue
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_subtotal_revenue
+    expr: SUM(source.subtotal)
+    display_name: Total Subtotal Revenue
+    comment: Total subtotal revenue before discounts, taxes, and shipping fees. Represents gross merchandise value. All amounts are in USD.
+    synonyms:
+      - subtotal
+      - gross merchandise value
+      - GMV
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_discount_amount
+    expr: SUM(source.discount_amount)
+    display_name: Total Discount Amount
+    comment: Total discount amount applied across all orders. All amounts are in USD.
+    synonyms:
+      - discounts
+      - discount value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_tax_amount
+    expr: SUM(source.tax_amount)
+    display_name: Total Tax Amount
+    comment: Total tax amount collected across all orders. Source tags this field as PII; possible mis-tag, confirm. All amounts are in USD.
+    synonyms:
+      - tax
+      - taxes collected
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_shipping_fee
+    expr: SUM(source.shipping_fee)
+    display_name: Total Shipping Fee
+    comment: Total shipping fees collected across all orders. All amounts are in USD.
+    synonyms:
+      - shipping
+      - shipping cost
+      - delivery fee
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: order_count
+    expr: COUNT(DISTINCT source.order_id)
+    display_name: Order Count
+    comment: Total number of orders placed. Use this for order-level counting.
+    synonyms:
+      - orders
+      - number of orders
+      - order volume
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: average_order_value
+    expr: SUM(source.total_amount) / NULLIF(COUNT(DISTINCT source.order_id), 0)
+    display_name: Average Order Value
+    comment: Average order value calculated as total revenue divided by order count. Represents the average amount spent per order. All amounts are in USD.
+    synonyms:
+      - AOV
+      - avg order value
+      - mean order value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
