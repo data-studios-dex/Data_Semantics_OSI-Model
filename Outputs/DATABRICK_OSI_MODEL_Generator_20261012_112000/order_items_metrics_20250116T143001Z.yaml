@@ -1,0 +1,241 @@
+version: 1.1
+
+source: ecom_bronze.order_items
+
+comment: |-
+  Order line item metrics for retail e-commerce analytics. One row per order line item. Use for product-level analysis within orders and line-item revenue. CRITICAL: Do not sum order-level amounts (orders.total_amount, subtotal, discount_amount, tax_amount, shipping_fee) in this view to avoid double counting. Source is not fully qualified; confirm the catalog name before deployment.
+
+joins:
+  - name: orders
+    source: ecom_bronze.orders
+    on: source.order_id = orders.order_id
+    joins:
+      - name: customers
+        source: ecom_bronze.customers
+        on: orders.customer_id = customers.customer_id
+
+  - name: products
+    source: ecom_bronze.products
+    on: source.product_id = products.product_id
+    joins:
+      - name: product_categories
+        source: ecom_bronze.product_categories
+        on: products.category_id = product_categories.category_id
+        joins:
+          - name: parent_category
+            source: ecom_bronze.product_categories
+            on: product_categories.parent_category_id = parent_category.category_id
+
+dimensions:
+  - name: order_item_id
+    expr: source.order_item_id
+    display_name: Order Item Identifier
+    comment: Unique identifier for an order line item.
+
+  - name: order_id
+    expr: source.order_id
+    display_name: Order Identifier
+    comment: References the related customer order record.
+
+  - name: line_number
+    expr: source.line_number
+    display_name: Line Number
+    comment: Sequential line number of the item within the order.
+
+  - name: product_id
+    expr: source.product_id
+    display_name: Product Identifier
+    comment: References the product associated with the order line.
+
+  - name: order_date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: order_month
+    expr: DATE_TRUNC('MONTH', orders.order_date)
+    display_name: Order Month
+    comment: Order date truncated to month for monthly analysis.
+
+  - name: order_status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+    synonyms:
+      - status
+
+  - name: sales_channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+    synonyms:
+      - channel
+
+  - name: order_currency
+    expr: orders.currency
+    display_name: Order Currency
+    comment: Currency code in which the order amounts are denominated.
+
+  - name: customer_id
+    expr: customers.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: customer_segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - segment
+
+  - name: customer_country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: customer_city
+    expr: customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: customer_state
+    expr: customers.state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: customer_gender
+    expr: customers.gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+  - name: product_sku
+    expr: products.sku
+    display_name: Product SKU
+    comment: Stock keeping unit code used to uniquely identify the product.
+    synonyms:
+      - SKU
+
+  - name: product_name
+    expr: products.product_name
+    display_name: Product Name
+    comment: Descriptive name of the product.
+
+  - name: product_brand
+    expr: products.brand
+    display_name: Product Brand
+    comment: Brand or manufacturer of the product.
+    synonyms:
+      - brand
+
+  - name: product_currency
+    expr: products.currency
+    display_name: Product Currency
+    comment: Currency code in which product prices are denominated.
+
+  - name: product_is_active
+    expr: products.is_active
+    display_name: Product Is Active
+    comment: Indicates whether the product is currently active for sale.
+
+  - name: category_id
+    expr: product_categories.category_id
+    display_name: Category Identifier
+    comment: Unique identifier for a product category.
+
+  - name: category_name
+    expr: product_categories.category_name
+    display_name: Category Name
+    comment: Descriptive name of the product category.
+
+  - name: category_is_active
+    expr: product_categories.is_active
+    display_name: Category Is Active
+    comment: Indicates whether the product category is currently active for use.
+
+  - name: parent_category_name
+    expr: parent_category.category_name
+    display_name: Parent Category Name
+    comment: Name of the parent category in the hierarchy. Category hierarchy limited to one parent level.
+
+measures:
+  - name: total_line_item_revenue
+    expr: SUM(source.line_total)
+    display_name: Total Line Item Revenue
+    comment: Total revenue from all order line items after line-level discounts. Use this for product-level revenue analysis. All amounts are in USD.
+    synonyms:
+      - line revenue
+      - line item sales
+      - product revenue
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_units_sold
+    expr: SUM(source.quantity)
+    display_name: Total Units Sold
+    comment: Total number of product units sold across all order line items. All amounts are in USD.
+    synonyms:
+      - units sold
+      - quantity sold
+      - volume
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: average_line_item_value
+    expr: SUM(source.line_total) / NULLIF(COUNT(source.order_item_id), 0)
+    display_name: Average Line Item Value
+    comment: Average line item value calculated as total line item revenue divided by the number of line items. All amounts are in USD.
+    synonyms:
+      - avg line value
+      - mean line value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: average_discount_pct
+    expr: AVG(source.discount_pct)
+    display_name: Average Discount Percentage
+    comment: Average discount percentage applied to order line items. Value is already expressed as a percentage (0-100).
+    synonyms:
+      - avg discount
+      - mean discount
+    format:
+      type: number
+      decimal_places: 2
+
+  - name: average_units_per_order
+    expr: SUM(source.quantity) / NULLIF(COUNT(DISTINCT source.order_id), 0)
+    display_name: Average Units Per Order
+    comment: Average number of units per order, calculated as total units sold divided by the number of orders.
+    synonyms:
+      - avg units per order
+      - units per order
+    format:
+      type: number
+      decimal_places: 2
+
+  - name: gross_profit
+    expr: SUM(source.line_total) - SUM(source.quantity * products.cost_price)
+    display_name: Gross Profit
+    comment: Gross profit calculated as line item revenue minus line item cost. Line item cost is quantity multiplied by product cost price. All amounts are in USD.
+    synonyms:
+      - profit
+      - gross margin value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: gross_margin_pct
+    expr: MEASURE(`gross_profit`) / NULLIF(SUM(source.line_total), 0) * 100
+    display_name: Gross Margin Percentage
+    comment: Gross margin percentage calculated as gross profit divided by line item revenue. Value is expressed as a percentage (0-100).
+    synonyms:
+      - margin pct
+      - profit margin
+    format:
+      type: number
+      decimal_places: 2
