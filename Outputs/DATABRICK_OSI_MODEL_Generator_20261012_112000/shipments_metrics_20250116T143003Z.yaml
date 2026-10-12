@@ -1,0 +1,140 @@
+version: 1.1
+
+source: ecom_bronze.shipments
+
+comment: |-
+  Shipment tracking metrics for retail e-commerce analytics. One row per shipment. Use for delivery performance analysis and carrier tracking. CRITICAL: Do not sum order-level amounts (orders.total_amount, subtotal, discount_amount, tax_amount, shipping_fee) in this view to avoid double counting. Source is not fully qualified; confirm the catalog name before deployment.
+
+joins:
+  - name: orders
+    source: ecom_bronze.orders
+    on: source.order_id = orders.order_id
+    joins:
+      - name: customers
+        source: ecom_bronze.customers
+        on: orders.customer_id = customers.customer_id
+
+dimensions:
+  - name: shipment_id
+    expr: source.shipment_id
+    display_name: Shipment Identifier
+    comment: Unique identifier for a shipment record.
+
+  - name: order_id
+    expr: source.order_id
+    display_name: Order Identifier
+    comment: References the order associated with the shipment.
+
+  - name: carrier
+    expr: source.carrier
+    display_name: Carrier
+    comment: Name of the shipping carrier handling the shipment.
+    synonyms:
+      - shipping carrier
+      - delivery carrier
+
+  - name: shipment_status
+    expr: source.shipment_status
+    display_name: Shipment Status
+    comment: Indicates the current delivery status of the shipment.
+    synonyms:
+      - status
+      - delivery status
+
+  - name: shipped_at
+    expr: source.shipped_at
+    display_name: Shipped At
+    comment: Timestamp when the shipment left the fulfillment location.
+
+  - name: delivered_at
+    expr: source.delivered_at
+    display_name: Delivered At
+    comment: Timestamp when the shipment was delivered to the customer.
+
+  - name: shipment_month
+    expr: DATE_TRUNC('MONTH', source.shipped_at)
+    display_name: Shipment Month
+    comment: Shipment date truncated to month for monthly analysis.
+
+  - name: shipment_city
+    expr: source.ship_city
+    display_name: Shipment City
+    comment: City component of the shipment destination address. PII - restrict access.
+
+  - name: shipment_state
+    expr: source.ship_state
+    display_name: Shipment State
+    comment: State or province component of the shipment destination address. PII - restrict access.
+
+  - name: order_date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+
+  - name: order_status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current lifecycle status of the order.
+
+  - name: sales_channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or store.
+    synonyms:
+      - channel
+
+  - name: customer_id
+    expr: customers.customer_id
+    display_name: Customer Identifier
+    comment: References the customer who placed the order.
+
+  - name: customer_segment
+    expr: customers.customer_segment
+    display_name: Customer Segment
+    comment: Marketing or business segment classification of the customer.
+    synonyms:
+      - segment
+
+  - name: customer_country
+    expr: customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address.
+
+  - name: customer_city
+    expr: customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access.
+
+  - name: customer_state
+    expr: customers.state
+    display_name: Customer State
+    comment: State or province of the customer's primary address. PII - restrict access.
+
+  - name: customer_gender
+    expr: customers.gender
+    display_name: Customer Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access.
+
+measures:
+  - name: shipment_count
+    expr: COUNT(DISTINCT source.shipment_id)
+    display_name: Shipment Count
+    comment: Total number of shipments.
+    synonyms:
+      - shipments
+      - number of shipments
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: delivery_time_days
+    expr: AVG(DATEDIFF(source.delivered_at, source.shipped_at)) FILTER (WHERE source.delivered_at IS NOT NULL AND source.shipped_at IS NOT NULL)
+    display_name: Delivery Time Days
+    comment: Average delivery time in days, calculated as the average difference between delivered timestamp and shipped timestamp for completed shipments.
+    synonyms:
+      - avg delivery time
+      - delivery duration
+      - transit time
+    format:
+      type: number
+      decimal_places: 2
