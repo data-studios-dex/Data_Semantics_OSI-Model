@@ -1,0 +1,141 @@
+version: 1.1
+
+source: ecom_bronze.products
+
+comment: |-
+  Product catalog metrics for retail e-commerce analytics. One row per product. Use for product catalog analysis and inventory. Source is not fully qualified; confirm the catalog name before deployment.
+
+joins:
+  - name: product_categories
+    source: ecom_bronze.product_categories
+    on: source.category_id = product_categories.category_id
+    joins:
+      - name: parent_category
+        source: ecom_bronze.product_categories
+        on: product_categories.parent_category_id = parent_category.category_id
+
+dimensions:
+  - name: product_id
+    expr: source.product_id
+    display_name: Product Identifier
+    comment: Unique identifier for a product.
+
+  - name: sku
+    expr: source.sku
+    display_name: SKU
+    comment: Stock keeping unit code used to uniquely identify the product.
+    synonyms:
+      - product code
+      - SKU code
+
+  - name: product_name
+    expr: source.product_name
+    display_name: Product Name
+    comment: Descriptive name of the product.
+
+  - name: brand
+    expr: source.brand
+    display_name: Brand
+    comment: Brand or manufacturer of the product.
+    synonyms:
+      - manufacturer
+
+  - name: product_currency
+    expr: source.currency
+    display_name: Product Currency
+    comment: Currency code in which product prices are denominated.
+
+  - name: is_active
+    expr: source.is_active
+    display_name: Is Active
+    comment: Indicates whether the product is currently active for sale.
+
+  - name: created_at
+    expr: source.created_at
+    display_name: Created At
+    comment: Timestamp when the product record was initially created.
+
+  - name: created_month
+    expr: DATE_TRUNC('MONTH', source.created_at)
+    display_name: Created Month
+    comment: Product creation date truncated to month for monthly analysis.
+
+  - name: category_id
+    expr: product_categories.category_id
+    display_name: Category Identifier
+    comment: Unique identifier for a product category.
+
+  - name: category_name
+    expr: product_categories.category_name
+    display_name: Category Name
+    comment: Descriptive name of the product category.
+
+  - name: category_is_active
+    expr: product_categories.is_active
+    display_name: Category Is Active
+    comment: Indicates whether the product category is currently active for use.
+
+  - name: parent_category_name
+    expr: parent_category.category_name
+    display_name: Parent Category Name
+    comment: Name of the parent category in the hierarchy. Category hierarchy limited to one parent level.
+
+measures:
+  - name: product_count
+    expr: COUNT(DISTINCT source.product_id)
+    display_name: Product Count
+    comment: Total number of products in the catalog.
+    synonyms:
+      - products
+      - number of products
+      - SKU count
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: total_inventory_value
+    expr: SUM(source.stock_quantity * source.cost_price)
+    display_name: Total Inventory Value
+    comment: Total inventory value calculated as the sum of stock quantity multiplied by cost price for all products. All amounts are in USD.
+    synonyms:
+      - inventory value
+      - stock value
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: total_stock_quantity
+    expr: SUM(source.stock_quantity)
+    display_name: Total Stock Quantity
+    comment: Total on-hand inventory quantity across all products.
+    synonyms:
+      - stock quantity
+      - inventory quantity
+    format:
+      type: number
+      decimal_places: 0
+
+  - name: average_unit_price
+    expr: AVG(source.unit_price)
+    display_name: Average Unit Price
+    comment: Average standard selling price per unit across all products. All amounts are in USD.
+    synonyms:
+      - avg price
+      - mean price
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
+
+  - name: average_cost_price
+    expr: AVG(source.cost_price)
+    display_name: Average Cost Price
+    comment: Average internal cost price per unit across all products. All amounts are in USD.
+    synonyms:
+      - avg cost
+      - mean cost
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places: 2
