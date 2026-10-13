@@ -7,23 +7,23 @@
     xmlns:ont="http://example.org/ontology/retail-ecommerce-semantic-model/"
     xml:base="http://example.org/ontology/retail-ecommerce-semantic-model/">
 
-    <!-- ============================================================ -->
-    <!-- Ontology Header                                              -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Ontology Header                                                  -->
+    <!-- ================================================================ -->
 
     <owl:Ontology rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/">
         <rdfs:label>Retail Ecommerce Semantic Model</rdfs:label>
         <rdfs:comment>Comprehensive semantic model for retail e-commerce analytics derived from the ecom_bronze schema. This model supports analytical queries across customers, orders, products, payments, and shipments. The model includes customer segmentation analysis, order fulfillment tracking, product performance, payment processing analytics, and hierarchical product categorization.</rdfs:comment>
     </owl:Ontology>
 
-    <!-- Source: osi_semantic_model_process_320.yaml
-         Warehouse: ecom_bronze
-         Excluded datasets: load_audit (ETL monitoring)
-         Classes: 7 | Data properties: 88 | Object properties: 14 | Data bindings: 7 -->
+    <!-- Source: osi_semantic_model_process_320.yaml -->
+    <!-- Warehouse: ecom_bronze (inferred from dataset sources) -->
+    <!-- Classes: 7 | Data properties: 85 | Object properties: 14 | Data bindings: 7 -->
+    <!-- Excluded dataset: load_audit (ETL monitoring) -->
 
-    <!-- ============================================================ -->
-    <!-- Annotation Property Declarations                             -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Annotation Property Declarations                                 -->
+    <!-- ================================================================ -->
 
     <owl:AnnotationProperty rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/icon"/>
     <owl:AnnotationProperty rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/iconCode"/>
@@ -50,9 +50,9 @@
         <rdfs:label>DataBinding</rdfs:label>
     </owl:Class>
 
-    <!-- ============================================================ -->
-    <!-- Entity Types (Classes)                                       -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Entity Types (Classes)                                           -->
+    <!-- ================================================================ -->
 
     <owl:Class rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/Customer">
         <rdfs:label>Customer</rdfs:label>
@@ -88,7 +88,7 @@
 
     <owl:Class rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/ProductCategory">
         <rdfs:label>ProductCategory</rdfs:label>
-        <rdfs:comment>Product category master data with hierarchical structure including category identifier, category name, parent category reference for hierarchical grouping, description, and active status.</rdfs:comment>
+        <rdfs:comment>Product category master data with hierarchical structure for retail e-commerce operations including category identifier, category name, parent category reference for hierarchical grouping, description, and active status.</rdfs:comment>
         <ont:icon>📂</ont:icon>
         <ont:iconCode>U+1F4C2</ont:iconCode>
         <ont:color>#CA5010</ont:color>
@@ -110,9 +110,9 @@
         <ont:color>#D83B01</ont:color>
     </owl:Class>
 
-    <!-- ============================================================ -->
-    <!-- Data Properties                                              -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Data Properties                                                  -->
+    <!-- ================================================================ -->
 
     <!-- Customer properties -->
 
@@ -756,9 +756,9 @@
         <ont:propertyType>string</ont:propertyType>
     </owl:DatatypeProperty>
 
-    <!-- ============================================================ -->
-    <!-- Object Properties (Relationships)                            -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Object Properties (Relationships)                                -->
+    <!-- ================================================================ -->
 
     <owl:ObjectProperty rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/order_placed_by_customer">
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
@@ -949,9 +949,9 @@
         <ont:sourceRelationship>shipments_to_orders</ont:sourceRelationship>
     </owl:ObjectProperty>
 
-    <!-- ============================================================ -->
-    <!-- Data Bindings                                                -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- Data Bindings                                                    -->
+    <!-- ================================================================ -->
 
     <ont:DataBinding rdf:about="http://example.org/ontology/retail-ecommerce-semantic-model/binding_customer">
         <ont:boundClass rdf:resource="http://example.org/ontology/retail-ecommerce-semantic-model/Customer"/>
