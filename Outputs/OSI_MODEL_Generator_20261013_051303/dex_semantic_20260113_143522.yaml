@@ -1,0 +1,1114 @@
+version: "1.0"
+
+semantic_model:
+  - name: entyvio_pharmaceutical_semantic_model
+    description: >-
+      Comprehensive semantic model for Entyvio pharmaceutical data covering drug products, 
+      dosage forms, indications, and safety information. This model enables analytical queries 
+      across drug product lifecycle, therapeutic applications, safety profiles, and regulatory 
+      compliance tracking within the healthcare domain.
+    
+    ai_context:
+      instructions: >-
+        ## Dataset Grain and Purpose
+        
+        **drug_product**: One row per drug product. This is the central fact table containing 
+        product-level information including brand names, generic names, manufacturers, therapeutic 
+        areas, approval years, and product status. Use this dataset for product-level analytics, 
+        manufacturer analysis, therapeutic area analysis, and regulatory approval tracking.
+        
+        **drug_dosage_forms**: One row per dosage form configuration. Contains detailed information 
+        about how each drug product is formulated and administered, including strength, route of 
+        administration, and packaging. Use this dataset for dosage form analysis, administration 
+        route analysis, and packaging analytics.
+        
+        **drug_indications**: One row per drug indication. Contains medical conditions and clinical 
+        indications for which drugs are approved, including indication categories, descriptions, 
+        and evidence levels. Use this dataset for indication analysis, therapeutic category analysis, 
+        and clinical evidence assessment.
+        
+        **drug_safety_information**: One row per safety record. Contains safety warnings, precautions, 
+        contraindications, and adverse event information. Use this dataset for safety profile analysis, 
+        risk assessment, and pharmacovigilance reporting.
+        
+        ## Relationship Graph
+        
+        The semantic model follows a star schema pattern with drug_product as the central dimension:
+        
+        ```
+        drug_product (central)
+            |
+            | drug_id
+            |
+            +--- drug_dosage_forms (many dosage forms per drug)
+            |
+            +--- drug_indications (many indications per drug)
+            |
+            +--- drug_safety_information (many safety records per drug)
+        ```
+        
+        ## Join Guidance
+        
+        **drug_product to drug_dosage_forms**: Join on drug_id. One drug product may have multiple 
+        dosage forms. When analyzing dosage forms, join drug_dosage_forms to drug_product to access 
+        product-level attributes such as brand name, manufacturer, and therapeutic area.
+        
+        **drug_product to drug_indications**: Join on drug_id. One drug product may have multiple 
+        approved indications. When analyzing indications, join drug_indications to drug_product to 
+        access product context.
+        
+        **drug_product to drug_safety_information**: Join on drug_id. One drug product may have 
+        multiple safety records. When analyzing safety profiles, join drug_safety_information to 
+        drug_product to access product context.
+        
+        ## Double-Counting Prevention
+        
+        **Critical**: The drug_product dataset is at product grain (one row per product). The related 
+        datasets (drug_dosage_forms, drug_indications, drug_safety_information) are at finer grains 
+        and contain multiple rows per drug product.
+        
+        **Do not count products after joining to related tables without proper aggregation**:
+        - When counting distinct products across dosage forms, use COUNT(DISTINCT drug_product.product_id)
+        - When counting distinct products across indications, use COUNT(DISTINCT drug_product.product_id)
+        - When counting distinct products with safety records, use COUNT(DISTINCT drug_product.product_id)
+        
+        **Correct approach for product-level metrics**:
+        - Count products directly from drug_product table when no dimension from related tables is needed
+        - Use COUNT(DISTINCT product_id) when joining to related tables
+        
+        ## Metric Selection Guidance
+        
+        **Product Metrics**: Use drug_product dataset for product counts, manufacturer counts, 
+        therapeutic area distribution, approval year analysis, and product status tracking.
+        
+        **Dosage Form Metrics**: Use drug_dosage_forms dataset for dosage form counts, route of 
+        administration analysis, strength analysis, and packaging analysis.
+        
+        **Indication Metrics**: Use drug_indications dataset for indication counts, indication 
+        category analysis, evidence level distribution, and therapeutic application analysis.
+        
+        **Safety Metrics**: Use drug_safety_information dataset for safety record counts, safety 
+        type distribution, severity analysis, and risk profiling.
+        
+        ## Time Analysis
+        
+        **_ingested_at**: Use this timestamp field for data ingestion tracking, data freshness 
+        analysis, and ETL pipeline monitoring across all datasets.
+        
+        **approval_year**: Use this field in drug_product for regulatory approval timeline analysis, 
+        product launch trends, and market entry analysis.
+        
+        ## Dimensional Analysis
+        
+        **Manufacturer Analysis**: Use drug_product.manufacturer to analyze product portfolios by 
+        pharmaceutical company, market share, and therapeutic area coverage.
+        
+        **Therapeutic Area Analysis**: Use drug_product.therapeutic_area to analyze product 
+        distribution across medical specialties and therapeutic categories.
+        
+        **Drug Class Analysis**: Use drug_product.drug_class to analyze pharmacological categories 
+        and drug classification patterns.
+        
+        **Molecule Type Analysis**: Use drug_product.molecule_type to distinguish between small 
+        molecules and biologics.
+        
+        **Market Analysis**: Use drug_product.market to analyze geographic and regulatory market 
+        distribution.
+        
+        **Product Status Analysis**: Use drug_product.product_status to track regulatory and 
+        commercial status (Approved, Pending, Withdrawn, etc.).
+        
+        **Indication Category Analysis**: Use drug_indications.indication_category to analyze 
+        therapeutic categories and disease areas.
+        
+        **Evidence Level Analysis**: Use drug_indications.evidence_level to assess clinical 
+        evidence strength and regulatory support.
+        
+        **Safety Type Analysis**: Use drug_safety_information.safety_type to categorize safety 
+        information (Warning, Precaution, Contraindication, Adverse Event).
+        
+        **Severity Analysis**: Use drug_safety_information.severity to assess risk levels and 
+        prioritize safety concerns.
+        
+        **Route of Administration Analysis**: Use drug_dosage_forms.route_of_administration to 
+        analyze administration methods and delivery mechanisms.
+        
+        ## Query Restrictions and Considerations
+        
+        **Data Freshness**: All datasets contain _ingested_at timestamps. Consider data recency 
+        when performing temporal analysis or comparing records across different ingestion batches.
+        
+        **Identifier Consistency**: All relationships are based on drug_id. Ensure drug_id values 
+        are consistent across datasets when performing joins.
+        
+        **String Data Types**: All business fields use STRING(255) data type. Consider case 
+        sensitivity and whitespace when filtering or grouping by categorical fields.
+        
+        **Missing Relationships**: The current model does not contain explicit primary key or 
+        foreign key constraints in the source metadata. Relationships are inferred from field 
+        names, descriptions, and business context.
+        
+        **Aggregation Considerations**: When aggregating across multiple dimensions from different 
+        datasets, always use COUNT(DISTINCT) for product-level counts to avoid double-counting.
+
+    datasets:
+      - name: drug_product
+        business_name: Drug Product
+        description: >-
+          Central dataset containing comprehensive drug product information. One row per drug product.
+          Includes commercial branding, generic names, active ingredients, manufacturer details, 
+          therapeutic classification, molecule types, market information, product presentation, 
+          regulatory approval years, and current product status. This dataset serves as the primary 
+          dimension for pharmaceutical product analytics and regulatory tracking.
+        source: entyvio_bronze.drug_product
+        primary_key: []
+        fields:
+          - name: product_id
+            business_name: Product Identifier
+            description: >-
+              Unique identifier for the drug product record. Serves as the primary business key 
+              for product identification and tracking across the pharmaceutical data ecosystem.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: drug_id
+            business_name: Drug Identifier
+            description: >-
+              Identifier for the underlying drug associated with the product. Links this product 
+              to related dosage forms, indications, and safety information. This field enables 
+              relationship traversal across the pharmaceutical data model.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: brand_name
+            business_name: Brand Name
+            description: >-
+              Commercial brand name under which the drug product is marketed. Represents the 
+              trademarked product name used in marketing, prescribing, and patient communication.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: generic_name
+            business_name: Generic Name
+            description: >-
+              Non-proprietary generic name of the drug product. Represents the standardized 
+              scientific name used in regulatory filings and clinical documentation.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: active_ingredient
+            business_name: Active Ingredient
+            description: >-
+              Name of the active pharmaceutical ingredient in the product. Identifies the 
+              therapeutic compound responsible for the drug's pharmacological effect.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: manufacturer
+            business_name: Manufacturer
+            description: >-
+              Name of the company that manufactures the drug product. Identifies the pharmaceutical 
+              company responsible for production, quality control, and regulatory compliance.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: therapeutic_area
+            business_name: Therapeutic Area
+            description: >-
+              Medical therapeutic area targeted by the drug product. Categorizes the product 
+              by medical specialty and disease domain for therapeutic portfolio analysis.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: drug_class
+            business_name: Drug Class
+            description: >-
+              Pharmacological or therapeutic class of the drug product. Classifies the product 
+              by mechanism of action and therapeutic category for pharmacological analysis.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: molecule_type
+            business_name: Molecule Type
+            description: >-
+              Type of molecule, such as small molecule or biologic, for the drug product. 
+              Distinguishes between traditional chemical drugs and biological therapeutic products.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: market
+            business_name: Market
+            description: >-
+              Geographic or regulatory market in which the drug product is approved or sold. 
+              Identifies the regulatory jurisdiction and commercial market for the product.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: product_presentation
+            business_name: Product Presentation
+            description: >-
+              Description of how the product is presented, such as vial, prefilled syringe, 
+              or blister pack. Describes the physical packaging and delivery format.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: approval_year
+            business_name: Approval Year
+            description: >-
+              Year in which the product received regulatory approval. Tracks the regulatory 
+              approval timeline and market entry date for the product.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: product_status
+            business_name: Product Status
+            description: >-
+              Indicates the current regulatory or commercial status of the product. Tracks 
+              whether the product is approved, pending approval, withdrawn, or discontinued.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: _source_file
+            business_name: Source File
+            description: >-
+              Name or path of the source file from which the product data was ingested. 
+              Provides data lineage and traceability for audit and data quality purposes.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _ingested_at
+            business_name: Ingested At
+            description: >-
+              Timestamp recording when the product data was ingested into the system. 
+              Enables data freshness tracking and temporal analysis of data loads.
+            sql_type: TIMESTAMP(29,9)
+            constraints: []
+            dimension:
+              is_time: true
+            
+          - name: _ingestion_method
+            business_name: Ingestion Method
+            description: >-
+              Indicates the technical method or process used to ingest the product data. 
+              Documents the ETL process and data integration approach for operational tracking.
+            sql_type: STRING(255)
+            constraints: []
+
+      - name: drug_dosage_forms
+        business_name: Drug Dosage Forms
+        description: >-
+          Dataset containing detailed drug dosage form configurations. One row per dosage form 
+          configuration. Includes dosage form types, drug strength specifications, routes of 
+          administration, and packaging descriptions. This dataset enables dosage form analysis, 
+          administration route analytics, and pharmaceutical formulation tracking.
+        source: entyvio_bronze.drug_dosage_forms
+        primary_key: []
+        fields:
+          - name: dosage_form_id
+            business_name: Dosage Form Identifier
+            description: >-
+              Unique identifier for the dosage form record. Serves as the primary business key 
+              for dosage form identification and tracking.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: drug_id
+            business_name: Drug Identifier
+            description: >-
+              Identifier for the drug associated with this dosage form. Links this dosage form 
+              to the parent drug product and enables relationship traversal.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: dosage_form
+            business_name: Dosage Form
+            description: >-
+              Describes the physical form in which the drug is administered, such as tablet 
+              or injection. Categorizes the pharmaceutical formulation type.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: strength
+            business_name: Strength
+            description: >-
+              Indicates the concentration or strength of the drug in the dosage form. 
+              Specifies the active ingredient quantity per unit dose.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: route_of_administration
+            business_name: Route Of Administration
+            description: >-
+              Specifies the route by which the drug is administered to a patient. Identifies 
+              the delivery method such as oral, intravenous, subcutaneous, or topical.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: package_description
+            business_name: Package Description
+            description: >-
+              Text description of the packaging and presentation of the dosage form. Describes 
+              the commercial packaging configuration and unit presentation.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _source_file
+            business_name: Source File
+            description: >-
+              Name or path of the source file from which the dosage form data was ingested. 
+              Provides data lineage and traceability for audit purposes.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _ingested_at
+            business_name: Ingested At
+            description: >-
+              Timestamp recording when the dosage form data was ingested into the system. 
+              Enables data freshness tracking and temporal analysis.
+            sql_type: TIMESTAMP(29,9)
+            constraints: []
+            dimension:
+              is_time: true
+            
+          - name: _ingestion_method
+            business_name: Ingestion Method
+            description: >-
+              Indicates the technical method or process used to ingest the dosage form data. 
+              Documents the ETL process for operational tracking.
+            sql_type: STRING(255)
+            constraints: []
+
+      - name: drug_indications
+        business_name: Drug Indications
+        description: >-
+          Dataset containing drug indication information. One row per drug indication. Includes 
+          indication names, categories, detailed descriptions, and clinical evidence levels. 
+          This dataset enables therapeutic indication analysis, clinical evidence assessment, 
+          and regulatory indication tracking.
+        source: entyvio_bronze.drug_indications
+        primary_key: []
+        fields:
+          - name: indication_id
+            business_name: Indication Identifier
+            description: >-
+              Unique identifier for the drug indication record. Serves as the primary business 
+              key for indication identification and tracking.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: drug_id
+            business_name: Drug Identifier
+            description: >-
+              Identifier for the drug associated with this indication. Links this indication 
+              to the parent drug product and enables relationship traversal.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: indication_name
+            business_name: Indication Name
+            description: >-
+              Name of the medical condition or indication for which the drug is used. 
+              Identifies the approved therapeutic use case.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: indication_category
+            business_name: Indication Category
+            description: >-
+              Category or classification of the drug indication. Groups indications by 
+              therapeutic area or disease category for analytical purposes.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: indication_description
+            business_name: Indication Description
+            description: >-
+              Detailed description of the medical indication and its clinical context. 
+              Provides comprehensive clinical information about the approved use case.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: evidence_level
+            business_name: Evidence Level
+            description: >-
+              Indicates the level of clinical evidence supporting the indication. Categorizes 
+              the strength of clinical trial evidence and regulatory support.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: _source_file
+            business_name: Source File
+            description: >-
+              Name or path of the source file from which the indication data was ingested. 
+              Provides data lineage and traceability for audit purposes.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _ingested_at
+            business_name: Ingested At
+            description: >-
+              Timestamp recording when the indication data was ingested into the system. 
+              Enables data freshness tracking and temporal analysis.
+            sql_type: TIMESTAMP(29,9)
+            constraints: []
+            dimension:
+              is_time: true
+            
+          - name: _ingestion_method
+            business_name: Ingestion Method
+            description: >-
+              Indicates the technical method or process used to ingest the indication data. 
+              Documents the ETL process for operational tracking.
+            sql_type: STRING(255)
+            constraints: []
+
+      - name: drug_safety_information
+        business_name: Drug Safety Information
+        description: >-
+          Dataset containing drug safety information records. One row per safety record. Includes 
+          safety types, safety text descriptions, severity levels, and source identifiers. This 
+          dataset enables safety profile analysis, risk assessment, pharmacovigilance reporting, 
+          and adverse event tracking.
+        source: entyvio_bronze.drug_safety_information
+        primary_key: []
+        fields:
+          - name: safety_id
+            business_name: Safety Identifier
+            description: >-
+              Unique identifier for the drug safety information record. Serves as the primary 
+              business key for safety record identification and tracking.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: drug_id
+            business_name: Drug Identifier
+            description: >-
+              Identifier for the drug associated with this safety information. Links this 
+              safety record to the parent drug product and enables relationship traversal.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: safety_type
+            business_name: Safety Type
+            description: >-
+              Type of safety information, such as warning, precaution, or contraindication. 
+              Categorizes the nature of the safety concern for risk classification.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: safety_text
+            business_name: Safety Text
+            description: >-
+              Narrative text describing the specific safety warning or precaution. Provides 
+              detailed clinical safety information for healthcare professionals and patients.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: severity
+            business_name: Severity
+            description: >-
+              Indicates the severity level of the safety risk. Categorizes the risk level 
+              for prioritization and risk management purposes.
+            sql_type: STRING(255)
+            constraints: []
+            dimension:
+              is_categorical: true
+            
+          - name: source_id
+            business_name: Source Identifier
+            description: >-
+              Identifier for the source document or system from which the safety information 
+              was derived. Provides traceability to regulatory filings and safety databases.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _source_file
+            business_name: Source File
+            description: >-
+              Name or path of the source file from which the safety information data was 
+              ingested. Provides data lineage and traceability for audit purposes.
+            sql_type: STRING(255)
+            constraints: []
+            
+          - name: _ingested_at
+            business_name: Ingested At
+            description: >-
+              Timestamp recording when the safety information data was ingested into the 
+              system. Enables data freshness tracking and temporal analysis.
+            sql_type: TIMESTAMP(29,9)
+            constraints: []
+            dimension:
+              is_time: true
+            
+          - name: _ingestion_method
+            business_name: Ingestion Method
+            description: >-
+              Indicates the technical method or process used to ingest the safety information 
+              data. Documents the ETL process for operational tracking.
+            sql_type: STRING(255)
+            constraints: []
+
+    relationships:
+      - name: drug_product_to_drug_dosage_forms
+        left_dataset: drug_product
+        right_dataset: drug_dosage_forms
+        relationship_type: one_to_many
+        join:
+          left:
+            - drug_id
+          right:
+            - drug_id
+        join_type: left
+        resolution: >-
+          This relationship links drug products to their associated dosage forms. One drug 
+          product may have multiple dosage form configurations. The relationship is based on 
+          drug_id equality. When analyzing dosage forms by product attributes, join 
+          drug_dosage_forms to drug_product using drug_id. Use COUNT(DISTINCT product_id) 
+          when counting products across dosage forms to avoid double-counting.
+          
+      - name: drug_product_to_drug_indications
+        left_dataset: drug_product
+        right_dataset: drug_indications
+        relationship_type: one_to_many
+        join:
+          left:
+            - drug_id
+          right:
+            - drug_id
+        join_type: left
+        resolution: >-
+          This relationship links drug products to their approved indications. One drug product 
+          may have multiple approved indications for different medical conditions. The relationship 
+          is based on drug_id equality. When analyzing indications by product attributes, join 
+          drug_indications to drug_product using drug_id. Use COUNT(DISTINCT product_id) when 
+          counting products across indications to avoid double-counting.
+          
+      - name: drug_product_to_drug_safety_information
+        left_dataset: drug_product
+        right_dataset: drug_safety_information
+        relationship_type: one_to_many
+        join:
+          left:
+            - drug_id
+          right:
+            - drug_id
+        join_type: left
+        resolution: >-
+          This relationship links drug products to their safety information records. One drug 
+          product may have multiple safety records including warnings, precautions, and 
+          contraindications. The relationship is based on drug_id equality. When analyzing 
+          safety information by product attributes, join drug_safety_information to drug_product 
+          using drug_id. Use COUNT(DISTINCT product_id) when counting products with safety 
+          records to avoid double-counting.
+
+    metrics:
+      - name: total_drug_products
+        business_name: Total Drug Products
+        description: >-
+          Total count of distinct drug products in the pharmaceutical portfolio. This metric 
+          provides the overall product count for portfolio size analysis and product tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT dp.product_id) AS total_drug_products
+                FROM entyvio_bronze.drug_product AS dp
+              columns_used:
+                - drug_product.product_id
+                
+      - name: total_dosage_forms
+        business_name: Total Dosage Forms
+        description: >-
+          Total count of distinct dosage form configurations across all drug products. This 
+          metric provides the overall dosage form count for formulation analysis and 
+          pharmaceutical development tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT ddf.dosage_form_id) AS total_dosage_forms
+                FROM entyvio_bronze.drug_dosage_forms AS ddf
+              columns_used:
+                - drug_dosage_forms.dosage_form_id
+                
+      - name: total_indications
+        business_name: Total Indications
+        description: >-
+          Total count of distinct drug indications across all drug products. This metric 
+          provides the overall indication count for therapeutic coverage analysis and 
+          regulatory approval tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT di.indication_id) AS total_indications
+                FROM entyvio_bronze.drug_indications AS di
+              columns_used:
+                - drug_indications.indication_id
+                
+      - name: total_safety_records
+        business_name: Total Safety Records
+        description: >-
+          Total count of distinct safety information records across all drug products. This 
+          metric provides the overall safety record count for pharmacovigilance analysis and 
+          risk management tracking.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT dsi.safety_id) AS total_safety_records
+                FROM entyvio_bronze.drug_safety_information AS dsi
+              columns_used:
+                - drug_safety_information.safety_id
+                
+      - name: products_by_manufacturer
+        business_name: Products by Manufacturer
+        description: >-
+          Count of distinct drug products grouped by manufacturer. This metric enables 
+          pharmaceutical company portfolio analysis and market share assessment.
+        return_type: integer
+        result_grain: one row per manufacturer
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.manufacturer,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.manufacturer
+              columns_used:
+                - drug_product.manufacturer
+                - drug_product.product_id
+                
+      - name: products_by_therapeutic_area
+        business_name: Products by Therapeutic Area
+        description: >-
+          Count of distinct drug products grouped by therapeutic area. This metric enables 
+          therapeutic portfolio analysis and medical specialty coverage assessment.
+        return_type: integer
+        result_grain: one row per therapeutic area
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.therapeutic_area,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.therapeutic_area
+              columns_used:
+                - drug_product.therapeutic_area
+                - drug_product.product_id
+                
+      - name: products_by_drug_class
+        business_name: Products by Drug Class
+        description: >-
+          Count of distinct drug products grouped by drug class. This metric enables 
+          pharmacological class analysis and therapeutic category distribution assessment.
+        return_type: integer
+        result_grain: one row per drug class
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.drug_class,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.drug_class
+              columns_used:
+                - drug_product.drug_class
+                - drug_product.product_id
+                
+      - name: products_by_molecule_type
+        business_name: Products by Molecule Type
+        description: >-
+          Count of distinct drug products grouped by molecule type. This metric enables 
+          analysis of small molecule versus biologic product distribution.
+        return_type: integer
+        result_grain: one row per molecule type
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.molecule_type,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.molecule_type
+              columns_used:
+                - drug_product.molecule_type
+                - drug_product.product_id
+                
+      - name: products_by_market
+        business_name: Products by Market
+        description: >-
+          Count of distinct drug products grouped by market. This metric enables geographic 
+          and regulatory market distribution analysis.
+        return_type: integer
+        result_grain: one row per market
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.market,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.market
+              columns_used:
+                - drug_product.market
+                - drug_product.product_id
+                
+      - name: products_by_status
+        business_name: Products by Status
+        description: >-
+          Count of distinct drug products grouped by product status. This metric enables 
+          regulatory and commercial status tracking across the product portfolio.
+        return_type: integer
+        result_grain: one row per product status
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.product_status,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.product_status
+              columns_used:
+                - drug_product.product_status
+                - drug_product.product_id
+                
+      - name: products_by_approval_year
+        business_name: Products by Approval Year
+        description: >-
+          Count of distinct drug products grouped by approval year. This metric enables 
+          regulatory approval timeline analysis and product launch trend assessment.
+        return_type: integer
+        result_grain: one row per approval year
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dp.approval_year,
+                    COUNT(DISTINCT dp.product_id) AS product_count
+                FROM entyvio_bronze.drug_product AS dp
+                GROUP BY dp.approval_year
+                ORDER BY dp.approval_year
+              columns_used:
+                - drug_product.approval_year
+                - drug_product.product_id
+                
+      - name: dosage_forms_by_type
+        business_name: Dosage Forms by Type
+        description: >-
+          Count of distinct dosage forms grouped by dosage form type. This metric enables 
+          pharmaceutical formulation analysis and dosage form distribution assessment.
+        return_type: integer
+        result_grain: one row per dosage form type
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    ddf.dosage_form,
+                    COUNT(DISTINCT ddf.dosage_form_id) AS dosage_form_count
+                FROM entyvio_bronze.drug_dosage_forms AS ddf
+                GROUP BY ddf.dosage_form
+              columns_used:
+                - drug_dosage_forms.dosage_form
+                - drug_dosage_forms.dosage_form_id
+                
+      - name: dosage_forms_by_route_of_administration
+        business_name: Dosage Forms by Route of Administration
+        description: >-
+          Count of distinct dosage forms grouped by route of administration. This metric 
+          enables administration method analysis and delivery mechanism distribution assessment.
+        return_type: integer
+        result_grain: one row per route of administration
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    ddf.route_of_administration,
+                    COUNT(DISTINCT ddf.dosage_form_id) AS dosage_form_count
+                FROM entyvio_bronze.drug_dosage_forms AS ddf
+                GROUP BY ddf.route_of_administration
+              columns_used:
+                - drug_dosage_forms.route_of_administration
+                - drug_dosage_forms.dosage_form_id
+                
+      - name: indications_by_category
+        business_name: Indications by Category
+        description: >-
+          Count of distinct indications grouped by indication category. This metric enables 
+          therapeutic category analysis and disease area distribution assessment.
+        return_type: integer
+        result_grain: one row per indication category
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    di.indication_category,
+                    COUNT(DISTINCT di.indication_id) AS indication_count
+                FROM entyvio_bronze.drug_indications AS di
+                GROUP BY di.indication_category
+              columns_used:
+                - drug_indications.indication_category
+                - drug_indications.indication_id
+                
+      - name: indications_by_evidence_level
+        business_name: Indications by Evidence Level
+        description: >-
+          Count of distinct indications grouped by evidence level. This metric enables 
+          clinical evidence strength analysis and regulatory support assessment.
+        return_type: integer
+        result_grain: one row per evidence level
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    di.evidence_level,
+                    COUNT(DISTINCT di.indication_id) AS indication_count
+                FROM entyvio_bronze.drug_indications AS di
+                GROUP BY di.evidence_level
+              columns_used:
+                - drug_indications.evidence_level
+                - drug_indications.indication_id
+                
+      - name: safety_records_by_type
+        business_name: Safety Records by Type
+        description: >-
+          Count of distinct safety records grouped by safety type. This metric enables 
+          safety information categorization and risk type distribution analysis.
+        return_type: integer
+        result_grain: one row per safety type
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dsi.safety_type,
+                    COUNT(DISTINCT dsi.safety_id) AS safety_record_count
+                FROM entyvio_bronze.drug_safety_information AS dsi
+                GROUP BY dsi.safety_type
+              columns_used:
+                - drug_safety_information.safety_type
+                - drug_safety_information.safety_id
+                
+      - name: safety_records_by_severity
+        business_name: Safety Records by Severity
+        description: >-
+          Count of distinct safety records grouped by severity level. This metric enables 
+          risk severity analysis and safety prioritization for pharmacovigilance.
+        return_type: integer
+        result_grain: one row per severity level
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    dsi.severity,
+                    COUNT(DISTINCT dsi.safety_id) AS safety_record_count
+                FROM entyvio_bronze.drug_safety_information AS dsi
+                GROUP BY dsi.severity
+              columns_used:
+                - drug_safety_information.severity
+                - drug_safety_information.safety_id
+                
+      - name: products_with_multiple_dosage_forms
+        business_name: Products with Multiple Dosage Forms
+        description: >-
+          Count of distinct drug products that have multiple dosage form configurations. 
+          This metric identifies products with diverse formulation options for patient 
+          convenience and therapeutic flexibility analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT dp.product_id) AS products_with_multiple_forms
+                FROM entyvio_bronze.drug_product AS dp
+                INNER JOIN entyvio_bronze.drug_dosage_forms AS ddf
+                    ON dp.drug_id = ddf.drug_id
+                GROUP BY dp.product_id
+                HAVING COUNT(DISTINCT ddf.dosage_form_id) > 1
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_dosage_forms.drug_id
+                - drug_dosage_forms.dosage_form_id
+                
+      - name: products_with_multiple_indications
+        business_name: Products with Multiple Indications
+        description: >-
+          Count of distinct drug products that have multiple approved indications. This 
+          metric identifies products with broad therapeutic applications for portfolio 
+          value and market opportunity analysis.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT dp.product_id) AS products_with_multiple_indications
+                FROM entyvio_bronze.drug_product AS dp
+                INNER JOIN entyvio_bronze.drug_indications AS di
+                    ON dp.drug_id = di.drug_id
+                GROUP BY dp.product_id
+                HAVING COUNT(DISTINCT di.indication_id) > 1
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_indications.drug_id
+                - drug_indications.indication_id
+                
+      - name: products_with_high_severity_safety_records
+        business_name: Products with High Severity Safety Records
+        description: >-
+          Count of distinct drug products that have at least one high severity safety 
+          record. This metric identifies products requiring enhanced pharmacovigilance 
+          and risk management attention.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT dp.product_id) AS products_with_high_severity_safety
+                FROM entyvio_bronze.drug_product AS dp
+                INNER JOIN entyvio_bronze.drug_safety_information AS dsi
+                    ON dp.drug_id = dsi.drug_id
+                WHERE UPPER(dsi.severity) = 'HIGH'
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_safety_information.drug_id
+                - drug_safety_information.severity
+                
+      - name: average_dosage_forms_per_product
+        business_name: Average Dosage Forms per Product
+        description: >-
+          Average number of dosage form configurations per drug product. This metric 
+          provides insight into formulation diversity and product line complexity.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    CAST(COUNT(DISTINCT ddf.dosage_form_id) AS DECIMAL(10,2)) / 
+                    NULLIF(COUNT(DISTINCT dp.product_id), 0) AS avg_dosage_forms_per_product
+                FROM entyvio_bronze.drug_product AS dp
+                LEFT JOIN entyvio_bronze.drug_dosage_forms AS ddf
+                    ON dp.drug_id = ddf.drug_id
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_dosage_forms.drug_id
+                - drug_dosage_forms.dosage_form_id
+                
+      - name: average_indications_per_product
+        business_name: Average Indications per Product
+        description: >-
+          Average number of approved indications per drug product. This metric provides 
+          insight into therapeutic breadth and regulatory approval scope.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    CAST(COUNT(DISTINCT di.indication_id) AS DECIMAL(10,2)) / 
+                    NULLIF(COUNT(DISTINCT dp.product_id), 0) AS avg_indications_per_product
+                FROM entyvio_bronze.drug_product AS dp
+                LEFT JOIN entyvio_bronze.drug_indications AS di
+                    ON dp.drug_id = di.drug_id
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_indications.drug_id
+                - drug_indications.indication_id
+                
+      - name: average_safety_records_per_product
+        business_name: Average Safety Records per Product
+        description: >-
+          Average number of safety records per drug product. This metric provides insight 
+          into safety profile complexity and pharmacovigilance burden.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    CAST(COUNT(DISTINCT dsi.safety_id) AS DECIMAL(10,2)) / 
+                    NULLIF(COUNT(DISTINCT dp.product_id), 0) AS avg_safety_records_per_product
+                FROM entyvio_bronze.drug_product AS dp
+                LEFT JOIN entyvio_bronze.drug_safety_information AS dsi
+                    ON dp.drug_id = dsi.drug_id
+              columns_used:
+                - drug_product.product_id
+                - drug_product.drug_id
+                - drug_safety_information.drug_id
+                - drug_safety_information.safety_id
