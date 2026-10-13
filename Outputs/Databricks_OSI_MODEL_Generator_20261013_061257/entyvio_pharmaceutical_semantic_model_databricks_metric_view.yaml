@@ -1,0 +1,427 @@
+version: 1.1
+
+comment: |-
+  Databricks Unity Catalog Metric View for Entyvio Pharmaceutical Semantic Model
+  
+  Generated from OSI Semantic Model version 1.0
+  Source: entyvio_pharmaceutical_semantic_model
+  Catalog: pharma_demo
+  Schema: entyvio_bronze
+  
+  This metric view provides comprehensive pharmaceutical analytics across drug products,
+  dosage forms, indications, and safety information. The view is built on the drug_product
+  dataset as the central spine, with joins to related datasets for multi-dimensional analysis.
+  
+  Relationships Implemented:
+  - drug_product_to_drug_dosage_forms: One drug product may have multiple dosage forms
+  - drug_product_to_drug_indications: One drug product may have multiple indications
+  - drug_product_to_drug_safety_information: One drug product may have multiple safety records
+  
+  PII Mode: restricted - Technical and audit columns excluded from dimensions
+  DEDUP Mode: off - Order-level aggregation measures not applicable to pharmaceutical domain
+  
+  Metrics Coverage:
+  - Product metrics: total_drug_products, products by manufacturer/therapeutic area/drug class/molecule type/market/status/approval year
+  - Dosage form metrics: total_dosage_forms, dosage forms by type/route of administration
+  - Indication metrics: total_indications, indications by category/evidence level
+  - Safety metrics: total_safety_records, safety records by type/severity
+  - Cross-entity metrics: products with multiple dosage forms/indications, products with high severity safety records
+  - Average metrics: average dosage forms/indications/safety records per product
+  
+  NOT REPRESENTED (domain-specific limitations):
+  - E-commerce metrics (revenue, orders, customers, payments, shipments) are not applicable to pharmaceutical reference data
+  - Transactional metrics require sales/prescription transaction data not present in this product catalog model
+
+source: '`pharma_demo`.entyvio_bronze.drug_product'
+
+joins:
+  - name: drug_dosage_forms
+    source: '`pharma_demo`.entyvio_bronze.drug_dosage_forms'
+    "on": source.drug_id = drug_dosage_forms.drug_id
+  - name: drug_indications
+    source: '`pharma_demo`.entyvio_bronze.drug_indications'
+    "on": source.drug_id = drug_indications.drug_id
+  - name: drug_safety_information
+    source: '`pharma_demo`.entyvio_bronze.drug_safety_information'
+    "on": source.drug_id = drug_safety_information.drug_id
+
+dimensions:
+  - name: product_id
+    expr: source.product_id
+    display_name: Product ID
+    comment: Unique identifier for the drug product record. Serves as the primary business key for product identification and tracking across the pharmaceutical data ecosystem.
+    synonyms:
+      - product identifier
+      - drug product id
+      - product key
+      
+  - name: drug_id
+    expr: source.drug_id
+    display_name: Drug ID
+    comment: Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information.
+    synonyms:
+      - drug identifier
+      - drug key
+      
+  - name: brand_name
+    expr: source.brand_name
+    display_name: Brand Name
+    comment: Commercial brand name under which the drug product is marketed. Represents the trademarked product name used in marketing, prescribing, and patient communication.
+    synonyms:
+      - product brand
+      - trade name
+      - commercial name
+      
+  - name: generic_name
+    expr: source.generic_name
+    display_name: Generic Name
+    comment: Non-proprietary generic name of the drug product. Represents the standardized scientific name used in regulatory filings and clinical documentation.
+    synonyms:
+      - scientific name
+      - non-proprietary name
+      - INN name
+      
+  - name: active_ingredient
+    expr: source.active_ingredient
+    display_name: Active Ingredient
+    comment: Name of the active pharmaceutical ingredient in the product. Identifies the therapeutic compound responsible for the drug's pharmacological effect.
+    synonyms:
+      - API
+      - active substance
+      - pharmaceutical ingredient
+      
+  - name: manufacturer
+    expr: source.manufacturer
+    display_name: Manufacturer
+    comment: Name of the company that manufactures the drug product. Identifies the pharmaceutical company responsible for production, quality control, and regulatory compliance.
+    synonyms:
+      - pharma company
+      - drug manufacturer
+      - producer
+      
+  - name: therapeutic_area
+    expr: source.therapeutic_area
+    display_name: Therapeutic Area
+    comment: Medical therapeutic area targeted by the drug product. Categorizes the product by medical specialty and disease domain for therapeutic portfolio analysis.
+    synonyms:
+      - medical specialty
+      - therapy area
+      - disease domain
+      
+  - name: drug_class
+    expr: source.drug_class
+    display_name: Drug Class
+    comment: Pharmacological or therapeutic class of the drug product. Classifies the product by mechanism of action and therapeutic category for pharmacological analysis.
+    synonyms:
+      - pharmacological class
+      - therapeutic class
+      - drug category
+      
+  - name: molecule_type
+    expr: source.molecule_type
+    display_name: Molecule Type
+    comment: Type of molecule, such as small molecule or biologic, for the drug product. Distinguishes between traditional chemical drugs and biological therapeutic products.
+    synonyms:
+      - molecular type
+      - drug type
+      - molecule class
+      
+  - name: market
+    expr: source.market
+    display_name: Market
+    comment: Geographic or regulatory market in which the drug product is approved or sold. Identifies the regulatory jurisdiction and commercial market for the product.
+    synonyms:
+      - geographic market
+      - regulatory market
+      - sales region
+      
+  - name: product_presentation
+    expr: source.product_presentation
+    display_name: Product Presentation
+    comment: Description of how the product is presented, such as vial, prefilled syringe, or blister pack. Describes the physical packaging and delivery format.
+    synonyms:
+      - packaging format
+      - presentation type
+      - package form
+      
+  - name: approval_year
+    expr: source.approval_year
+    display_name: Approval Year
+    comment: Year in which the product received regulatory approval. Tracks the regulatory approval timeline and market entry date for the product.
+    synonyms:
+      - regulatory approval year
+      - launch year
+      - approval date
+      
+  - name: product_status
+    expr: source.product_status
+    display_name: Product Status
+    comment: Indicates the current regulatory or commercial status of the product. Tracks whether the product is approved, pending approval, withdrawn, or discontinued.
+    synonyms:
+      - regulatory status
+      - commercial status
+      - approval status
+      
+  - name: ingested_at
+    expr: source._ingested_at
+    display_name: Ingested At
+    comment: Timestamp recording when the product data was ingested into the system. Enables data freshness tracking and temporal analysis of data loads.
+    synonyms:
+      - load timestamp
+      - ingestion time
+      - data load date
+      
+  - name: dosage_form_id
+    expr: drug_dosage_forms.dosage_form_id
+    display_name: Dosage Form ID
+    comment: Unique identifier for the dosage form record. Serves as the primary business key for dosage form identification and tracking.
+    synonyms:
+      - form identifier
+      - dosage form key
+      
+  - name: dosage_form
+    expr: drug_dosage_forms.dosage_form
+    display_name: Dosage Form
+    comment: Describes the physical form in which the drug is administered, such as tablet or injection. Categorizes the pharmaceutical formulation type.
+    synonyms:
+      - formulation type
+      - administration form
+      - pharmaceutical form
+      
+  - name: strength
+    expr: drug_dosage_forms.strength
+    display_name: Strength
+    comment: Indicates the concentration or strength of the drug in the dosage form. Specifies the active ingredient quantity per unit dose.
+    synonyms:
+      - drug strength
+      - concentration
+      - potency
+      
+  - name: route_of_administration
+    expr: drug_dosage_forms.route_of_administration
+    display_name: Route of Administration
+    comment: Specifies the route by which the drug is administered to a patient. Identifies the delivery method such as oral, intravenous, subcutaneous, or topical.
+    synonyms:
+      - administration route
+      - delivery route
+      - administration method
+      
+  - name: dosage_form_ingested_at
+    expr: drug_dosage_forms._ingested_at
+    display_name: Dosage Form Ingested At
+    comment: Timestamp recording when the dosage form data was ingested into the system. Enables data freshness tracking and temporal analysis.
+    synonyms:
+      - dosage form load time
+      - form ingestion timestamp
+      
+  - name: indication_id
+    expr: drug_indications.indication_id
+    display_name: Indication ID
+    comment: Unique identifier for the drug indication record. Serves as the primary business key for indication identification and tracking.
+    synonyms:
+      - indication identifier
+      - indication key
+      
+  - name: indication_name
+    expr: drug_indications.indication_name
+    display_name: Indication Name
+    comment: Name of the medical condition or indication for which the drug is used. Identifies the approved therapeutic use case.
+    synonyms:
+      - medical condition
+      - therapeutic indication
+      - approved use
+      
+  - name: indication_category
+    expr: drug_indications.indication_category
+    display_name: Indication Category
+    comment: Category or classification of the drug indication. Groups indications by therapeutic area or disease category for analytical purposes.
+    synonyms:
+      - indication class
+      - disease category
+      - therapeutic category
+      
+  - name: evidence_level
+    expr: drug_indications.evidence_level
+    display_name: Evidence Level
+    comment: Indicates the level of clinical evidence supporting the indication. Categorizes the strength of clinical trial evidence and regulatory support.
+    synonyms:
+      - clinical evidence level
+      - evidence strength
+      - proof level
+      
+  - name: indication_ingested_at
+    expr: drug_indications._ingested_at
+    display_name: Indication Ingested At
+    comment: Timestamp recording when the indication data was ingested into the system. Enables data freshness tracking and temporal analysis.
+    synonyms:
+      - indication load time
+      - indication ingestion timestamp
+      
+  - name: safety_id
+    expr: drug_safety_information.safety_id
+    display_name: Safety ID
+    comment: Unique identifier for the drug safety information record. Serves as the primary business key for safety record identification and tracking.
+    synonyms:
+      - safety identifier
+      - safety record key
+      
+  - name: safety_type
+    expr: drug_safety_information.safety_type
+    display_name: Safety Type
+    comment: Type of safety information, such as warning, precaution, or contraindication. Categorizes the nature of the safety concern for risk classification.
+    synonyms:
+      - safety category
+      - risk type
+      - warning type
+      
+  - name: severity
+    expr: drug_safety_information.severity
+    display_name: Severity
+    comment: Indicates the severity level of the safety risk. Categorizes the risk level for prioritization and risk management purposes.
+    synonyms:
+      - risk severity
+      - severity level
+      - risk level
+      
+  - name: safety_ingested_at
+    expr: drug_safety_information._ingested_at
+    display_name: Safety Ingested At
+    comment: Timestamp recording when the safety information data was ingested into the system. Enables data freshness tracking and temporal analysis.
+    synonyms:
+      - safety load time
+      - safety ingestion timestamp
+
+measures:
+  - name: total_drug_products
+    expr: COUNT(DISTINCT source.product_id)
+    display_name: Total Drug Products
+    comment: Total count of distinct drug products in the pharmaceutical portfolio. This metric provides the overall product count for portfolio size analysis and product tracking.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - product count
+      - number of products
+      - drug product total
+      
+  - name: total_dosage_forms
+    expr: COUNT(DISTINCT drug_dosage_forms.dosage_form_id)
+    display_name: Total Dosage Forms
+    comment: Total count of distinct dosage form configurations across all drug products. This metric provides the overall dosage form count for formulation analysis and pharmaceutical development tracking.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - dosage form count
+      - formulation count
+      - number of dosage forms
+      
+  - name: total_indications
+    expr: COUNT(DISTINCT drug_indications.indication_id)
+    display_name: Total Indications
+    comment: Total count of distinct drug indications across all drug products. This metric provides the overall indication count for therapeutic coverage analysis and regulatory approval tracking.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - indication count
+      - number of indications
+      - therapeutic indication total
+      
+  - name: total_safety_records
+    expr: COUNT(DISTINCT drug_safety_information.safety_id)
+    display_name: Total Safety Records
+    comment: Total count of distinct safety information records across all drug products. This metric provides the overall safety record count for pharmacovigilance analysis and risk management tracking.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - safety record count
+      - number of safety records
+      - safety information total
+      
+  - name: products_with_multiple_dosage_forms
+    expr: COUNT(DISTINCT CASE WHEN drug_dosage_forms.dosage_form_id IS NOT NULL THEN source.product_id END)
+    display_name: Products with Multiple Dosage Forms
+    comment: Count of distinct drug products that have at least one dosage form configuration. This metric identifies products with formulation options for patient convenience and therapeutic flexibility analysis.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - products with dosage forms
+      - multi-form products
+      
+  - name: products_with_multiple_indications
+    expr: COUNT(DISTINCT CASE WHEN drug_indications.indication_id IS NOT NULL THEN source.product_id END)
+    display_name: Products with Multiple Indications
+    comment: Count of distinct drug products that have at least one approved indication. This metric identifies products with therapeutic applications for portfolio value and market opportunity analysis.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - products with indications
+      - multi-indication products
+      
+  - name: products_with_high_severity_safety_records
+    expr: COUNT(DISTINCT CASE WHEN UPPER(drug_safety_information.severity) = 'HIGH' THEN source.product_id END)
+    display_name: Products with High Severity Safety Records
+    comment: Count of distinct drug products that have at least one high severity safety record. This metric identifies products requiring enhanced pharmacovigilance and risk management attention.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - high risk products
+      - products with severe warnings
+      
+  - name: average_dosage_forms_per_product
+    expr: ROUND(CAST(COUNT(DISTINCT drug_dosage_forms.dosage_form_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)
+    display_name: Average Dosage Forms per Product
+    comment: Average number of dosage form configurations per drug product. This metric provides insight into formulation diversity and product line complexity.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg dosage forms
+      - mean formulations per product
+      
+  - name: average_indications_per_product
+    expr: ROUND(CAST(COUNT(DISTINCT drug_indications.indication_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)
+    display_name: Average Indications per Product
+    comment: Average number of approved indications per drug product. This metric provides insight into therapeutic breadth and regulatory approval scope.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg indications
+      - mean indications per product
+      
+  - name: average_safety_records_per_product
+    expr: ROUND(CAST(COUNT(DISTINCT drug_safety_information.safety_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)
+    display_name: Average Safety Records per Product
+    comment: Average number of safety records per drug product. This metric provides insight into safety profile complexity and pharmacovigilance burden.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg safety records
+      - mean safety records per product
