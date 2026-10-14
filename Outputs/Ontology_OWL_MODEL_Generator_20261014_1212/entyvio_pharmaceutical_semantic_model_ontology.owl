@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:ont="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/"
+    xml:base="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/">
+
+    <!-- ========================================
+         Ontology Header
+         ======================================== -->
+
+    <owl:Ontology rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/">
+        <rdfs:label>Entyvio Pharmaceutical Semantic Model</rdfs:label>
+        <rdfs:comment>Comprehensive semantic model for Entyvio pharmaceutical data covering drug products, dosage forms, indications, and safety information. This model enables analytical queries across drug product lifecycle, therapeutic applications, safety profiles, and regulatory compliance tracking within the healthcare domain.</rdfs:comment>
+    </owl:Ontology>
+
+    <!--
+        Source: osi_semantic_model_process_322.yaml
+        Warehouse: entyvio_bronze
+        Classes: 4 | Data properties: 120 | Object properties: 6 | Data bindings: 4
+    -->
+
+    <!-- ========================================
+         Annotation Property Declarations
+         ======================================== -->
+
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/icon"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/iconCode"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/color"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/propertyType"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/isIdentifier"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/isPII"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/unit"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/enumValues"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/cardinality"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/fromEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/toEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/joinKey"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/sourceRelationship"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/relationshipAttributeOf"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/attributeType"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/boundClass"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/boundEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/source"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/table"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/columnMapping"/>
+
+    <owl:Class rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DataBinding">
+        <rdfs:label>DataBinding</rdfs:label>
+    </owl:Class>
+
+    <!-- ========================================
+         Entity Types (Classes)
+         ======================================== -->
+
+    <owl:Class rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct">
+        <rdfs:label>DrugProduct</rdfs:label>
+        <rdfs:comment>Central dataset containing comprehensive drug product information including commercial branding, generic names, active ingredients, manufacturer details, therapeutic classification, molecule types, market information, product presentation, regulatory approval years, and current product status.</rdfs:comment>
+        <ont:icon>💊</ont:icon>
+        <ont:iconCode>U+1F48A</ont:iconCode>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm">
+        <rdfs:label>DrugDosageForm</rdfs:label>
+        <rdfs:comment>Dataset containing detailed drug dosage form configurations including dosage form types, drug strength specifications, routes of administration, and packaging descriptions.</rdfs:comment>
+        <ont:icon>💉</ont:icon>
+        <ont:iconCode>U+1F489</ont:iconCode>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication">
+        <rdfs:label>DrugIndication</rdfs:label>
+        <rdfs:comment>Dataset containing drug indication information including indication names, categories, detailed descriptions, and clinical evidence levels.</rdfs:comment>
+        <ont:icon>🏥</ont:icon>
+        <ont:iconCode>U+1F3E5</ont:iconCode>
+        <ont:color>#00B7C3</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation">
+        <rdfs:label>DrugSafetyInformation</rdfs:label>
+        <rdfs:comment>Dataset containing drug safety information records including safety types, safety text descriptions, severity levels, and source identifiers.</rdfs:comment>
+        <ont:icon>⚠️</ont:icon>
+        <ont:iconCode>U+26A0</ont:iconCode>
+        <ont:color>#D83B01</ont:color>
+    </owl:Class>
+
+    <!-- ========================================
+         Data Properties
+         ======================================== -->
+
+    <!-- DrugProduct properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_productId">
+        <rdfs:label>productId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug product record. Serves as the primary business key for product identification and tracking across the pharmaceutical data ecosystem.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information. This field enables relationship traversal across the pharmaceutical data model.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_brandName">
+        <rdfs:label>brandName</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Commercial brand name under which the drug product is marketed. Represents the trademarked product name used in marketing, prescribing, and patient communication.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_genericName">
+        <rdfs:label>genericName</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Non-proprietary generic name of the drug product. Represents the standardized scientific name used in regulatory filings and clinical documentation.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_activeIngredient">
+        <rdfs:label>activeIngredient</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the active pharmaceutical ingredient in the product. Identifies the therapeutic compound responsible for the drug&apos;s pharmacological effect.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_manufacturer">
+        <rdfs:label>manufacturer</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the company that manufactures the drug product. Identifies the pharmaceutical company responsible for production, quality control, and regulatory compliance.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_therapeuticArea">
+        <rdfs:label>therapeuticArea</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Medical therapeutic area targeted by the drug product. Categorizes the product by medical specialty and disease domain for therapeutic portfolio analysis.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_drugClass">
+        <rdfs:label>drugClass</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Pharmacological or therapeutic class of the drug product. Classifies the product by mechanism of action and therapeutic category for pharmacological analysis.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_moleculeType">
+        <rdfs:label>moleculeType</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of molecule, such as small molecule or biologic, for the drug product. Distinguishes between traditional chemical drugs and biological therapeutic products.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_market">
+        <rdfs:label>market</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Geographic or regulatory market in which the drug product is approved or sold. Identifies the regulatory jurisdiction and commercial market for the product.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_productPresentation">
+        <rdfs:label>productPresentation</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Description of how the product is presented, such as vial, prefilled syringe, or blister pack. Describes the physical packaging and delivery format.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_approvalYear">
+        <rdfs:label>approvalYear</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Year in which the product received regulatory approval. Tracks the regulatory approval timeline and market entry date for the product.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_productStatus">
+        <rdfs:label>productStatus</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current regulatory or commercial status of the product. Tracks whether the product is approved, pending approval, withdrawn, or discontinued.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_sourceFile">
+        <rdfs:label>sourceFile</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name or path of the source file from which the product data was ingested. Provides data lineage and traceability for audit and data quality purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_ingestedAt">
+        <rdfs:label>ingestedAt</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the product data was ingested into the system. Enables data freshness tracking and temporal analysis of data loads.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_ingestionMethod">
+        <rdfs:label>ingestionMethod</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the technical method or process used to ingest the product data. Documents the ETL process and data integration approach for operational tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugDosageForm properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_dosageFormId">
+        <rdfs:label>dosageFormId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the dosage form record. Serves as the primary business key for dosage form identification and tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the drug associated with this dosage form. Links this dosage form to the parent drug product and enables relationship traversal.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_dosageForm">
+        <rdfs:label>dosageForm</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Describes the physical form in which the drug is administered, such as tablet or injection. Categorizes the pharmaceutical formulation type.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_strength">
+        <rdfs:label>strength</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the concentration or strength of the drug in the dosage form. Specifies the active ingredient quantity per unit dose.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_routeOfAdministration">
+        <rdfs:label>routeOfAdministration</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Specifies the route by which the drug is administered to a patient. Identifies the delivery method such as oral, intravenous, subcutaneous, or topical.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_packageDescription">
+        <rdfs:label>packageDescription</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text description of the packaging and presentation of the dosage form. Describes the commercial packaging configuration and unit presentation.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_sourceFile">
+        <rdfs:label>sourceFile</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name or path of the source file from which the dosage form data was ingested. Provides data lineage and traceability for audit purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_ingestedAt">
+        <rdfs:label>ingestedAt</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the dosage form data was ingested into the system. Enables data freshness tracking and temporal analysis.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_ingestionMethod">
+        <rdfs:label>ingestionMethod</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the technical method or process used to ingest the dosage form data. Documents the ETL process for operational tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugIndication properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_indicationId">
+        <rdfs:label>indicationId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug indication record. Serves as the primary business key for indication identification and tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the drug associated with this indication. Links this indication to the parent drug product and enables relationship traversal.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_indicationName">
+        <rdfs:label>indicationName</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the medical condition or indication for which the drug is used. Identifies the approved therapeutic use case.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_indicationCategory">
+        <rdfs:label>indicationCategory</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Category or classification of the drug indication. Groups indications by therapeutic area or disease category for analytical purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_indicationDescription">
+        <rdfs:label>indicationDescription</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Detailed description of the medical indication and its clinical context. Provides comprehensive clinical information about the approved use case.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_evidenceLevel">
+        <rdfs:label>evidenceLevel</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the level of clinical evidence supporting the indication. Categorizes the strength of clinical trial evidence and regulatory support.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_sourceFile">
+        <rdfs:label>sourceFile</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name or path of the source file from which the indication data was ingested. Provides data lineage and traceability for audit purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_ingestedAt">
+        <rdfs:label>ingestedAt</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the indication data was ingested into the system. Enables data freshness tracking and temporal analysis.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_ingestionMethod">
+        <rdfs:label>ingestionMethod</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the technical method or process used to ingest the indication data. Documents the ETL process for operational tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugSafetyInformation properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_safetyId">
+        <rdfs:label>safetyId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug safety information record. Serves as the primary business key for safety record identification and tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the drug associated with this safety information. Links this safety record to the parent drug product and enables relationship traversal.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_safetyType">
+        <rdfs:label>safetyType</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of safety information, such as warning, precaution, or contraindication. Categorizes the nature of the safety concern for risk classification.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_safetyText">
+        <rdfs:label>safetyText</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Narrative text describing the specific safety warning or precaution. Provides detailed clinical safety information for healthcare professionals and patients.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_severity">
+        <rdfs:label>severity</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the severity level of the safety risk. Categorizes the risk level for prioritization and risk management purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_sourceId">
+        <rdfs:label>sourceId</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the source document or system from which the safety information was derived. Provides traceability to regulatory filings and safety databases.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_sourceFile">
+        <rdfs:label>sourceFile</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name or path of the source file from which the safety information data was ingested. Provides data lineage and traceability for audit purposes.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_ingestedAt">
+        <rdfs:label>ingestedAt</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the safety information data was ingested into the system. Enables data freshness tracking and temporal analysis.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_ingestionMethod">
+        <rdfs:label>ingestionMethod</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the technical method or process used to ingest the safety information data. Documents the ETL process for operational tracking.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ========================================
+         Object Properties (Relationships)
+         ======================================== -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugDosageForm">
+        <rdfs:label>hasDosageForm</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:comment>A drug product has one or more dosage forms</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugDosageForm</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_dosage_forms</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugDosageForm_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:comment>A dosage form belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugDosageForm"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:fromEntityId>drugDosageForm</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_dosage_forms</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugIndication">
+        <rdfs:label>hasIndication</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:comment>A drug product has one or more indications</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugIndication</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_indications</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugIndication_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:comment>An indication belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugIndication"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:fromEntityId>drugIndication</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_indications</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugSafetyInformation">
+        <rdfs:label>hasSafetyInformation</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:comment>A drug product has one or more safety information records</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugSafetyInformation</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_safety_information</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugSafetyInformation_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <rdfs:comment>A safety information record belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/drugProduct_has_drugSafetyInformation"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:fromEntityId>drugSafetyInformation</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_product_to_drug_safety_information</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- ========================================
+         Data Bindings
+         ======================================== -->
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/binding_drugProduct">
+        <ont:boundClass rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugProduct"/>
+        <ont:boundEntityId>drugProduct</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>entyvio_bronze.drug_product</ont:table>
+        <ont:columnMapping>productId=product_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>brandName=brand_name</ont:columnMapping>
+        <ont:columnMapping>genericName=generic_name</ont:columnMapping>
+        <ont:columnMapping>activeIngredient=active_ingredient</ont:columnMapping>
+        <ont:columnMapping>manufacturer=manufacturer</ont:columnMapping>
+        <ont:columnMapping>therapeuticArea=therapeutic_area</ont:columnMapping>
+        <ont:columnMapping>drugClass=drug_class</ont:columnMapping>
+        <ont:columnMapping>moleculeType=molecule_type</ont:columnMapping>
+        <ont:columnMapping>market=market</ont:columnMapping>
+        <ont:columnMapping>productPresentation=product_presentation</ont:columnMapping>
+        <ont:columnMapping>approvalYear=approval_year</ont:columnMapping>
+        <ont:columnMapping>productStatus=product_status</ont:columnMapping>
+        <ont:columnMapping>sourceFile=_source_file</ont:columnMapping>
+        <ont:columnMapping>ingestedAt=_ingested_at</ont:columnMapping>
+        <ont:columnMapping>ingestionMethod=_ingestion_method</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/binding_drugDosageForm">
+        <ont:boundClass rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugDosageForm"/>
+        <ont:boundEntityId>drugDosageForm</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>entyvio_bronze.drug_dosage_forms</ont:table>
+        <ont:columnMapping>dosageFormId=dosage_form_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>dosageForm=dosage_form</ont:columnMapping>
+        <ont:columnMapping>strength=strength</ont:columnMapping>
+        <ont:columnMapping>routeOfAdministration=route_of_administration</ont:columnMapping>
+        <ont:columnMapping>packageDescription=package_description</ont:columnMapping>
+        <ont:columnMapping>sourceFile=_source_file</ont:columnMapping>
+        <ont:columnMapping>ingestedAt=_ingested_at</ont:columnMapping>
+        <ont:columnMapping>ingestionMethod=_ingestion_method</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/binding_drugIndication">
+        <ont:boundClass rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugIndication"/>
+        <ont:boundEntityId>drugIndication</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>entyvio_bronze.drug_indications</ont:table>
+        <ont:columnMapping>indicationId=indication_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>indicationName=indication_name</ont:columnMapping>
+        <ont:columnMapping>indicationCategory=indication_category</ont:columnMapping>
+        <ont:columnMapping>indicationDescription=indication_description</ont:columnMapping>
+        <ont:columnMapping>evidenceLevel=evidence_level</ont:columnMapping>
+        <ont:columnMapping>sourceFile=_source_file</ont:columnMapping>
+        <ont:columnMapping>ingestedAt=_ingested_at</ont:columnMapping>
+        <ont:columnMapping>ingestionMethod=_ingestion_method</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/binding_drugSafetyInformation">
+        <ont:boundClass rdf:resource="http://example.org/ontology/entyvio-pharmaceutical-semantic-model/DrugSafetyInformation"/>
+        <ont:boundEntityId>drugSafetyInformation</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>entyvio_bronze.drug_safety_information</ont:table>
+        <ont:columnMapping>safetyId=safety_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>safetyType=safety_type</ont:columnMapping>
+        <ont:columnMapping>safetyText=safety_text</ont:columnMapping>
+        <ont:columnMapping>severity=severity</ont:columnMapping>
+        <ont:columnMapping>sourceId=source_id</ont:columnMapping>
+        <ont:columnMapping>sourceFile=_source_file</ont:columnMapping>
+        <ont:columnMapping>ingestedAt=_ingested_at</ont:columnMapping>
+        <ont:columnMapping>ingestionMethod=_ingestion_method</ont:columnMapping>
+    </ont:DataBinding>
+
+</rdf:RDF>
