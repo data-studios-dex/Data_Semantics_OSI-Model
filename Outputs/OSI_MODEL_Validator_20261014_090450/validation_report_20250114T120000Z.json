@@ -1,0 +1,84 @@
+{
+  "overall_validation_score": 92.3,
+  "accuracy_score": 95.0,
+  "efficiency_score": 85.0,
+  "completeness_score": 97.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "scoring_thresholds": {
+    "pass": "Overall score >= 95%, no High-severity issues",
+    "pass_with_warnings": "Overall score >= 85%, no High-severity issues",
+    "fail": "Overall score < 85% or any High-severity issue present"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Object Coverage",
+      "issue": "Product category reference (category_id) in PRODUCT table references a category entity that is not present as a separate dataset in the semantic model",
+      "recommendation": "Consider adding a CATEGORY dataset to the semantic model or document that category_id is a simple numeric code without a separate dimension table"
+    },
+    {
+      "severity": "Low",
+      "area": "Documentation Coverage",
+      "issue": "Product.brand field in glossary has no sample value ('-' placeholder), while semantic model treats it as a dimension",
+      "recommendation": "Ensure sample values are provided for all dimensional attributes to aid understanding and validation"
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Metadata/Technical Accuracy",
+      "issue": "Orders.tax_amount is marked as PII in both artifacts, but tax amounts are typically not considered personally identifiable information unless they can be linked to an individual's financial records",
+      "recommendation": "Review PII classification for tax_amount; consider reclassifying as sensitive financial data rather than PII, or document the specific regulatory requirement that classifies it as PII"
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Convention Consistency",
+      "issue": "Glossary uses 'ORDERS' (plural) while other tables use singular form (CUSTOMER, PRODUCT, SHIPMENT, PAYMENT). ORDER_ITEM uses singular with underscore separator",
+      "recommendation": "Standardize table naming convention to either all singular or all plural forms for consistency"
+    },
+    {
+      "severity": "Low",
+      "area": "Business Definition Accuracy",
+      "issue": "Glossary describes order_item.line_total as 'Monetary amount representing the total value of the line item after discounts' but does not provide the explicit formula. Semantic model provides the formula: 'Derived from quantity * unit_price * (1 - discount_pct / 100)'",
+      "recommendation": "Align the glossary description to include the explicit calculation formula for derived/calculated fields to ensure consistency"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Redundant Metadata / Repeated Definitions",
+      "issue": "Multiple metrics compute similar aggregations with minor variations (e.g., total_order_revenue, total_order_subtotal, total_tax_collected, total_shipping_revenue all follow the same SUM(orders.field) pattern)",
+      "recommendation": "Consider creating a parameterized base metric or reusable CTE that accepts the field name as a parameter to reduce code duplication"
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation",
+      "issue": "Several metrics have nearly identical descriptions and expressions differing only in the aggregated field (e.g., revenue_by_customer_segment, revenue_by_product, revenue_by_brand, revenue_by_order_status, revenue_by_payment_method all follow 'Total X grouped by Y' pattern)",
+      "recommendation": "Consolidate these into a generic 'revenue_by_dimension' metric pattern with dimension parameter, or create a shared base query template"
+    },
+    {
+      "severity": "Low",
+      "area": "Unnecessary Complexity / Structural Efficiency",
+      "issue": "Multiple metrics include CASE WHEN COUNT = 0 THEN 0 ELSE ... END logic for division-by-zero protection. This pattern is repeated across average_order_value, average_line_item_value, average_units_per_order_item, revenue_per_customer, orders_per_customer",
+      "recommendation": "Create a reusable SQL function or macro for safe division (e.g., SAFE_DIVIDE(numerator, denominator)) to eliminate repetitive CASE logic"
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability / Optimization Opportunities",
+      "issue": "Metrics like customer_lifetime_value, customer_revenue_rank, and revenue_per_customer all perform similar customer-level revenue aggregations with different output formats",
+      "recommendation": "Create a base customer_revenue_summary CTE or view that computes SUM(orders.total_amount) per customer once, then reference it in multiple metrics to avoid redundant computation"
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability / Optimization Opportunities",
+      "issue": "Metrics like product_revenue_rank and revenue_by_product both aggregate order_item.line_total by product with nearly identical joins and grouping",
+      "recommendation": "Create a base product_revenue_summary CTE or view that computes SUM(order_item.line_total) per product once, then reference it in multiple metrics"
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability / Optimization Opportunities",
+      "issue": "Time-series metrics (monthly_order_revenue, monthly_order_count, running_total_revenue) all use DATE_TRUNC or window functions on orders.order_date",
+      "recommendation": "Consider creating a date dimension table or reusable date-spine CTE to standardize time-series analysis and improve query performance"
+    }
+  ]
+}
