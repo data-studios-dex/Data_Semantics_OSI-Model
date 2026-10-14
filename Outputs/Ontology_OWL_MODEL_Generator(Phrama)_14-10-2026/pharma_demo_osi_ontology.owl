@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xml:base="http://example.org/ontology/pharma-demo-osi/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:ont="http://example.org/ontology/pharma-demo-osi/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:dcterms="http://purl.org/dc/terms/">
+
+    <!-- ================================================================ -->
+    <!-- Ontology Header                                                  -->
+    <!-- ================================================================ -->
+
+    <owl:Ontology rdf:about="http://example.org/ontology/pharma-demo-osi/">
+        <owl:versionIRI rdf:resource="http://example.org/ontology/pharma-demo-osi/1.0/"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <rdfs:label>Pharma Demo Osi</rdfs:label>
+        <rdfs:comment>Databricks Unity Catalog Metric View for Entyvio Pharmaceutical Semantic Model Generated from OSI Semantic Model version 1.0 Source: entyvio_pharmaceutical_semantic_model Catalog: pharma_demo Schema: entyvio_bronze This metric view provides comprehensive pharmaceutical analytics across drug products, dosage forms, indications, and safety information. The view is built on the drug_product dataset as the central spine, with joins to related datasets for multi-dimensional analysis. Relationships Implemented: - drug_product_to_drug_dosage_forms: One drug product may have multiple dosage forms - drug_product_to_drug_indications: One drug product may have multiple indications - drug_product_to_drug_safety_information: One drug product may have multiple safety records PII Mode: restricted - Technical and audit columns excluded from dimensions DEDUP Mode: off - Order-level aggregation measures not applicable to pharmaceutical domain Metrics Coverage: - Product metrics: total_drug_products, products by manufacturer/therapeutic area/drug class/molecule type/market/status/approval year - Dosage form metrics: total_dosage_forms, dosage forms by type/route of administration - Indication metrics: total_indications, indications by category/evidence level - Safety metrics: total_safety_records, safety records by type/severity - Cross-entity metrics: products with multiple dosage forms/indications, products with high severity safety records - Average metrics: average dosage forms/indications/safety records per product NOT REPRESENTED (domain-specific limitations): - E-commerce metrics (revenue, orders, customers, payments, shipments) are not applicable to pharmaceutical reference data - Transactional metrics require sales/prescription transaction data not present in this product catalog model</rdfs:comment>
+        <dcterms:source>pharma_demo_osi.yml</dcterms:source>
+        <ont:sourceFormat>Databricks Metric View</ont:sourceFormat>
+    </owl:Ontology>
+
+    <!--
+    Source file: pharma_demo_osi.yml
+    Detected format: Databricks Unity Catalog Metric View (version 1.1)
+    Excluded datasets: None
+    Icon choices: DrugProduct 💊, DrugDosageForm 💉, DrugIndication 🏥, DrugSafetyInformation 🚨
+    Classes: 4 | Data properties: 50 | Measure properties: 10 | Object properties: 6 | Data bindings: 4
+    Inferred: types 50 | identifiers 8 | cardinalities 3
+    -->
+
+    <!-- ================================================================ -->
+    <!-- Annotation Property Declarations                                 -->
+    <!-- ================================================================ -->
+
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/icon"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/iconCode"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/color"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/propertyType"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/isIdentifier"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/isPII"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/isMeasure"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/isDerived"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/expression"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/typeInferred"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/unit"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/enumValues"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/cardinality"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/cardinalitySource"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/fromEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/toEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/joinKey"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/sourceRelationship"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/sourceFormat"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/boundClass"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/boundEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/source"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/table"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/pharma-demo-osi/columnMapping"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#altLabel"/>
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/source"/>
+
+    <!-- ================================================================ -->
+    <!-- Entity Types (Classes)                                           -->
+    <!-- ================================================================ -->
+
+    <!-- Identifiers inferred from join keys and key naming. -->
+    <owl:Class rdf:about="http://example.org/ontology/pharma-demo-osi/DrugProduct">
+        <rdfs:label>DrugProduct</rdfs:label>
+        <rdfs:comment>Entity representing pharmaceutical drug products with comprehensive product information, regulatory details, and market characteristics.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/pharma-demo-osi/"/>
+        <ont:icon>💊</ont:icon>
+        <ont:iconCode>U+1F48A</ont:iconCode>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <!-- Identifiers inferred from join keys and key naming. -->
+    <owl:Class rdf:about="http://example.org/ontology/pharma-demo-osi/DrugDosageForm">
+        <rdfs:label>DrugDosageForm</rdfs:label>
+        <rdfs:comment>Entity representing pharmaceutical dosage form configurations including formulation type, strength, and route of administration.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/pharma-demo-osi/"/>
+        <ont:icon>💉</ont:icon>
+        <ont:iconCode>U+1F489</ont:iconCode>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <!-- Identifiers inferred from join keys and key naming. -->
+    <owl:Class rdf:about="http://example.org/ontology/pharma-demo-osi/DrugIndication">
+        <rdfs:label>DrugIndication</rdfs:label>
+        <rdfs:comment>Entity representing approved therapeutic indications for drug products with evidence level and categorization.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/pharma-demo-osi/"/>
+        <ont:icon>🏥</ont:icon>
+        <ont:iconCode>U+1F3E5</ont:iconCode>
+        <ont:color>#00B7C3</ont:color>
+    </owl:Class>
+
+    <!-- Identifiers inferred from join keys and key naming. -->
+    <owl:Class rdf:about="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation">
+        <rdfs:label>DrugSafetyInformation</rdfs:label>
+        <rdfs:comment>Entity representing safety information records for drug products including warnings, precautions, and risk severity levels.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/pharma-demo-osi/"/>
+        <ont:icon>🚨</ont:icon>
+        <ont:iconCode>U+1F6A8</ont:iconCode>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <!-- ================================================================ -->
+    <!-- Data Properties                                                  -->
+    <!-- ================================================================ -->
+
+    <!-- DrugProduct properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productId">
+        <rdfs:label>productId</rdfs:label>
+        <skos:prefLabel>Product ID</skos:prefLabel>
+        <skos:altLabel>product identifier</skos:altLabel>
+        <skos:altLabel>drug product id</skos:altLabel>
+        <skos:altLabel>product key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug product record. Serves as the primary business key for product identification and tracking across the pharmaceutical data ecosystem.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <skos:prefLabel>Drug ID</skos:prefLabel>
+        <skos:altLabel>drug identifier</skos:altLabel>
+        <skos:altLabel>drug key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_brandName">
+        <rdfs:label>brandName</rdfs:label>
+        <skos:prefLabel>Brand Name</skos:prefLabel>
+        <skos:altLabel>product brand</skos:altLabel>
+        <skos:altLabel>trade name</skos:altLabel>
+        <skos:altLabel>commercial name</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Commercial brand name under which the drug product is marketed. Represents the trademarked product name used in marketing, prescribing, and patient communication.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_genericName">
+        <rdfs:label>genericName</rdfs:label>
+        <skos:prefLabel>Generic Name</skos:prefLabel>
+        <skos:altLabel>scientific name</skos:altLabel>
+        <skos:altLabel>non-proprietary name</skos:altLabel>
+        <skos:altLabel>INN name</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Non-proprietary generic name of the drug product. Represents the standardized scientific name used in regulatory filings and clinical documentation.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_activeIngredient">
+        <rdfs:label>activeIngredient</rdfs:label>
+        <skos:prefLabel>Active Ingredient</skos:prefLabel>
+        <skos:altLabel>API</skos:altLabel>
+        <skos:altLabel>active substance</skos:altLabel>
+        <skos:altLabel>pharmaceutical ingredient</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the active pharmaceutical ingredient in the product. Identifies the therapeutic compound responsible for the drug&apos;s pharmacological effect.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_manufacturer">
+        <rdfs:label>manufacturer</rdfs:label>
+        <skos:prefLabel>Manufacturer</skos:prefLabel>
+        <skos:altLabel>pharma company</skos:altLabel>
+        <skos:altLabel>drug manufacturer</skos:altLabel>
+        <skos:altLabel>producer</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the company that manufactures the drug product. Identifies the pharmaceutical company responsible for production, quality control, and regulatory compliance.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_therapeuticArea">
+        <rdfs:label>therapeuticArea</rdfs:label>
+        <skos:prefLabel>Therapeutic Area</skos:prefLabel>
+        <skos:altLabel>medical specialty</skos:altLabel>
+        <skos:altLabel>therapy area</skos:altLabel>
+        <skos:altLabel>disease domain</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Medical therapeutic area targeted by the drug product. Categorizes the product by medical specialty and disease domain for therapeutic portfolio analysis.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_drugClass">
+        <rdfs:label>drugClass</rdfs:label>
+        <skos:prefLabel>Drug Class</skos:prefLabel>
+        <skos:altLabel>pharmacological class</skos:altLabel>
+        <skos:altLabel>therapeutic class</skos:altLabel>
+        <skos:altLabel>drug category</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Pharmacological or therapeutic class of the drug product. Classifies the product by mechanism of action and therapeutic category for pharmacological analysis.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_moleculeType">
+        <rdfs:label>moleculeType</rdfs:label>
+        <skos:prefLabel>Molecule Type</skos:prefLabel>
+        <skos:altLabel>molecular type</skos:altLabel>
+        <skos:altLabel>drug type</skos:altLabel>
+        <skos:altLabel>molecule class</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of molecule, such as small molecule or biologic, for the drug product. Distinguishes between traditional chemical drugs and biological therapeutic products.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_market">
+        <rdfs:label>market</rdfs:label>
+        <skos:prefLabel>Market</skos:prefLabel>
+        <skos:altLabel>geographic market</skos:altLabel>
+        <skos:altLabel>regulatory market</skos:altLabel>
+        <skos:altLabel>sales region</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Geographic or regulatory market in which the drug product is approved or sold. Identifies the regulatory jurisdiction and commercial market for the product.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productPresentation">
+        <rdfs:label>productPresentation</rdfs:label>
+        <skos:prefLabel>Product Presentation</skos:prefLabel>
+        <skos:altLabel>packaging format</skos:altLabel>
+        <skos:altLabel>presentation type</skos:altLabel>
+        <skos:altLabel>package form</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Description of how the product is presented, such as vial, prefilled syringe, or blister pack. Describes the physical packaging and delivery format.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_approvalYear">
+        <rdfs:label>approvalYear</rdfs:label>
+        <skos:prefLabel>Approval Year</skos:prefLabel>
+        <skos:altLabel>regulatory approval year</skos:altLabel>
+        <skos:altLabel>launch year</skos:altLabel>
+        <skos:altLabel>approval date</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Year in which the product received regulatory approval. Tracks the regulatory approval timeline and market entry date for the product.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productStatus">
+        <rdfs:label>productStatus</rdfs:label>
+        <skos:prefLabel>Product Status</skos:prefLabel>
+        <skos:altLabel>regulatory status</skos:altLabel>
+        <skos:altLabel>commercial status</skos:altLabel>
+        <skos:altLabel>approval status</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current regulatory or commercial status of the product. Tracks whether the product is approved, pending approval, withdrawn, or discontinued.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugProduct measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_totalDrugProducts">
+        <rdfs:label>totalDrugProducts</rdfs:label>
+        <skos:prefLabel>Total Drug Products</skos:prefLabel>
+        <skos:altLabel>product count</skos:altLabel>
+        <skos:altLabel>number of products</skos:altLabel>
+        <skos:altLabel>drug product total</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total count of distinct drug products in the pharmaceutical portfolio. This metric provides the overall product count for portfolio size analysis and product tracking.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT source.product_id)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_totalDosageForms">
+        <rdfs:label>totalDosageForms</rdfs:label>
+        <skos:prefLabel>Total Dosage Forms</skos:prefLabel>
+        <skos:altLabel>dosage form count</skos:altLabel>
+        <skos:altLabel>formulation count</skos:altLabel>
+        <skos:altLabel>number of dosage forms</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total count of distinct dosage form configurations across all drug products. This metric provides the overall dosage form count for formulation analysis and pharmaceutical development tracking.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT drug_dosage_forms.dosage_form_id)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_totalIndications">
+        <rdfs:label>totalIndications</rdfs:label>
+        <skos:prefLabel>Total Indications</skos:prefLabel>
+        <skos:altLabel>indication count</skos:altLabel>
+        <skos:altLabel>number of indications</skos:altLabel>
+        <skos:altLabel>therapeutic indication total</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total count of distinct drug indications across all drug products. This metric provides the overall indication count for therapeutic coverage analysis and regulatory approval tracking.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT drug_indications.indication_id)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_totalSafetyRecords">
+        <rdfs:label>totalSafetyRecords</rdfs:label>
+        <skos:prefLabel>Total Safety Records</skos:prefLabel>
+        <skos:altLabel>safety record count</skos:altLabel>
+        <skos:altLabel>number of safety records</skos:altLabel>
+        <skos:altLabel>safety information total</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total count of distinct safety information records across all drug products. This metric provides the overall safety record count for pharmacovigilance analysis and risk management tracking.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT drug_safety_information.safety_id)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productsWithMultipleDosageForms">
+        <rdfs:label>productsWithMultipleDosageForms</rdfs:label>
+        <skos:prefLabel>Products with Multiple Dosage Forms</skos:prefLabel>
+        <skos:altLabel>products with dosage forms</skos:altLabel>
+        <skos:altLabel>multi-form products</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Count of distinct drug products that have at least one dosage form configuration. This metric identifies products with formulation options for patient convenience and therapeutic flexibility analysis.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT CASE WHEN drug_dosage_forms.dosage_form_id IS NOT NULL THEN source.product_id END)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productsWithMultipleIndications">
+        <rdfs:label>productsWithMultipleIndications</rdfs:label>
+        <skos:prefLabel>Products with Multiple Indications</skos:prefLabel>
+        <skos:altLabel>products with indications</skos:altLabel>
+        <skos:altLabel>multi-indication products</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Count of distinct drug products that have at least one approved indication. This metric identifies products with therapeutic applications for portfolio value and market opportunity analysis.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT CASE WHEN drug_indications.indication_id IS NOT NULL THEN source.product_id END)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_productsWithHighSeveritySafetyRecords">
+        <rdfs:label>productsWithHighSeveritySafetyRecords</rdfs:label>
+        <skos:prefLabel>Products with High Severity Safety Records</skos:prefLabel>
+        <skos:altLabel>high risk products</skos:altLabel>
+        <skos:altLabel>products with severe warnings</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Count of distinct drug products that have at least one high severity safety record. This metric identifies products requiring enhanced pharmacovigilance and risk management attention.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>COUNT(DISTINCT CASE WHEN UPPER(drug_safety_information.severity) = &apos;HIGH&apos; THEN source.product_id END)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_averageDosageFormsPerProduct">
+        <rdfs:label>averageDosageFormsPerProduct</rdfs:label>
+        <skos:prefLabel>Average Dosage Forms per Product</skos:prefLabel>
+        <skos:altLabel>avg dosage forms</skos:altLabel>
+        <skos:altLabel>mean formulations per product</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Average number of dosage form configurations per drug product. This metric provides insight into formulation diversity and product line complexity.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>ROUND(CAST(COUNT(DISTINCT drug_dosage_forms.dosage_form_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_averageIndicationsPerProduct">
+        <rdfs:label>averageIndicationsPerProduct</rdfs:label>
+        <skos:prefLabel>Average Indications per Product</skos:prefLabel>
+        <skos:altLabel>avg indications</skos:altLabel>
+        <skos:altLabel>mean indications per product</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Average number of approved indications per drug product. This metric provides insight into therapeutic breadth and regulatory approval scope.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>ROUND(CAST(COUNT(DISTINCT drug_indications.indication_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_averageSafetyRecordsPerProduct">
+        <rdfs:label>averageSafetyRecordsPerProduct</rdfs:label>
+        <skos:prefLabel>Average Safety Records per Product</skos:prefLabel>
+        <skos:altLabel>avg safety records</skos:altLabel>
+        <skos:altLabel>mean safety records per product</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Average number of safety records per drug product. This metric provides insight into safety profile complexity and pharmacovigilance burden.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:expression>ROUND(CAST(COUNT(DISTINCT drug_safety_information.safety_id) AS DOUBLE) / NULLIF(COUNT(DISTINCT source.product_id), 0), 2)</ont:expression>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugDosageForm properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_dosageFormId">
+        <rdfs:label>dosageFormId</rdfs:label>
+        <skos:prefLabel>Dosage Form ID</skos:prefLabel>
+        <skos:altLabel>form identifier</skos:altLabel>
+        <skos:altLabel>dosage form key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the dosage form record. Serves as the primary business key for dosage form identification and tracking.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <skos:prefLabel>Drug ID</skos:prefLabel>
+        <skos:altLabel>drug identifier</skos:altLabel>
+        <skos:altLabel>drug key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_dosageForm">
+        <rdfs:label>dosageForm</rdfs:label>
+        <skos:prefLabel>Dosage Form</skos:prefLabel>
+        <skos:altLabel>formulation type</skos:altLabel>
+        <skos:altLabel>administration form</skos:altLabel>
+        <skos:altLabel>pharmaceutical form</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Describes the physical form in which the drug is administered, such as tablet or injection. Categorizes the pharmaceutical formulation type.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_strength">
+        <rdfs:label>strength</rdfs:label>
+        <skos:prefLabel>Strength</skos:prefLabel>
+        <skos:altLabel>drug strength</skos:altLabel>
+        <skos:altLabel>concentration</skos:altLabel>
+        <skos:altLabel>potency</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the concentration or strength of the drug in the dosage form. Specifies the active ingredient quantity per unit dose.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_routeOfAdministration">
+        <rdfs:label>routeOfAdministration</rdfs:label>
+        <skos:prefLabel>Route of Administration</skos:prefLabel>
+        <skos:altLabel>administration route</skos:altLabel>
+        <skos:altLabel>delivery route</skos:altLabel>
+        <skos:altLabel>administration method</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Specifies the route by which the drug is administered to a patient. Identifies the delivery method such as oral, intravenous, subcutaneous, or topical.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugIndication properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_indicationId">
+        <rdfs:label>indicationId</rdfs:label>
+        <skos:prefLabel>Indication ID</skos:prefLabel>
+        <skos:altLabel>indication identifier</skos:altLabel>
+        <skos:altLabel>indication key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug indication record. Serves as the primary business key for indication identification and tracking.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <skos:prefLabel>Drug ID</skos:prefLabel>
+        <skos:altLabel>drug identifier</skos:altLabel>
+        <skos:altLabel>drug key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_indicationName">
+        <rdfs:label>indicationName</rdfs:label>
+        <skos:prefLabel>Indication Name</skos:prefLabel>
+        <skos:altLabel>medical condition</skos:altLabel>
+        <skos:altLabel>therapeutic indication</skos:altLabel>
+        <skos:altLabel>approved use</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the medical condition or indication for which the drug is used. Identifies the approved therapeutic use case.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_indicationCategory">
+        <rdfs:label>indicationCategory</rdfs:label>
+        <skos:prefLabel>Indication Category</skos:prefLabel>
+        <skos:altLabel>indication class</skos:altLabel>
+        <skos:altLabel>disease category</skos:altLabel>
+        <skos:altLabel>therapeutic category</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Category or classification of the drug indication. Groups indications by therapeutic area or disease category for analytical purposes.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_evidenceLevel">
+        <rdfs:label>evidenceLevel</rdfs:label>
+        <skos:prefLabel>Evidence Level</skos:prefLabel>
+        <skos:altLabel>clinical evidence level</skos:altLabel>
+        <skos:altLabel>evidence strength</skos:altLabel>
+        <skos:altLabel>proof level</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the level of clinical evidence supporting the indication. Categorizes the strength of clinical trial evidence and regulatory support.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DrugSafetyInformation properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_safetyId">
+        <rdfs:label>safetyId</rdfs:label>
+        <skos:prefLabel>Safety ID</skos:prefLabel>
+        <skos:altLabel>safety identifier</skos:altLabel>
+        <skos:altLabel>safety record key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Unique identifier for the drug safety information record. Serves as the primary business key for safety record identification and tracking.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_drugId">
+        <rdfs:label>drugId</rdfs:label>
+        <skos:prefLabel>Drug ID</skos:prefLabel>
+        <skos:altLabel>drug identifier</skos:altLabel>
+        <skos:altLabel>drug key</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Identifier for the underlying drug associated with the product. Links this product to related dosage forms, indications, and safety information.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_safetyType">
+        <rdfs:label>safetyType</rdfs:label>
+        <skos:prefLabel>Safety Type</skos:prefLabel>
+        <skos:altLabel>safety category</skos:altLabel>
+        <skos:altLabel>risk type</skos:altLabel>
+        <skos:altLabel>warning type</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of safety information, such as warning, precaution, or contraindication. Categorizes the nature of the safety concern for risk classification.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_severity">
+        <rdfs:label>severity</rdfs:label>
+        <skos:prefLabel>Severity</skos:prefLabel>
+        <skos:altLabel>risk severity</skos:altLabel>
+        <skos:altLabel>severity level</skos:altLabel>
+        <skos:altLabel>risk level</skos:altLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the severity level of the safety risk. Categorizes the risk level for prioritization and risk management purposes.</rdfs:comment>
+        <ont:typeInferred rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:typeInferred>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ================================================================ -->
+    <!-- Object Properties (Relationships)                                -->
+    <!-- ================================================================ -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugDosageForm_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:comment>A drug dosage form belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugDosageForm"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugDosageForm</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_dosage_forms</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugDosageForm">
+        <rdfs:label>hasDrugDosageForm</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <rdfs:comment>A drug product has one or more drug dosage forms</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugDosageForm_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugDosageForm</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_dosage_forms</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugIndication_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:comment>A drug indication belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugIndication"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugIndication</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_indications</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugIndication">
+        <rdfs:label>hasDrugIndication</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <rdfs:comment>A drug product has one or more drug indications</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugIndication_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugIndication</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_indications</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_belongs_to_drugProduct">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:comment>A drug safety information record belongs to exactly one drug product</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugSafetyInformation"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugSafetyInformation</ont:fromEntityId>
+        <ont:toEntityId>drugProduct</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_safety_information</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/pharma-demo-osi/drugProduct_has_drugSafetyInformation">
+        <rdfs:label>hasDrugSafetyInformation</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <rdfs:comment>A drug product has one or more drug safety information records</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/pharma-demo-osi/drugSafetyInformation_belongs_to_drugProduct"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>inferred-keys</ont:cardinalitySource>
+        <ont:fromEntityId>drugProduct</ont:fromEntityId>
+        <ont:toEntityId>drugSafetyInformation</ont:toEntityId>
+        <ont:joinKey>drug_id=drug_id</ont:joinKey>
+        <ont:sourceRelationship>drug_safety_information</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- ================================================================ -->
+    <!-- Data Bindings                                                    -->
+    <!-- ================================================================ -->
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/pharma-demo-osi/binding_drugProduct">
+        <ont:boundClass rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugProduct"/>
+        <ont:boundEntityId>drugProduct</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>pharma_demo.entyvio_bronze.drug_product</ont:table>
+        <ont:columnMapping>productId=product_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>brandName=brand_name</ont:columnMapping>
+        <ont:columnMapping>genericName=generic_name</ont:columnMapping>
+        <ont:columnMapping>activeIngredient=active_ingredient</ont:columnMapping>
+        <ont:columnMapping>manufacturer=manufacturer</ont:columnMapping>
+        <ont:columnMapping>therapeuticArea=therapeutic_area</ont:columnMapping>
+        <ont:columnMapping>drugClass=drug_class</ont:columnMapping>
+        <ont:columnMapping>moleculeType=molecule_type</ont:columnMapping>
+        <ont:columnMapping>market=market</ont:columnMapping>
+        <ont:columnMapping>productPresentation=product_presentation</ont:columnMapping>
+        <ont:columnMapping>approvalYear=approval_year</ont:columnMapping>
+        <ont:columnMapping>productStatus=product_status</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/pharma-demo-osi/binding_drugDosageForm">
+        <ont:boundClass rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugDosageForm"/>
+        <ont:boundEntityId>drugDosageForm</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>pharma_demo.entyvio_bronze.drug_dosage_forms</ont:table>
+        <ont:columnMapping>dosageFormId=dosage_form_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>dosageForm=dosage_form</ont:columnMapping>
+        <ont:columnMapping>strength=strength</ont:columnMapping>
+        <ont:columnMapping>routeOfAdministration=route_of_administration</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/pharma-demo-osi/binding_drugIndication">
+        <ont:boundClass rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugIndication"/>
+        <ont:boundEntityId>drugIndication</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>pharma_demo.entyvio_bronze.drug_indications</ont:table>
+        <ont:columnMapping>indicationId=indication_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>indicationName=indication_name</ont:columnMapping>
+        <ont:columnMapping>indicationCategory=indication_category</ont:columnMapping>
+        <ont:columnMapping>evidenceLevel=evidence_level</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/pharma-demo-osi/binding_drugSafetyInformation">
+        <ont:boundClass rdf:resource="http://example.org/ontology/pharma-demo-osi/DrugSafetyInformation"/>
+        <ont:boundEntityId>drugSafetyInformation</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>pharma_demo.entyvio_bronze.drug_safety_information</ont:table>
+        <ont:columnMapping>safetyId=safety_id</ont:columnMapping>
+        <ont:columnMapping>drugId=drug_id</ont:columnMapping>
+        <ont:columnMapping>safetyType=safety_type</ont:columnMapping>
+        <ont:columnMapping>severity=severity</ont:columnMapping>
+    </ont:DataBinding>
+
+</rdf:RDF>
