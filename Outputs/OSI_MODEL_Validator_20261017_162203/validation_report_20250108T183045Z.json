@@ -1,0 +1,133 @@
+{
+  "overall_validation_score": 92.5,
+  "accuracy_score": 95.0,
+  "efficiency_score": 85.0,
+  "completeness_score": 97.5,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Dataset Coverage",
+      "issue": "All 18 tables from the glossary have corresponding datasets in the semantic model",
+      "recommendation": "No action required - full coverage achieved"
+    },
+    {
+      "severity": "Low",
+      "area": "Column Coverage",
+      "issue": "All 172 columns documented in the glossary are represented in the semantic model datasets",
+      "recommendation": "No action required - full coverage achieved"
+    },
+    {
+      "severity": "Low",
+      "area": "Relationship Coverage",
+      "issue": "All documented foreign key relationships in the glossary are represented in the semantic model relationships section",
+      "recommendation": "No action required - comprehensive relationship mapping"
+    },
+    {
+      "severity": "Low",
+      "area": "Metric Coverage",
+      "issue": "50 metrics defined covering revenue, order counts, customer metrics, delivery performance, agent payouts, promotions, reviews, and support tickets",
+      "recommendation": "Consider adding metrics for restaurant performance by category and time-based trend analysis"
+    },
+    {
+      "severity": "Medium",
+      "area": "Documentation Coverage",
+      "issue": "All datasets have business names and descriptions; all fields have business names, descriptions, and types",
+      "recommendation": "Minor: Some metric descriptions could be more explicit about filter conditions and edge cases"
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Type Consistency",
+      "issue": "All data types in the semantic model (BIGINT, STRING, DOUBLE, BOOLEAN, DATE, TIMESTAMP) match the glossary types exactly",
+      "recommendation": "No action required - perfect type alignment"
+    },
+    {
+      "severity": "Low",
+      "area": "PII Flag Consistency",
+      "issue": "All 27 PII fields identified in the glossary are correctly marked with PII constraints in the semantic model",
+      "recommendation": "No action required - complete PII coverage and accuracy"
+    },
+    {
+      "severity": "Low",
+      "area": "Primary Key Accuracy",
+      "issue": "All primary keys defined in the semantic model match the glossary documentation",
+      "recommendation": "No action required - primary key definitions are accurate"
+    },
+    {
+      "severity": "Low",
+      "area": "Foreign Key Accuracy",
+      "issue": "All foreign key relationships in the semantic model correspond to actual FK constraints documented in the glossary",
+      "recommendation": "No action required - relationship integrity validated"
+    },
+    {
+      "severity": "Medium",
+      "area": "Constraint Accuracy",
+      "issue": "The semantic model marks orders.tax, orders.tip, orders.total_amount, and orders.payment_method as PII, which matches the glossary; however, the glossary does not explicitly mark these as NOT NULL, while the semantic model does not declare NOT NULL constraints for these fields",
+      "recommendation": "Review whether tax, tip, and total_amount should have NOT NULL constraints for data quality"
+    },
+    {
+      "severity": "Low",
+      "area": "Join Cardinality Accuracy",
+      "issue": "All relationship cardinalities (one-to-one, one-to-many, many-to-one) stated in the semantic model align with PK/FK patterns in the glossary",
+      "recommendation": "No action required - cardinality definitions are correct"
+    },
+    {
+      "severity": "Low",
+      "area": "Aggregation Accuracy",
+      "issue": "Metric aggregation functions (SUM, AVG, COUNT) are appropriate for the field types and business meanings",
+      "recommendation": "No action required - aggregation logic is sound"
+    },
+    {
+      "severity": "Low",
+      "area": "Business Definition Accuracy",
+      "issue": "Business terms and descriptions in the semantic model are consistent with the glossary definitions",
+      "recommendation": "No action required - semantic alignment is strong"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Redundant Metric Definitions",
+      "issue": "Multiple metrics calculate similar aggregations with only filter differences (e.g., total_order_count, delivered_order_count, cancelled_order_count)",
+      "recommendation": "Consider parameterizing order count metrics by status to reduce redundancy"
+    },
+    {
+      "severity": "Medium",
+      "area": "Repeated SQL Patterns",
+      "issue": "Many metrics repeat the same WHERE clause filter pattern (e.g., WHERE orders.order_status = 'Delivered')",
+      "recommendation": "Define a reusable base view or CTE for delivered orders to simplify metric definitions"
+    },
+    {
+      "severity": "Low",
+      "area": "Documentation Redundancy",
+      "issue": "Some field descriptions in the semantic model repeat information already present in the business name",
+      "recommendation": "Minor optimization: streamline descriptions to focus on usage guidance rather than repeating the business name"
+    },
+    {
+      "severity": "Medium",
+      "area": "Metric Complexity",
+      "issue": "Several metrics (e.g., average_order_value, orders_per_customer, revenue_per_customer) include CASE statements to handle division by zero",
+      "recommendation": "Consider defining a standard division-by-zero handling pattern or macro to improve maintainability"
+    },
+    {
+      "severity": "Low",
+      "area": "Relationship Documentation",
+      "issue": "The ai_context instructions section provides comprehensive join guidance, but some join patterns are repeated in both the instructions and the relationships section",
+      "recommendation": "Minor: consolidate join guidance to avoid duplication between ai_context and relationships"
+    },
+    {
+      "severity": "Medium",
+      "area": "Reusability Opportunities",
+      "issue": "Metrics for agent payouts (total_agent_payout, total_agent_base_pay, total_agent_distance_bonus, total_agent_tips) all filter by payout_status = 'Completed'",
+      "recommendation": "Define a base metric or view for completed payouts to enable reuse across related metrics"
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Consistency",
+      "issue": "Metric naming follows a consistent pattern (total_, average_, _count, _per_) which aids discoverability",
+      "recommendation": "No action required - naming conventions are clear and consistent"
+    }
+  ]
+}
