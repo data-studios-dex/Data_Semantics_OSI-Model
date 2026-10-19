@@ -1,0 +1,3006 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xml:base="http://example.org/ontology/food-delivery-semantic-model/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:ont="http://example.org/ontology/food-delivery-semantic-model/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:dcterms="http://purl.org/dc/terms/">
+
+    <!-- ============================================================
+         ONTOLOGY HEADER
+         ============================================================ -->
+
+    <owl:Ontology rdf:about="http://example.org/ontology/food-delivery-semantic-model/">
+        <owl:versionIRI rdf:resource="http://example.org/ontology/food-delivery-semantic-model/1.0/"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <rdfs:label>Food Delivery Semantic Model</rdfs:label>
+        <rdfs:comment>Comprehensive semantic model for the food delivery platform analytics. This model supports analytical queries across customers, orders, restaurants, deliveries, agents, payments, promotions, and support operations. The model enables analysis of order fulfillment, revenue, customer behavior, restaurant performance, delivery agent performance, and operational efficiency.</rdfs:comment>
+        <dcterms:source>Food-delivery-Context.yaml</dcterms:source>
+        <ont:sourceFormat>OSI Semantic Model</ont:sourceFormat>
+    </owl:Ontology>
+
+    <!--
+        Source file   : Food-delivery-Context.yaml
+        Detected format: OSI Semantic Model (Format A)
+        Excluded datasets: none (no load_audit dataset present)
+        Icon choices outside known table: CustomerAddress 📍 U+1F4CD, Restaurant 🏢 U+1F3E2,
+            RestaurantCategory 📂 U+1F4C2, RestaurantCategoryMap 📊 U+1F4CA,
+            MenuSection 📄 U+1F4C4, MenuItem 📦 U+1F4E6, OperatingHour 📅 U+1F4C5,
+            OrderItem 🛒 U+1F6D2, Promotion 💰 U+1F4B0, OrderPromotion 🔑 U+1F511,
+            Delivery 🚚 U+1F69A, DeliveryAgent 👥 U+1F465, AgentPayout 💳 U+1F4B3,
+            Payment 💳 U+1F4B3 (known), Review 📈 U+1F4C8, SupportTicket 🚨 U+1F6A8
+        Classes: 18 | Data properties: 148 | Measure properties: 29 | Object properties: 50 | Data bindings: 18
+    -->
+
+    <!-- ============================================================
+         ANNOTATION PROPERTY DECLARATIONS
+         ============================================================ -->
+
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/icon"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/iconCode"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/color"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/propertyType"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/isIdentifier"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/isPII"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/isMeasure"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/isDerived"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/expression"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/typeInferred"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/unit"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/enumValues"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/cardinality"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/cardinalitySource"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/fromEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/toEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/joinKey"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/sourceRelationship"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/sourceFormat"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/boundClass"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/boundEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/source"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/table"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/columnMapping"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#altLabel"/>
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/source"/>
+
+    <!-- ============================================================
+         ENTITY TYPES (CLASSES)
+         ============================================================ -->
+
+    <!-- Customer -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Customer">
+        <rdfs:label>Customer</rdfs:label>
+        <skos:prefLabel>Customers</skos:prefLabel>
+        <rdfs:comment>A registered user of the food delivery platform with a profile, account status, and order history.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>👤</ont:icon>
+        <ont:iconCode>U+1F464</ont:iconCode>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <!-- CustomerAddress -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress">
+        <rdfs:label>CustomerAddress</rdfs:label>
+        <skos:prefLabel>Customer Addresses</skos:prefLabel>
+        <rdfs:comment>A delivery address associated with a customer, supporting multiple addresses per customer for routing and location analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📍</ont:icon>
+        <ont:iconCode>U+1F4CD</ont:iconCode>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <!-- Restaurant -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Restaurant">
+        <rdfs:label>Restaurant</rdfs:label>
+        <skos:prefLabel>Restaurants</skos:prefLabel>
+        <rdfs:comment>A food service establishment registered on the platform with profile, location, ratings, and operational settings.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🏢</ont:icon>
+        <ont:iconCode>U+1F3E2</ont:iconCode>
+        <ont:color>#00B7C3</ont:color>
+    </owl:Class>
+
+    <!-- RestaurantCategory -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory">
+        <rdfs:label>RestaurantCategory</rdfs:label>
+        <skos:prefLabel>Restaurant Categories</skos:prefLabel>
+        <rdfs:comment>A classification label for restaurants by cuisine type or service style used for category-level analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📂</ont:icon>
+        <ont:iconCode>U+1F4C2</ont:iconCode>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <!-- RestaurantCategoryMap -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap">
+        <rdfs:label>RestaurantCategoryMap</rdfs:label>
+        <skos:prefLabel>Restaurant Category Map</skos:prefLabel>
+        <rdfs:comment>A many-to-many mapping record linking a restaurant to one of its assigned categories.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📊</ont:icon>
+        <ont:iconCode>U+1F4CA</ont:iconCode>
+        <ont:color>#CA5010</ont:color>
+    </owl:Class>
+
+    <!-- MenuSection -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/MenuSection">
+        <rdfs:label>MenuSection</rdfs:label>
+        <skos:prefLabel>Menu Sections</skos:prefLabel>
+        <rdfs:comment>A logical grouping of menu items within a restaurant menu, such as Appetizers or Entrees.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📄</ont:icon>
+        <ont:iconCode>U+1F4C4</ont:iconCode>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <!-- MenuItem -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/MenuItem">
+        <rdfs:label>MenuItem</rdfs:label>
+        <skos:prefLabel>Menu Items</skos:prefLabel>
+        <rdfs:comment>A food or beverage item offered by a restaurant with pricing, dietary attributes, and availability status.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📦</ont:icon>
+        <ont:iconCode>U+1F4E6</ont:iconCode>
+        <ont:color>#D83B01</ont:color>
+    </owl:Class>
+
+    <!-- OperatingHour -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/OperatingHour">
+        <rdfs:label>OperatingHour</rdfs:label>
+        <skos:prefLabel>Operating Hours</skos:prefLabel>
+        <rdfs:comment>A record defining the opening and closing times for a restaurant on a specific day of the week.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📅</ont:icon>
+        <ont:iconCode>U+1F4C5</ont:iconCode>
+        <ont:color>#E3008C</ont:color>
+    </owl:Class>
+
+    <!-- Order -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Order">
+        <rdfs:label>Order</rdfs:label>
+        <skos:prefLabel>Orders</skos:prefLabel>
+        <rdfs:comment>A customer order placed on the platform capturing totals, fees, taxes, tips, status, and timestamps for revenue analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🧾</ont:icon>
+        <ont:iconCode>U+1F9FE</ont:iconCode>
+        <ont:color>#008272</ont:color>
+    </owl:Class>
+
+    <!-- OrderItem -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/OrderItem">
+        <rdfs:label>OrderItem</rdfs:label>
+        <skos:prefLabel>Order Items</skos:prefLabel>
+        <rdfs:comment>A single line item within a customer order representing a specific menu item, quantity, and price at time of purchase.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🛒</ont:icon>
+        <ont:iconCode>U+1F6D2</ont:iconCode>
+        <ont:color>#4F6BED</ont:color>
+    </owl:Class>
+
+    <!-- Promotion -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Promotion">
+        <rdfs:label>Promotion</rdfs:label>
+        <skos:prefLabel>Promotions</skos:prefLabel>
+        <rdfs:comment>A discount offer with eligibility rules, validity period, and usage limits available to customers on the platform.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>💰</ont:icon>
+        <ont:iconCode>U+1F4B0</ont:iconCode>
+        <ont:color>#8E562E</ont:color>
+    </owl:Class>
+
+    <!-- OrderPromotion -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion">
+        <rdfs:label>OrderPromotion</rdfs:label>
+        <skos:prefLabel>Order Promotions</skos:prefLabel>
+        <rdfs:comment>A record of a promotion applied to a specific order capturing the discount amount and application timestamp.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🔑</ont:icon>
+        <ont:iconCode>U+1F511</ont:iconCode>
+        <ont:color>#767676</ont:color>
+    </owl:Class>
+
+    <!-- Delivery -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Delivery">
+        <rdfs:label>Delivery</rdfs:label>
+        <skos:prefLabel>Deliveries</skos:prefLabel>
+        <rdfs:comment>A delivery record tracking status, pickup and delivery times, distance, and agent assignment for a customer order.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🚚</ont:icon>
+        <ont:iconCode>U+1F69A</ont:iconCode>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <!-- DeliveryAgent -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent">
+        <rdfs:label>DeliveryAgent</rdfs:label>
+        <skos:prefLabel>Delivery Agents</skos:prefLabel>
+        <rdfs:comment>A courier registered on the platform with vehicle information, ratings, and performance metrics for agent-level analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>👥</ont:icon>
+        <ont:iconCode>U+1F465</ont:iconCode>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <!-- AgentPayout -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/AgentPayout">
+        <rdfs:label>AgentPayout</rdfs:label>
+        <skos:prefLabel>Agent Payouts</skos:prefLabel>
+        <rdfs:comment>A payout record for a delivery agent covering base pay, distance bonus, tip, and total payout for a specific delivery.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>💳</ont:icon>
+        <ont:iconCode>U+1F4B3</ont:iconCode>
+        <ont:color>#00B7C3</ont:color>
+    </owl:Class>
+
+    <!-- Payment -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Payment">
+        <rdfs:label>Payment</rdfs:label>
+        <skos:prefLabel>Payments</skos:prefLabel>
+        <rdfs:comment>A payment transaction record for an order capturing method, amount, status, and processing timestamp.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>💳</ont:icon>
+        <ont:iconCode>U+1F4B3</ont:iconCode>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <!-- Review -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/Review">
+        <rdfs:label>Review</rdfs:label>
+        <skos:prefLabel>Reviews</skos:prefLabel>
+        <rdfs:comment>A customer review rating food quality, delivery experience, and overall satisfaction for a completed order.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>📈</ont:icon>
+        <ont:iconCode>U+1F4C8</ont:iconCode>
+        <ont:color>#CA5010</ont:color>
+    </owl:Class>
+
+    <!-- SupportTicket -->
+    <owl:Class rdf:about="http://example.org/ontology/food-delivery-semantic-model/SupportTicket">
+        <rdfs:label>SupportTicket</rdfs:label>
+        <skos:prefLabel>Support Tickets</skos:prefLabel>
+        <rdfs:comment>A customer support request tracking an issue, its priority, resolution status, and resolution notes.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/food-delivery-semantic-model/"/>
+        <ont:icon>🚨</ont:icon>
+        <ont:iconCode>U+1F6A8</ont:iconCode>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <!-- ============================================================
+         DATA PROPERTIES
+         ============================================================ -->
+
+    <!-- Customer properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_firstName">
+        <rdfs:label>firstName</rdfs:label>
+        <skos:prefLabel>First Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Given name of the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_lastName">
+        <rdfs:label>lastName</rdfs:label>
+        <skos:prefLabel>Last Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Family name of the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_email">
+        <rdfs:label>email</rdfs:label>
+        <skos:prefLabel>Email</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Email address used to contact or authenticate the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_phone">
+        <rdfs:label>phone</rdfs:label>
+        <skos:prefLabel>Phone</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Phone number used to contact the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_dateOfBirth">
+        <rdfs:label>dateOfBirth</rdfs:label>
+        <skos:prefLabel>Date Of Birth</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Date of birth of the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_registeredAt">
+        <rdfs:label>registeredAt</rdfs:label>
+        <skos:prefLabel>Registered At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the customer registered for the service.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the customer account is currently active.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_isPremium">
+        <rdfs:label>isPremium</rdfs:label>
+        <skos:prefLabel>Is Premium</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the customer is enrolled in a premium program.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_preferredLanguage">
+        <rdfs:label>preferredLanguage</rdfs:label>
+        <skos:prefLabel>Preferred Language</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Language preference used for communications with the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- CustomerAddress properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_addressId">
+        <rdfs:label>addressId</rdfs:label>
+        <skos:prefLabel>Address Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer address record.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the customer associated with the address.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_addressType">
+        <rdfs:label>addressType</rdfs:label>
+        <skos:prefLabel>Address Type</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the type of address, such as Home or Work.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_streetAddress">
+        <rdfs:label>streetAddress</rdfs:label>
+        <skos:prefLabel>Street Address</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Street address where the customer receives deliveries.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_aptUnit">
+        <rdfs:label>aptUnit</rdfs:label>
+        <skos:prefLabel>Apartment Unit</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Apartment, unit, or suite designation for the customer address.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_city">
+        <rdfs:label>city</rdfs:label>
+        <skos:prefLabel>City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City where the customer address is located.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_state">
+        <rdfs:label>state</rdfs:label>
+        <skos:prefLabel>State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or region where the customer address is located.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_zipCode">
+        <rdfs:label>zipCode</rdfs:label>
+        <skos:prefLabel>Zip Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Postal or ZIP code for the customer address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_latitude">
+        <rdfs:label>latitude</rdfs:label>
+        <skos:prefLabel>Latitude</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Geographic latitude coordinate of the customer address.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_longitude">
+        <rdfs:label>longitude</rdfs:label>
+        <skos:prefLabel>Longitude</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Geographic longitude coordinate of the customer address.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_isDefault">
+        <rdfs:label>isDefault</rdfs:label>
+        <skos:prefLabel>Is Default</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether this is the customer&apos;s default delivery address.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Restaurant properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a restaurant.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_name">
+        <rdfs:label>name</rdfs:label>
+        <skos:prefLabel>Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Display name of the restaurant.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text description of the restaurant and its offerings.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_phone">
+        <rdfs:label>phone</rdfs:label>
+        <skos:prefLabel>Phone</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Contact phone number for the restaurant.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_email">
+        <rdfs:label>email</rdfs:label>
+        <skos:prefLabel>Email</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Contact email address for the restaurant.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_streetAddress">
+        <rdfs:label>streetAddress</rdfs:label>
+        <skos:prefLabel>Street Address</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Street address where the restaurant is located.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_city">
+        <rdfs:label>city</rdfs:label>
+        <skos:prefLabel>City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City where the restaurant operates.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_state">
+        <rdfs:label>state</rdfs:label>
+        <skos:prefLabel>State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or region where the restaurant operates.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_zipCode">
+        <rdfs:label>zipCode</rdfs:label>
+        <skos:prefLabel>Zip Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Postal or ZIP code for the restaurant location.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_latitude">
+        <rdfs:label>latitude</rdfs:label>
+        <skos:prefLabel>Latitude</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Geographic latitude coordinate of the restaurant location.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_longitude">
+        <rdfs:label>longitude</rdfs:label>
+        <skos:prefLabel>Longitude</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Geographic longitude coordinate of the restaurant location.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_minOrderAmount">
+        <rdfs:label>minOrderAmount</rdfs:label>
+        <skos:prefLabel>Minimum Order Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Minimum monetary order amount required by the restaurant.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the restaurant is currently active on the platform.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_createdAt">
+        <rdfs:label>createdAt</rdfs:label>
+        <skos:prefLabel>Created At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the restaurant record was created on the platform.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Restaurant measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_avgRating">
+        <rdfs:label>avgRating</rdfs:label>
+        <skos:prefLabel>Average Rating</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Average rating the restaurant has received from customer reviews.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_totalReviews">
+        <rdfs:label>totalReviews</rdfs:label>
+        <skos:prefLabel>Total Reviews</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total number of reviews the restaurant has received.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_avgDeliveryTimeMin">
+        <rdfs:label>avgDeliveryTimeMin</rdfs:label>
+        <skos:prefLabel>Average Delivery Time Minutes</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Average delivery time in minutes for orders fulfilled by the restaurant.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_deliveryFee">
+        <rdfs:label>deliveryFee</rdfs:label>
+        <skos:prefLabel>Delivery Fee</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Standard delivery fee charged by the restaurant.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- RestaurantCategory properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategory_categoryId">
+        <rdfs:label>categoryId</rdfs:label>
+        <skos:prefLabel>Category Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a restaurant category.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategory_categoryName">
+        <rdfs:label>categoryName</rdfs:label>
+        <skos:prefLabel>Category Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the restaurant category, such as Italian or Fast Food.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategory_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text description of the restaurant category.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- RestaurantCategoryMap properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_mappingId">
+        <rdfs:label>mappingId</rdfs:label>
+        <skos:prefLabel>Mapping Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a restaurant-to-category mapping.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant being categorized.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_categoryId">
+        <rdfs:label>categoryId</rdfs:label>
+        <skos:prefLabel>Category Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the category assigned to the restaurant.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- MenuSection properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_sectionId">
+        <rdfs:label>sectionId</rdfs:label>
+        <skos:prefLabel>Section Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a menu section.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant to which the menu section belongs.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_name">
+        <rdfs:label>name</rdfs:label>
+        <skos:prefLabel>Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Display name of the menu section, such as Appetizers or Desserts.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_displayOrder">
+        <rdfs:label>displayOrder</rdfs:label>
+        <skos:prefLabel>Display Order</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Numeric value indicating the order in which the section appears in the menu.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_isAvailable">
+        <rdfs:label>isAvailable</rdfs:label>
+        <skos:prefLabel>Is Available</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu section is currently available.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- MenuItem properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_itemId">
+        <rdfs:label>itemId</rdfs:label>
+        <skos:prefLabel>Item Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a menu item.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_sectionId">
+        <rdfs:label>sectionId</rdfs:label>
+        <skos:prefLabel>Section Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the menu section to which the item belongs.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant offering the menu item.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_name">
+        <rdfs:label>name</rdfs:label>
+        <skos:prefLabel>Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Display name of the menu item shown to customers.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text description of the menu item and its ingredients.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_isVegetarian">
+        <rdfs:label>isVegetarian</rdfs:label>
+        <skos:prefLabel>Is Vegetarian</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu item is suitable for vegetarians.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_isVegan">
+        <rdfs:label>isVegan</rdfs:label>
+        <skos:prefLabel>Is Vegan</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu item is suitable for vegans.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_isGlutenFree">
+        <rdfs:label>isGlutenFree</rdfs:label>
+        <skos:prefLabel>Is Gluten Free</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu item is gluten free.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_spiceLevel">
+        <rdfs:label>spiceLevel</rdfs:label>
+        <skos:prefLabel>Spice Level</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the spice level of the menu item, such as Mild or Spicy.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_isAvailable">
+        <rdfs:label>isAvailable</rdfs:label>
+        <skos:prefLabel>Is Available</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu item is currently available to order.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_isPopular">
+        <rdfs:label>isPopular</rdfs:label>
+        <skos:prefLabel>Is Popular</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the menu item is marked as popular based on demand.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- MenuItem measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_price">
+        <rdfs:label>price</rdfs:label>
+        <skos:prefLabel>Price</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary price of the menu item.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_calories">
+        <rdfs:label>calories</rdfs:label>
+        <skos:prefLabel>Calories</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Estimated number of calories contained in the menu item.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- OperatingHour properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_hoursId">
+        <rdfs:label>hoursId</rdfs:label>
+        <skos:prefLabel>Hours Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a restaurant operating hours record.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant whose operating hours are defined.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_dayOfWeek">
+        <rdfs:label>dayOfWeek</rdfs:label>
+        <skos:prefLabel>Day Of Week</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Day of the week for the operating hours, such as Monday or Friday.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_openTime">
+        <rdfs:label>openTime</rdfs:label>
+        <skos:prefLabel>Open Time</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Local time when the restaurant opens on the specified day.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_closeTime">
+        <rdfs:label>closeTime</rdfs:label>
+        <skos:prefLabel>Close Time</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Local time when the restaurant closes on the specified day.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_isClosed">
+        <rdfs:label>isClosed</rdfs:label>
+        <skos:prefLabel>Is Closed</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the restaurant is closed on the specified day.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Order properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer order.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the customer who placed the order.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant fulfilling the order.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_orderStatus">
+        <rdfs:label>orderStatus</rdfs:label>
+        <skos:prefLabel>Order Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current status of the order, such as Placed, Delivered, or Cancelled.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_paymentMethod">
+        <rdfs:label>paymentMethod</rdfs:label>
+        <skos:prefLabel>Payment Method</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Payment method used for the order, such as Credit Card or Digital Wallet.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_orderedAt">
+        <rdfs:label>orderedAt</rdfs:label>
+        <skos:prefLabel>Ordered At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the order was placed.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_estimatedDeliveryAt">
+        <rdfs:label>estimatedDeliveryAt</rdfs:label>
+        <skos:prefLabel>Estimated Delivery At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp indicating the estimated delivery time communicated to the customer.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_deliveredAt">
+        <rdfs:label>deliveredAt</rdfs:label>
+        <skos:prefLabel>Delivered At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the order was actually delivered.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_cancelledAt">
+        <rdfs:label>cancelledAt</rdfs:label>
+        <skos:prefLabel>Cancelled At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the order was cancelled, if applicable.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_cancellationReason">
+        <rdfs:label>cancellationReason</rdfs:label>
+        <skos:prefLabel>Cancellation Reason</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text describing the reason the order was cancelled.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_isScheduled">
+        <rdfs:label>isScheduled</rdfs:label>
+        <skos:prefLabel>Is Scheduled</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the order was scheduled for a future time.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_channel">
+        <rdfs:label>channel</rdfs:label>
+        <skos:prefLabel>Channel</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Order channel used, such as Mobile App, Web, or Partner Platform.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Order measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_subtotal">
+        <rdfs:label>subtotal</rdfs:label>
+        <skos:prefLabel>Subtotal</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary subtotal of the order before fees, taxes, and tips.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_deliveryFee">
+        <rdfs:label>deliveryFee</rdfs:label>
+        <skos:prefLabel>Delivery Fee</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary fee charged for delivery.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_tax">
+        <rdfs:label>tax</rdfs:label>
+        <skos:prefLabel>Tax</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of tax applied to the order.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_tip">
+        <rdfs:label>tip</rdfs:label>
+        <skos:prefLabel>Tip</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of tip provided by the customer.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_totalAmount">
+        <rdfs:label>totalAmount</rdfs:label>
+        <skos:prefLabel>Total Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Total monetary amount charged for the order including all fees, taxes, and tips.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- OrderItem properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_orderItemId">
+        <rdfs:label>orderItemId</rdfs:label>
+        <skos:prefLabel>Order Item Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for an item within a customer order.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order that the item belongs to.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_itemId">
+        <rdfs:label>itemId</rdfs:label>
+        <skos:prefLabel>Item Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the menu item included in the order.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_itemName">
+        <rdfs:label>itemName</rdfs:label>
+        <skos:prefLabel>Item Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the item as recorded on the order.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_specialInstructions">
+        <rdfs:label>specialInstructions</rdfs:label>
+        <skos:prefLabel>Special Instructions</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Customer-provided special instructions for preparing or delivering the item.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- OrderItem measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_quantity">
+        <rdfs:label>quantity</rdfs:label>
+        <skos:prefLabel>Quantity</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Number of units of the item ordered.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_unitPrice">
+        <rdfs:label>unitPrice</rdfs:label>
+        <skos:prefLabel>Unit Price</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary price per unit of the item at the time of order.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_lineTotal">
+        <rdfs:label>lineTotal</rdfs:label>
+        <skos:prefLabel>Line Total</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Total monetary amount for the item line, including quantity.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Promotion properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_promotionId">
+        <rdfs:label>promotionId</rdfs:label>
+        <skos:prefLabel>Promotion Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a promotion.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_code">
+        <rdfs:label>code</rdfs:label>
+        <skos:prefLabel>Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Promotion code entered by customers to redeem the offer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text description of the promotion offer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_discountType">
+        <rdfs:label>discountType</rdfs:label>
+        <skos:prefLabel>Discount Type</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of discount, such as Percentage or Fixed Amount.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_discountValue">
+        <rdfs:label>discountValue</rdfs:label>
+        <skos:prefLabel>Discount Value</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Numeric value representing the discount offered.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_minOrderAmount">
+        <rdfs:label>minOrderAmount</rdfs:label>
+        <skos:prefLabel>Minimum Order Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Minimum order value required to qualify for the promotion.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_maxDiscount">
+        <rdfs:label>maxDiscount</rdfs:label>
+        <skos:prefLabel>Maximum Discount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Maximum monetary discount that can be applied under the promotion.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_startDate">
+        <rdfs:label>startDate</rdfs:label>
+        <skos:prefLabel>Start Date</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp indicating when the promotion becomes active.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_endDate">
+        <rdfs:label>endDate</rdfs:label>
+        <skos:prefLabel>End Date</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp indicating when the promotion expires.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the promotion is currently active.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_usageLimit">
+        <rdfs:label>usageLimit</rdfs:label>
+        <skos:prefLabel>Usage Limit</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Maximum number of times the promotion can be used.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Promotion measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_timesUsed">
+        <rdfs:label>timesUsed</rdfs:label>
+        <skos:prefLabel>Times Used</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Number of times the promotion has been redeemed.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- OrderPromotion properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_orderPromotionId">
+        <rdfs:label>orderPromotionId</rdfs:label>
+        <skos:prefLabel>Order Promotion Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a promotion applied to an order.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order to which the promotion was applied.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_promotionId">
+        <rdfs:label>promotionId</rdfs:label>
+        <skos:prefLabel>Promotion Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the promotion definition that was used.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_appliedAt">
+        <rdfs:label>appliedAt</rdfs:label>
+        <skos:prefLabel>Applied At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the promotion was applied to the order.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- OrderPromotion measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_discountAmount">
+        <rdfs:label>discountAmount</rdfs:label>
+        <skos:prefLabel>Discount Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary value of the discount applied to the order.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Delivery properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_deliveryId">
+        <rdfs:label>deliveryId</rdfs:label>
+        <skos:prefLabel>Delivery Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a delivery.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order associated with the delivery.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_agentId">
+        <rdfs:label>agentId</rdfs:label>
+        <skos:prefLabel>Agent Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the delivery agent handling the delivery.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_deliveryStatus">
+        <rdfs:label>deliveryStatus</rdfs:label>
+        <skos:prefLabel>Delivery Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current status of the delivery, such as In Transit or Delivered.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_pickupTime">
+        <rdfs:label>pickupTime</rdfs:label>
+        <skos:prefLabel>Pickup Time</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the agent picked up the order from the restaurant.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_deliveredTime">
+        <rdfs:label>deliveredTime</rdfs:label>
+        <skos:prefLabel>Delivered Time</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the order was delivered to the customer.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Delivery measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_distanceKm">
+        <rdfs:label>distanceKm</rdfs:label>
+        <skos:prefLabel>Distance Km</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Distance in kilometers traveled for the delivery.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_estimatedTimeMin">
+        <rdfs:label>estimatedTimeMin</rdfs:label>
+        <skos:prefLabel>Estimated Time Minutes</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Estimated delivery time in minutes provided to the customer.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_actualTimeMin">
+        <rdfs:label>actualTimeMin</rdfs:label>
+        <skos:prefLabel>Actual Time Minutes</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Actual delivery time in minutes taken to complete the delivery.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DeliveryAgent properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_agentId">
+        <rdfs:label>agentId</rdfs:label>
+        <skos:prefLabel>Agent Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a delivery agent.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_firstName">
+        <rdfs:label>firstName</rdfs:label>
+        <skos:prefLabel>First Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Given name of the delivery agent.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_lastName">
+        <rdfs:label>lastName</rdfs:label>
+        <skos:prefLabel>Last Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Family name of the delivery agent.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_email">
+        <rdfs:label>email</rdfs:label>
+        <skos:prefLabel>Email</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Email address used to contact the delivery agent.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_phone">
+        <rdfs:label>phone</rdfs:label>
+        <skos:prefLabel>Phone</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Phone number used to contact the delivery agent.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_vehicleType">
+        <rdfs:label>vehicleType</rdfs:label>
+        <skos:prefLabel>Vehicle Type</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Type of vehicle used by the delivery agent, such as Bike or Car.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_licensePlate">
+        <rdfs:label>licensePlate</rdfs:label>
+        <skos:prefLabel>License Plate</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Vehicle license plate associated with the delivery agent.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_city">
+        <rdfs:label>city</rdfs:label>
+        <skos:prefLabel>City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City where the delivery agent primarily operates.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_state">
+        <rdfs:label>state</rdfs:label>
+        <skos:prefLabel>State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or region where the delivery agent primarily operates.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the delivery agent is currently active on the platform.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_joinedAt">
+        <rdfs:label>joinedAt</rdfs:label>
+        <skos:prefLabel>Joined At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the delivery agent joined the platform.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- DeliveryAgent measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_avgRating">
+        <rdfs:label>avgRating</rdfs:label>
+        <skos:prefLabel>Average Rating</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Average customer rating received by the delivery agent.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_totalDeliveries">
+        <rdfs:label>totalDeliveries</rdfs:label>
+        <skos:prefLabel>Total Deliveries</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Total number of deliveries completed by the agent.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- AgentPayout properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_payoutId">
+        <rdfs:label>payoutId</rdfs:label>
+        <skos:prefLabel>Payout Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for an agent payout record.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_deliveryId">
+        <rdfs:label>deliveryId</rdfs:label>
+        <skos:prefLabel>Delivery Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related delivery associated with the payout.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_agentId">
+        <rdfs:label>agentId</rdfs:label>
+        <skos:prefLabel>Agent Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the delivery agent receiving the payout.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_payoutStatus">
+        <rdfs:label>payoutStatus</rdfs:label>
+        <skos:prefLabel>Payout Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current status of the payout, such as Pending or Completed.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_payoutDate">
+        <rdfs:label>payoutDate</rdfs:label>
+        <skos:prefLabel>Payout Date</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the payout was processed.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- AgentPayout measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_basePay">
+        <rdfs:label>basePay</rdfs:label>
+        <skos:prefLabel>Base Pay</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Base monetary amount paid to the delivery agent for the delivery.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_distanceBonus">
+        <rdfs:label>distanceBonus</rdfs:label>
+        <skos:prefLabel>Distance Bonus</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Additional monetary amount paid to the agent based on delivery distance.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_tipAmount">
+        <rdfs:label>tipAmount</rdfs:label>
+        <skos:prefLabel>Tip Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of customer tip included in the payout.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_totalPayout">
+        <rdfs:label>totalPayout</rdfs:label>
+        <skos:prefLabel>Total Payout</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Total monetary amount paid to the delivery agent for the delivery.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Payment properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_paymentId">
+        <rdfs:label>paymentId</rdfs:label>
+        <skos:prefLabel>Payment Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a payment transaction.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order associated with the payment.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_paymentMethod">
+        <rdfs:label>paymentMethod</rdfs:label>
+        <skos:prefLabel>Payment Method</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Payment method used for the transaction, such as Credit Card or PayPal.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_paymentStatus">
+        <rdfs:label>paymentStatus</rdfs:label>
+        <skos:prefLabel>Payment Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current status of the payment, such as Authorized or Settled.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_transactionId">
+        <rdfs:label>transactionId</rdfs:label>
+        <skos:prefLabel>Transaction Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>External payment processor transaction reference.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_processedAt">
+        <rdfs:label>processedAt</rdfs:label>
+        <skos:prefLabel>Processed At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the payment was processed.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_cardLastFour">
+        <rdfs:label>cardLastFour</rdfs:label>
+        <skos:prefLabel>Card Last Four</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Last four digits of the payment card used for the transaction.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Payment measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_amount">
+        <rdfs:label>amount</rdfs:label>
+        <skos:prefLabel>Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of the payment.</rdfs:comment>
+        <ont:isPII rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isPII>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Review properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_reviewId">
+        <rdfs:label>reviewId</rdfs:label>
+        <skos:prefLabel>Review Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer review.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order being reviewed.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the customer who submitted the review.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_restaurantId">
+        <rdfs:label>restaurantId</rdfs:label>
+        <skos:prefLabel>Restaurant Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the restaurant being evaluated in the review.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_agentId">
+        <rdfs:label>agentId</rdfs:label>
+        <skos:prefLabel>Agent Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the delivery agent being evaluated in the review.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_comment">
+        <rdfs:label>comment</rdfs:label>
+        <skos:prefLabel>Comment</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Text comment provided by the customer about the order experience.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_reviewedAt">
+        <rdfs:label>reviewedAt</rdfs:label>
+        <skos:prefLabel>Reviewed At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the review was submitted.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_isAnonymous">
+        <rdfs:label>isAnonymous</rdfs:label>
+        <skos:prefLabel>Is Anonymous</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the review is displayed anonymously.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- Review measures -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_foodRating">
+        <rdfs:label>foodRating</rdfs:label>
+        <skos:prefLabel>Food Rating</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Numeric rating given to the food quality.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_deliveryRating">
+        <rdfs:label>deliveryRating</rdfs:label>
+        <skos:prefLabel>Delivery Rating</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Numeric rating given to the delivery experience.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_overallRating">
+        <rdfs:label>overallRating</rdfs:label>
+        <skos:prefLabel>Overall Rating</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Numeric rating summarizing the overall experience.</rdfs:comment>
+        <ont:isMeasure rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isMeasure>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- SupportTicket properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_ticketId">
+        <rdfs:label>ticketId</rdfs:label>
+        <skos:prefLabel>Ticket Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer support ticket.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the order associated with the support ticket.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the customer who raised the support ticket.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_category">
+        <rdfs:label>category</rdfs:label>
+        <skos:prefLabel>Category</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Category of the support issue, such as Delivery Problem or Payment Issue.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_subject">
+        <rdfs:label>subject</rdfs:label>
+        <skos:prefLabel>Subject</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Short subject line summarizing the support ticket.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Detailed description of the issue reported by the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_priority">
+        <rdfs:label>priority</rdfs:label>
+        <skos:prefLabel>Priority</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the urgency level of the support ticket, such as Low, Medium, or High.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_status">
+        <rdfs:label>status</rdfs:label>
+        <skos:prefLabel>Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Current status of the support ticket, such as Open, In Progress, or Resolved.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_createdAt">
+        <rdfs:label>createdAt</rdfs:label>
+        <skos:prefLabel>Created At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the support ticket was created.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_resolvedAt">
+        <rdfs:label>resolvedAt</rdfs:label>
+        <skos:prefLabel>Resolved At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp recording when the support ticket was resolved.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_resolutionNotes">
+        <rdfs:label>resolutionNotes</rdfs:label>
+        <skos:prefLabel>Resolution Notes</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Notes entered by support staff describing how the ticket was resolved.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         OBJECT PROPERTIES (RELATIONSHIPS)
+         ============================================================ -->
+
+    <!-- orders_to_customers: Order -> Customer (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_placed_by_customer">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>placedBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:comment>An order is placed by exactly one customer.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/customer_places_order"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_places_order">
+        <rdfs:label>places</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A customer places one or more orders.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_placed_by_customer"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_restaurants: Order -> Restaurant (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>An order is fulfilled by exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_order"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_order">
+        <rdfs:label>hasOrder</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A restaurant fulfills one or more orders.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_order_items: OrderItem -> Order (many-to-one, input is one_to_many from orders side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>An order item belongs to exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_contains_orderItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderItem</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_order_items</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_contains_orderItem">
+        <rdfs:label>contains</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:comment>An order contains one or more order items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/orderItem_belongs_to_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>orderItem</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_order_items</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- order_items_to_menu_items: OrderItem -> MenuItem (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderItem_refers_to_menuItem">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>refersTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:comment>An order item references exactly one menu item.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/menuItem_appears_in_orderItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderItem</ont:fromEntityId>
+        <ont:toEntityId>menuItem</ont:toEntityId>
+        <ont:joinKey>item_id=item_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_menu_items</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_appears_in_orderItem">
+        <rdfs:label>appearsIn</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <rdfs:comment>A menu item can appear in one or more order items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/orderItem_refers_to_menuItem"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>menuItem</ont:fromEntityId>
+        <ont:toEntityId>orderItem</ont:toEntityId>
+        <ont:joinKey>item_id=item_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_menu_items</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- menu_items_to_menu_sections: MenuItem -> MenuSection (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_belongs_to_menuSection">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:comment>A menu item belongs to exactly one menu section.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/menuSection_has_menuItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>menuItem</ont:fromEntityId>
+        <ont:toEntityId>menuSection</ont:toEntityId>
+        <ont:joinKey>section_id=section_id</ont:joinKey>
+        <ont:sourceRelationship>menu_items_to_menu_sections</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_has_menuItem">
+        <rdfs:label>hasMenuItem</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:comment>A menu section contains one or more menu items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/menuItem_belongs_to_menuSection"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>menuSection</ont:fromEntityId>
+        <ont:toEntityId>menuItem</ont:toEntityId>
+        <ont:joinKey>section_id=section_id</ont:joinKey>
+        <ont:sourceRelationship>menu_items_to_menu_sections</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- menu_items_to_restaurants: MenuItem -> Restaurant (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuItem_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>offeredBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>A menu item is offered by exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_menuItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>menuItem</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>menu_items_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_menuItem">
+        <rdfs:label>hasMenuItem</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <rdfs:comment>A restaurant offers one or more menu items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/menuItem_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>menuItem</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>menu_items_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- menu_sections_to_restaurants: MenuSection -> Restaurant (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/menuSection_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>A menu section belongs to exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_menuSection"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>menuSection</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>menu_sections_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_menuSection">
+        <rdfs:label>hasMenuSection</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <rdfs:comment>A restaurant has one or more menu sections.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/menuSection_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>menuSection</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>menu_sections_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_deliveries: Delivery -> Order (one-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A delivery is associated with exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_has_delivery"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>delivery</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_deliveries</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_has_delivery">
+        <rdfs:label>hasDelivery</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:comment>An order has at most one delivery record.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/delivery_belongs_to_order"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>delivery</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_deliveries</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- deliveries_to_delivery_agents: Delivery -> DeliveryAgent (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_belongs_to_deliveryAgent">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>handledBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:comment>A delivery is handled by exactly one delivery agent.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_delivery"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>delivery</ont:fromEntityId>
+        <ont:toEntityId>deliveryAgent</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>deliveries_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_delivery">
+        <rdfs:label>hasDelivery</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:comment>A delivery agent handles one or more deliveries.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/delivery_belongs_to_deliveryAgent"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>deliveryAgent</ont:fromEntityId>
+        <ont:toEntityId>delivery</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>deliveries_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- deliveries_to_agent_payouts: AgentPayout -> Delivery (one-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_belongs_to_delivery">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:comment>An agent payout is associated with exactly one delivery.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/delivery_has_agentPayout"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>agentPayout</ont:fromEntityId>
+        <ont:toEntityId>delivery</ont:toEntityId>
+        <ont:joinKey>delivery_id=delivery_id</ont:joinKey>
+        <ont:sourceRelationship>deliveries_to_agent_payouts</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/delivery_has_agentPayout">
+        <rdfs:label>hasAgentPayout</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:comment>A delivery has at most one agent payout record.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/agentPayout_belongs_to_delivery"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>delivery</ont:fromEntityId>
+        <ont:toEntityId>agentPayout</ont:toEntityId>
+        <ont:joinKey>delivery_id=delivery_id</ont:joinKey>
+        <ont:sourceRelationship>deliveries_to_agent_payouts</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- agent_payouts_to_delivery_agents: AgentPayout -> DeliveryAgent (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/agentPayout_belongs_to_deliveryAgent">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>paidTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:comment>An agent payout is paid to exactly one delivery agent.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_agentPayout"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>agentPayout</ont:fromEntityId>
+        <ont:toEntityId>deliveryAgent</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>agent_payouts_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_agentPayout">
+        <rdfs:label>hasAgentPayout</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <rdfs:comment>A delivery agent receives one or more payouts.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/agentPayout_belongs_to_deliveryAgent"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>deliveryAgent</ont:fromEntityId>
+        <ont:toEntityId>agentPayout</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>agent_payouts_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_payments: Payment -> Order (one-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/payment_settles_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>settles</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A payment settles exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_paid_by_payment"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>payment</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_payments</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_paid_by_payment">
+        <rdfs:label>paidBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <rdfs:comment>An order is paid by at most one payment transaction.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/payment_settles_order"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>payment</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_payments</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_order_promotions: OrderPromotion -> Order (many-to-one, input is one_to_many from orders side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>An order promotion is applied to exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_has_orderPromotion"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderPromotion</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_order_promotions</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_has_orderPromotion">
+        <rdfs:label>hasOrderPromotion</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:comment>An order can have zero or more promotions applied.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_belongs_to_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>orderPromotion</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_order_promotions</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- order_promotions_to_promotions: OrderPromotion -> Promotion (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_belongs_to_promotion">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>usesPromotion</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:comment>An order promotion references exactly one promotion definition.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/promotion_has_orderPromotion"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderPromotion</ont:fromEntityId>
+        <ont:toEntityId>promotion</ont:toEntityId>
+        <ont:joinKey>promotion_id=promotion_id</ont:joinKey>
+        <ont:sourceRelationship>order_promotions_to_promotions</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/promotion_has_orderPromotion">
+        <rdfs:label>hasOrderPromotion</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <rdfs:comment>A promotion can be referenced by one or more order promotions.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/orderPromotion_belongs_to_promotion"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>promotion</ont:fromEntityId>
+        <ont:toEntityId>orderPromotion</ont:toEntityId>
+        <ont:joinKey>promotion_id=promotion_id</ont:joinKey>
+        <ont:sourceRelationship>order_promotions_to_promotions</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_reviews: Review -> Order (one-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>reviewsOrder</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A review is associated with exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_has_review"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>review</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_reviews</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_has_review">
+        <rdfs:label>hasReview</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:comment>An order has at most one review.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_order"/>
+        <ont:cardinality>one-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>review</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_reviews</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- reviews_to_customers: Review -> Customer (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_customer">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>submittedBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:comment>A review is submitted by exactly one customer.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/customer_has_review"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>review</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_has_review">
+        <rdfs:label>hasReview</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:comment>A customer can submit one or more reviews.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_customer"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>review</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- reviews_to_restaurants: Review -> Restaurant (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>evaluatesRestaurant</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>A review evaluates exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_review"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>review</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_review">
+        <rdfs:label>hasReview</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:comment>A restaurant can receive one or more reviews.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>review</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_restaurants</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- reviews_to_delivery_agents: Review -> DeliveryAgent (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_deliveryAgent">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>evaluatesAgent</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:comment>A review evaluates exactly one delivery agent.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_review"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>review</ont:fromEntityId>
+        <ont:toEntityId>deliveryAgent</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/deliveryAgent_has_review">
+        <rdfs:label>hasReview</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <rdfs:comment>A delivery agent can receive one or more reviews.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/review_belongs_to_deliveryAgent"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>deliveryAgent</ont:fromEntityId>
+        <ont:toEntityId>review</ont:toEntityId>
+        <ont:joinKey>agent_id=agent_id</ont:joinKey>
+        <ont:sourceRelationship>reviews_to_delivery_agents</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- orders_to_support_tickets: SupportTicket -> Order (many-to-one, input is one_to_many from orders side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:comment>A support ticket is associated with exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/order_has_supportTicket"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>supportTicket</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_support_tickets</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/order_has_supportTicket">
+        <rdfs:label>hasSupportTicket</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:comment>An order can have zero or more support tickets.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/supportTicket_belongs_to_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>supportTicket</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_support_tickets</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- support_tickets_to_customers: SupportTicket -> Customer (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/supportTicket_belongs_to_customer">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>raisedBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:comment>A support ticket is raised by exactly one customer.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/customer_has_supportTicket"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>supportTicket</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>support_tickets_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_has_supportTicket">
+        <rdfs:label>hasSupportTicket</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <rdfs:comment>A customer can raise one or more support tickets.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/supportTicket_belongs_to_customer"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>supportTicket</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>support_tickets_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- restaurants_to_restaurant_category_map: RestaurantCategoryMap -> Restaurant (many-to-one, input is one_to_many from restaurants side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>A restaurant-category mapping references exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_restaurantCategoryMap"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurantCategoryMap</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>restaurants_to_restaurant_category_map</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_restaurantCategoryMap">
+        <rdfs:label>hasRestaurantCategoryMap</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:comment>A restaurant can be assigned to one or more category mappings.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>restaurantCategoryMap</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>restaurants_to_restaurant_category_map</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- restaurant_category_map_to_restaurant_categories: RestaurantCategoryMap -> RestaurantCategory (many-to-one) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_belongs_to_restaurantCategory">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>referencesCategory</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <rdfs:comment>A restaurant-category mapping references exactly one restaurant category.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurantCategory_has_restaurantCategoryMap"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurantCategoryMap</ont:fromEntityId>
+        <ont:toEntityId>restaurantCategory</ont:toEntityId>
+        <ont:joinKey>category_id=category_id</ont:joinKey>
+        <ont:sourceRelationship>restaurant_category_map_to_restaurant_categories</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurantCategory_has_restaurantCategoryMap">
+        <rdfs:label>hasRestaurantCategoryMap</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <rdfs:comment>A restaurant category can be referenced by one or more category mappings.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurantCategoryMap_belongs_to_restaurantCategory"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurantCategory</ont:fromEntityId>
+        <ont:toEntityId>restaurantCategoryMap</ont:toEntityId>
+        <ont:joinKey>category_id=category_id</ont:joinKey>
+        <ont:sourceRelationship>restaurant_category_map_to_restaurant_categories</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- restaurants_to_operating_hours: OperatingHour -> Restaurant (many-to-one, input is one_to_many from restaurants side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/operatingHour_belongs_to_restaurant">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:comment>An operating hours record belongs to exactly one restaurant.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_operatingHour"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>operatingHour</ont:fromEntityId>
+        <ont:toEntityId>restaurant</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>restaurants_to_operating_hours</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/restaurant_has_operatingHour">
+        <rdfs:label>hasOperatingHour</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <rdfs:comment>A restaurant has one or more operating hours records.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/operatingHour_belongs_to_restaurant"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>restaurant</ont:fromEntityId>
+        <ont:toEntityId>operatingHour</ont:toEntityId>
+        <ont:joinKey>restaurant_id=restaurant_id</ont:joinKey>
+        <ont:sourceRelationship>restaurants_to_operating_hours</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- customers_to_customer_addresses: CustomerAddress -> Customer (many-to-one, input is one_to_many from customers side) -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customerAddress_belongs_to_customer">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:comment>A customer address belongs to exactly one customer.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/customer_has_customerAddress"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customerAddress</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>customers_to_customer_addresses</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/food-delivery-semantic-model/customer_has_customerAddress">
+        <rdfs:label>hasCustomerAddress</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <rdfs:comment>A customer can have one or more delivery addresses.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/food-delivery-semantic-model/customerAddress_belongs_to_customer"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>customerAddress</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>customers_to_customer_addresses</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- ============================================================
+         DATA BINDINGS
+         ============================================================ -->
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_customer">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Customer"/>
+        <ont:boundEntityId>customer</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.customers</ont:table>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>firstName=first_name</ont:columnMapping>
+        <ont:columnMapping>lastName=last_name</ont:columnMapping>
+        <ont:columnMapping>email=email</ont:columnMapping>
+        <ont:columnMapping>phone=phone</ont:columnMapping>
+        <ont:columnMapping>dateOfBirth=date_of_birth</ont:columnMapping>
+        <ont:columnMapping>registeredAt=registered_at</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+        <ont:columnMapping>isPremium=is_premium</ont:columnMapping>
+        <ont:columnMapping>preferredLanguage=preferred_language</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_customerAddress">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/CustomerAddress"/>
+        <ont:boundEntityId>customerAddress</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.customer_addresses</ont:table>
+        <ont:columnMapping>addressId=address_id</ont:columnMapping>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>addressType=address_type</ont:columnMapping>
+        <ont:columnMapping>streetAddress=street_address</ont:columnMapping>
+        <ont:columnMapping>aptUnit=apt_unit</ont:columnMapping>
+        <ont:columnMapping>city=city</ont:columnMapping>
+        <ont:columnMapping>state=state</ont:columnMapping>
+        <ont:columnMapping>zipCode=zip_code</ont:columnMapping>
+        <ont:columnMapping>latitude=latitude</ont:columnMapping>
+        <ont:columnMapping>longitude=longitude</ont:columnMapping>
+        <ont:columnMapping>isDefault=is_default</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_restaurant">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Restaurant"/>
+        <ont:boundEntityId>restaurant</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.restaurants</ont:table>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>name=name</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+        <ont:columnMapping>phone=phone</ont:columnMapping>
+        <ont:columnMapping>email=email</ont:columnMapping>
+        <ont:columnMapping>streetAddress=street_address</ont:columnMapping>
+        <ont:columnMapping>city=city</ont:columnMapping>
+        <ont:columnMapping>state=state</ont:columnMapping>
+        <ont:columnMapping>zipCode=zip_code</ont:columnMapping>
+        <ont:columnMapping>latitude=latitude</ont:columnMapping>
+        <ont:columnMapping>longitude=longitude</ont:columnMapping>
+        <ont:columnMapping>avgRating=avg_rating</ont:columnMapping>
+        <ont:columnMapping>totalReviews=total_reviews</ont:columnMapping>
+        <ont:columnMapping>avgDeliveryTimeMin=avg_delivery_time_min</ont:columnMapping>
+        <ont:columnMapping>minOrderAmount=min_order_amount</ont:columnMapping>
+        <ont:columnMapping>deliveryFee=delivery_fee</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+        <ont:columnMapping>createdAt=created_at</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_restaurantCategory">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategory"/>
+        <ont:boundEntityId>restaurantCategory</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.restaurant_categories</ont:table>
+        <ont:columnMapping>categoryId=category_id</ont:columnMapping>
+        <ont:columnMapping>categoryName=category_name</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_restaurantCategoryMap">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/RestaurantCategoryMap"/>
+        <ont:boundEntityId>restaurantCategoryMap</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.restaurant_category_map</ont:table>
+        <ont:columnMapping>mappingId=mapping_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>categoryId=category_id</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_menuSection">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuSection"/>
+        <ont:boundEntityId>menuSection</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.menu_sections</ont:table>
+        <ont:columnMapping>sectionId=section_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>name=name</ont:columnMapping>
+        <ont:columnMapping>displayOrder=display_order</ont:columnMapping>
+        <ont:columnMapping>isAvailable=is_available</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_menuItem">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/MenuItem"/>
+        <ont:boundEntityId>menuItem</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.menu_items</ont:table>
+        <ont:columnMapping>itemId=item_id</ont:columnMapping>
+        <ont:columnMapping>sectionId=section_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>name=name</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+        <ont:columnMapping>price=price</ont:columnMapping>
+        <ont:columnMapping>isVegetarian=is_vegetarian</ont:columnMapping>
+        <ont:columnMapping>isVegan=is_vegan</ont:columnMapping>
+        <ont:columnMapping>isGlutenFree=is_gluten_free</ont:columnMapping>
+        <ont:columnMapping>spiceLevel=spice_level</ont:columnMapping>
+        <ont:columnMapping>calories=calories</ont:columnMapping>
+        <ont:columnMapping>isAvailable=is_available</ont:columnMapping>
+        <ont:columnMapping>isPopular=is_popular</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_operatingHour">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OperatingHour"/>
+        <ont:boundEntityId>operatingHour</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.operating_hours</ont:table>
+        <ont:columnMapping>hoursId=hours_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>dayOfWeek=day_of_week</ont:columnMapping>
+        <ont:columnMapping>openTime=open_time</ont:columnMapping>
+        <ont:columnMapping>closeTime=close_time</ont:columnMapping>
+        <ont:columnMapping>isClosed=is_closed</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_order">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Order"/>
+        <ont:boundEntityId>order</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.orders</ont:table>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>orderStatus=order_status</ont:columnMapping>
+        <ont:columnMapping>subtotal=subtotal</ont:columnMapping>
+        <ont:columnMapping>deliveryFee=delivery_fee</ont:columnMapping>
+        <ont:columnMapping>tax=tax</ont:columnMapping>
+        <ont:columnMapping>tip=tip</ont:columnMapping>
+        <ont:columnMapping>totalAmount=total_amount</ont:columnMapping>
+        <ont:columnMapping>paymentMethod=payment_method</ont:columnMapping>
+        <ont:columnMapping>orderedAt=ordered_at</ont:columnMapping>
+        <ont:columnMapping>estimatedDeliveryAt=estimated_delivery_at</ont:columnMapping>
+        <ont:columnMapping>deliveredAt=delivered_at</ont:columnMapping>
+        <ont:columnMapping>cancelledAt=cancelled_at</ont:columnMapping>
+        <ont:columnMapping>cancellationReason=cancellation_reason</ont:columnMapping>
+        <ont:columnMapping>isScheduled=is_scheduled</ont:columnMapping>
+        <ont:columnMapping>channel=channel</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_orderItem">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderItem"/>
+        <ont:boundEntityId>orderItem</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.order_items</ont:table>
+        <ont:columnMapping>orderItemId=order_item_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>itemId=item_id</ont:columnMapping>
+        <ont:columnMapping>itemName=item_name</ont:columnMapping>
+        <ont:columnMapping>quantity=quantity</ont:columnMapping>
+        <ont:columnMapping>unitPrice=unit_price</ont:columnMapping>
+        <ont:columnMapping>lineTotal=line_total</ont:columnMapping>
+        <ont:columnMapping>specialInstructions=special_instructions</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_promotion">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Promotion"/>
+        <ont:boundEntityId>promotion</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.promotions</ont:table>
+        <ont:columnMapping>promotionId=promotion_id</ont:columnMapping>
+        <ont:columnMapping>code=code</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+        <ont:columnMapping>discountType=discount_type</ont:columnMapping>
+        <ont:columnMapping>discountValue=discount_value</ont:columnMapping>
+        <ont:columnMapping>minOrderAmount=min_order_amount</ont:columnMapping>
+        <ont:columnMapping>maxDiscount=max_discount</ont:columnMapping>
+        <ont:columnMapping>startDate=start_date</ont:columnMapping>
+        <ont:columnMapping>endDate=end_date</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+        <ont:columnMapping>usageLimit=usage_limit</ont:columnMapping>
+        <ont:columnMapping>timesUsed=times_used</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_orderPromotion">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/OrderPromotion"/>
+        <ont:boundEntityId>orderPromotion</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.order_promotions</ont:table>
+        <ont:columnMapping>orderPromotionId=order_promotion_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>promotionId=promotion_id</ont:columnMapping>
+        <ont:columnMapping>discountAmount=discount_amount</ont:columnMapping>
+        <ont:columnMapping>appliedAt=applied_at</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_delivery">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Delivery"/>
+        <ont:boundEntityId>delivery</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.deliveries</ont:table>
+        <ont:columnMapping>deliveryId=delivery_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>agentId=agent_id</ont:columnMapping>
+        <ont:columnMapping>deliveryStatus=delivery_status</ont:columnMapping>
+        <ont:columnMapping>pickupTime=pickup_time</ont:columnMapping>
+        <ont:columnMapping>deliveredTime=delivered_time</ont:columnMapping>
+        <ont:columnMapping>distanceKm=distance_km</ont:columnMapping>
+        <ont:columnMapping>estimatedTimeMin=estimated_time_min</ont:columnMapping>
+        <ont:columnMapping>actualTimeMin=actual_time_min</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_deliveryAgent">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/DeliveryAgent"/>
+        <ont:boundEntityId>deliveryAgent</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.delivery_agents</ont:table>
+        <ont:columnMapping>agentId=agent_id</ont:columnMapping>
+        <ont:columnMapping>firstName=first_name</ont:columnMapping>
+        <ont:columnMapping>lastName=last_name</ont:columnMapping>
+        <ont:columnMapping>email=email</ont:columnMapping>
+        <ont:columnMapping>phone=phone</ont:columnMapping>
+        <ont:columnMapping>vehicleType=vehicle_type</ont:columnMapping>
+        <ont:columnMapping>licensePlate=license_plate</ont:columnMapping>
+        <ont:columnMapping>city=city</ont:columnMapping>
+        <ont:columnMapping>state=state</ont:columnMapping>
+        <ont:columnMapping>avgRating=avg_rating</ont:columnMapping>
+        <ont:columnMapping>totalDeliveries=total_deliveries</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+        <ont:columnMapping>joinedAt=joined_at</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_agentPayout">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/AgentPayout"/>
+        <ont:boundEntityId>agentPayout</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.agent_payouts</ont:table>
+        <ont:columnMapping>payoutId=payout_id</ont:columnMapping>
+        <ont:columnMapping>deliveryId=delivery_id</ont:columnMapping>
+        <ont:columnMapping>agentId=agent_id</ont:columnMapping>
+        <ont:columnMapping>basePay=base_pay</ont:columnMapping>
+        <ont:columnMapping>distanceBonus=distance_bonus</ont:columnMapping>
+        <ont:columnMapping>tipAmount=tip_amount</ont:columnMapping>
+        <ont:columnMapping>totalPayout=total_payout</ont:columnMapping>
+        <ont:columnMapping>payoutStatus=payout_status</ont:columnMapping>
+        <ont:columnMapping>payoutDate=payout_date</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_payment">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Payment"/>
+        <ont:boundEntityId>payment</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.payments</ont:table>
+        <ont:columnMapping>paymentId=payment_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>paymentMethod=payment_method</ont:columnMapping>
+        <ont:columnMapping>amount=amount</ont:columnMapping>
+        <ont:columnMapping>paymentStatus=payment_status</ont:columnMapping>
+        <ont:columnMapping>transactionId=transaction_id</ont:columnMapping>
+        <ont:columnMapping>processedAt=processed_at</ont:columnMapping>
+        <ont:columnMapping>cardLastFour=card_last_four</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_review">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/Review"/>
+        <ont:boundEntityId>review</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.reviews</ont:table>
+        <ont:columnMapping>reviewId=review_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>restaurantId=restaurant_id</ont:columnMapping>
+        <ont:columnMapping>agentId=agent_id</ont:columnMapping>
+        <ont:columnMapping>foodRating=food_rating</ont:columnMapping>
+        <ont:columnMapping>deliveryRating=delivery_rating</ont:columnMapping>
+        <ont:columnMapping>overallRating=overall_rating</ont:columnMapping>
+        <ont:columnMapping>comment=comment</ont:columnMapping>
+        <ont:columnMapping>reviewedAt=reviewed_at</ont:columnMapping>
+        <ont:columnMapping>isAnonymous=is_anonymous</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/food-delivery-semantic-model/binding_supportTicket">
+        <ont:boundClass rdf:resource="http://example.org/ontology/food-delivery-semantic-model/SupportTicket"/>
+        <ont:boundEntityId>supportTicket</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>food_delivery.support_tickets</ont:table>
+        <ont:columnMapping>ticketId=ticket_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>category=category</ont:columnMapping>
+        <ont:columnMapping>subject=subject</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+        <ont:columnMapping>priority=priority</ont:columnMapping>
+        <ont:columnMapping>status=status</ont:columnMapping>
+        <ont:columnMapping>createdAt=created_at</ont:columnMapping>
+        <ont:columnMapping>resolvedAt=resolved_at</ont:columnMapping>
+        <ont:columnMapping>resolutionNotes=resolution_notes</ont:columnMapping>
+    </ont:DataBinding>
+
+</rdf:RDF>
