@@ -1,0 +1,127 @@
+{
+  "overall_validation_score": 94.7,
+  "accuracy_score": 98.0,
+  "efficiency_score": 88.0,
+  "completeness_score": 98.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "scoring_methodology": {
+    "overall_calculation": "Average of (Completeness + Accuracy + Efficiency) / 3",
+    "pass_threshold": ">=95% with no High-severity issues",
+    "pass_with_warnings_threshold": "85-94% or no High-severity but Medium/Low issues present",
+    "fail_threshold": "<85% or any High-severity issue present"
+  },
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Object Coverage",
+      "issue": "All 7 tables from the glossary (mod_record, task_record, subtask, impact_record, baseline_record, completion_gate, audit_event) have corresponding datasets in the semantic model.",
+      "recommendation": "No action required. Coverage is complete."
+    },
+    {
+      "severity": "Low",
+      "area": "Attribute Coverage",
+      "issue": "All 53 columns documented in the glossary have corresponding fields in the semantic model with business names, descriptions, and types.",
+      "recommendation": "No action required. Attribute coverage is complete."
+    },
+    {
+      "severity": "Low",
+      "area": "Relationship Coverage",
+      "issue": "All 4 relationships documented in the semantic model (mod_record_to_task_record, task_record_to_subtask, task_record_to_completion_gate, mod_record_to_impact_record) reference columns that exist in the glossary with appropriate FK constraints.",
+      "recommendation": "No action required. Relationship coverage is complete."
+    },
+    {
+      "severity": "Low",
+      "area": "Mapping Coverage",
+      "issue": "All 23 metrics defined in the semantic model reference only columns that exist in the glossary. Verified columns_used arrays against glossary column inventory.",
+      "recommendation": "No action required. Mapping coverage is complete."
+    },
+    {
+      "severity": "Low",
+      "area": "Documentation Coverage",
+      "issue": "All 7 datasets have non-empty descriptions and business names. All 53 fields have non-empty descriptions and business names. All 23 metrics have non-empty descriptions and business names.",
+      "recommendation": "No action required. Documentation coverage is complete."
+    },
+    {
+      "severity": "Medium",
+      "area": "Rule Coverage - baseline_record",
+      "issue": "The glossary does not document any PRIMARY KEY constraint on baseline_record.baseline_id, but the semantic model declares it as a primary key.",
+      "recommendation": "Add PRIMARY KEY constraint documentation to baseline_record.baseline_id in the glossary to align with the semantic model declaration."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Metadata/Technical Accuracy - Data Types",
+      "issue": "All declared types in the glossary match the semantic model. BIGINT columns have numeric samples, VARCHAR columns have text samples, DATETIME columns have date samples, BIT columns have 0/1 samples, TEXT columns have text samples.",
+      "recommendation": "No action required. Type accuracy is verified."
+    },
+    {
+      "severity": "Low",
+      "area": "Business Definition Accuracy - PII Field",
+      "issue": "The glossary marks impact_record.owner_name as PII (YES), and the semantic model correctly documents this with a PII constraint and includes handling guidance in ai_context instructions.",
+      "recommendation": "No action required. PII handling is accurate and consistent."
+    },
+    {
+      "severity": "Low",
+      "area": "Mapping/Relationship Accuracy - Cardinality",
+      "issue": "All 4 relationships in the semantic model declare many_to_one cardinality, which aligns with the glossary's FK constraint documentation (task_record.mod_id → mod_record.mod_id, subtask.task_id → task_record.task_id, completion_gate.task_id → task_record.task_id, impact_record.mod_id → mod_record.mod_id).",
+      "recommendation": "No action required. Cardinality declarations are accurate."
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Convention Consistency",
+      "issue": "All table and column names follow consistent snake_case convention across both artifacts. ID suffix conventions are consistent (_id for identifiers, _ref for references, _date for dates, _ts for timestamps).",
+      "recommendation": "No action required. Naming conventions are consistent."
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Detection - Business Definitions",
+      "issue": "The business term \"Modification Identifier\" is used for both mod_record.mod_id and task_record.mod_id (and impact_record.mod_id). While technically correct (they reference the same entity), this could cause confusion. Consider distinguishing as \"Modification Identifier (Primary)\" vs \"Modification Identifier (Foreign Key)\".",
+      "recommendation": "Enhance business term clarity by distinguishing primary key vs foreign key usage of \"Modification Identifier\" in the glossary."
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Detection - Business Definitions",
+      "issue": "The business term \"Task Identifier\" is used for both task_record.task_id and subtask.task_id (and completion_gate.task_id). While technically correct (they reference the same entity), this could cause confusion. Consider distinguishing as \"Task Identifier (Primary)\" vs \"Task Identifier (Foreign Key)\".",
+      "recommendation": "Enhance business term clarity by distinguishing primary key vs foreign key usage of \"Task Identifier\" in the glossary."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Redundant Metadata - Table Descriptions",
+      "issue": "All 7 table descriptions in the glossary follow the pattern \"Contains [table_name] data information.\" This is generic and does not add semantic value. The semantic model provides richer, more specific descriptions.",
+      "recommendation": "Replace generic glossary table descriptions with the more detailed descriptions from the semantic model to improve business user understanding."
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation - Metric Patterns",
+      "issue": "Three metrics follow near-identical patterns for counting by time: modification_count_by_created_month, task_count_by_created_month, and audit_event_count_by_date. These differ only in the source table and date column.",
+      "recommendation": "Consider creating a reusable parameterized metric template for \"count by time period\" to reduce duplication and improve maintainability."
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation - Metric Patterns",
+      "issue": "Three metrics follow near-identical patterns for counting by categorical dimension: modification_count_by_class, modification_count_by_approval_status, task_count_by_status, impact_count_by_change_type, and audit_event_count_by_action. These differ only in the source table and grouping column.",
+      "recommendation": "Consider creating a reusable parameterized metric template for \"count by dimension\" to reduce duplication and improve maintainability."
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation - Metric Patterns",
+      "issue": "Three metrics calculate average ratios using identical CASE/CAST patterns: tasks_per_modification, subtasks_per_task, and impacts_per_modification.",
+      "recommendation": "Consider creating a reusable SQL function or CTE for \"average ratio calculation\" to reduce code duplication and improve maintainability."
+    },
+    {
+      "severity": "Low",
+      "area": "Unnecessary Complexity - Metric Expressions",
+      "issue": "The gate_completion_rate metric uses a CASE statement to handle division by zero, which is appropriate. However, the same pattern is repeated in tasks_per_modification, subtasks_per_task, and impacts_per_modification.",
+      "recommendation": "Consolidate the division-by-zero handling pattern into a reusable SQL function or macro to simplify metric definitions."
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability Opportunity - Base Views",
+      "issue": "Several metrics query the same base tables (mod_record, task_record, impact_record) with similar filters (e.g., is_active = 1, status = 'In Progress', is_selected = 1).",
+      "recommendation": "Consider creating materialized views or CTEs for commonly filtered base tables (e.g., active_modifications, in_progress_tasks, selected_impacts) to improve query performance and reusability."
+    }
+  ]
+}
