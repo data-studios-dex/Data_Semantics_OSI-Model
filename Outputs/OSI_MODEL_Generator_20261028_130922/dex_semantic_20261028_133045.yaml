@@ -1,0 +1,3276 @@
+version: "1.0"
+
+semantic_model:
+  - name: food_delivery_semantic_model
+    description: >-
+      Comprehensive semantic model for the food delivery platform analytics.
+      This model represents the complete analytical ecosystem including customers,
+      orders, restaurants, menu items, deliveries, agents, payments, promotions,
+      reviews, and support operations. The model supports analytical queries across
+      customer behavior, order fulfillment, restaurant performance, delivery operations,
+      financial transactions, and customer satisfaction metrics.
+    
+    ai_context:
+      instructions: >-
+        This semantic model represents a food delivery platform with 18 interconnected datasets.
+        
+        
+        DATASET GRAIN DEFINITIONS:
+        
+        - customers: One row per customer (grain: customer_id)
+        
+        - customer_addresses: One row per customer address (grain: address_id)
+        
+        - orders: One row per order (grain: order_id)
+        
+        - order_items: One row per item within an order (grain: order_item_id)
+        
+        - order_promotions: One row per promotion applied to an order (grain: order_promotion_id)
+        
+        - restaurants: One row per restaurant (grain: restaurant_id)
+        
+        - restaurant_categories: One row per restaurant category (grain: category_id)
+        
+        - restaurant_category_map: One row per restaurant-category assignment (grain: mapping_id)
+        
+        - menu_sections: One row per menu section within a restaurant (grain: section_id)
+        
+        - menu_items: One row per menu item (grain: item_id)
+        
+        - operating_hours: One row per restaurant day-of-week operating hours (grain: hours_id)
+        
+        - deliveries: One row per delivery (grain: delivery_id)
+        
+        - delivery_agents: One row per delivery agent (grain: agent_id)
+        
+        - agent_payouts: One row per agent payout (grain: payout_id)
+        
+        - payments: One row per payment transaction (grain: payment_id)
+        
+        - promotions: One row per promotion definition (grain: promotion_id)
+        
+        - reviews: One row per customer review (grain: review_id)
+        
+        - support_tickets: One row per support ticket (grain: ticket_id)
+        
+        
+        CRITICAL GRAIN RELATIONSHIPS AND DOUBLE-COUNTING PREVENTION:
+        
+        
+        Orders vs Order Items:
+        
+        - orders contains one row per order with order-level aggregates (subtotal, delivery_fee, tax, tip, total_amount)
+        
+        - order_items contains multiple rows per order, one per menu item ordered
+        
+        - NEVER sum orders.subtotal, orders.total_amount, orders.delivery_fee, orders.tax, or orders.tip after joining orders to order_items
+        
+        - For order-level revenue analysis, use orders.total_amount directly from the orders dataset
+        
+        - For item-level revenue analysis, use order_items.line_total from the order_items dataset
+        
+        - For product-level analysis, always aggregate from order_items, not orders
+        
+        
+        Deliveries vs Orders:
+        
+        - Each order has at most one delivery
+        
+        - deliveries.delivery_id references orders.order_id via FK
+        
+        - Delivery metrics (distance, time, status) should be analyzed from the deliveries dataset
+        
+        - When joining orders to deliveries, the relationship is one-to-one
+        
+        
+        Agent Payouts vs Deliveries:
+        
+        - Each delivery may have one payout
+        
+        - agent_payouts.delivery_id references deliveries.delivery_id
+        
+        - Payout amounts (base_pay, distance_bonus, tip_amount, total_payout) are delivery-level measures
+        
+        - Do not sum payout amounts after joining to order_items
+        
+        
+        Reviews:
+        
+        - reviews can reference orders, customers, restaurants, and agents
+        
+        - Each review is associated with one order
+        
+        - When analyzing ratings, ensure the grain matches the analytical question
+        
+        
+        Payments vs Orders:
+        
+        - Each order has one payment
+        
+        - payments.order_id references orders.order_id
+        
+        - Payment amount should match orders.total_amount
+        
+        
+        TIME DIMENSION GUIDANCE:
+        
+        
+        Primary Date Fields for Analysis:
+        
+        - orders.ordered_at: Use for order placement time-series analysis
+        
+        - orders.delivered_at: Use for order fulfillment time-series analysis
+        
+        - deliveries.pickup_time: Use for restaurant pickup time analysis
+        
+        - deliveries.delivered_time: Use for delivery completion time analysis
+        
+        - payments.processed_at: Use for payment transaction time analysis
+        
+        - agent_payouts.payout_date: Use for agent payout time analysis
+        
+        - reviews.reviewed_at: Use for review submission time analysis
+        
+        - support_tickets.created_at: Use for support ticket creation time analysis
+        
+        - customers.registered_at: Use for customer acquisition time analysis
+        
+        - delivery_agents.joined_at: Use for agent onboarding time analysis
+        
+        
+        For revenue time-series analysis, use orders.ordered_at as the primary date dimension.
+        
+        For delivery performance time-series, use deliveries.delivered_time.
+        
+        For customer satisfaction trends, use reviews.reviewed_at.
+        
+        
+        RELATIONSHIP GUIDANCE:
+        
+        
+        Customer Relationships:
+        
+        - customers → orders (one-to-many via customer_id)
+        
+        - customers → customer_addresses (one-to-many via customer_id)
+        
+        - customers → reviews (one-to-many via customer_id)
+        
+        - customers → support_tickets (one-to-many via customer_id)
+        
+        
+        Order Relationships:
+        
+        - orders → customers (many-to-one via customer_id)
+        
+        - orders → restaurants (many-to-one via restaurant_id)
+        
+        - orders → order_items (one-to-many via order_id)
+        
+        - orders → order_promotions (one-to-many via order_id)
+        
+        - orders → deliveries (one-to-one via order_id)
+        
+        - orders → payments (one-to-one via order_id)
+        
+        - orders → reviews (one-to-one via order_id)
+        
+        - orders → support_tickets (one-to-many via order_id)
+        
+        
+        Restaurant Relationships:
+        
+        - restaurants → orders (one-to-many via restaurant_id)
+        
+        - restaurants → menu_sections (one-to-many via restaurant_id)
+        
+        - restaurants → menu_items (one-to-many via restaurant_id)
+        
+        - restaurants → operating_hours (one-to-many via restaurant_id)
+        
+        - restaurants → restaurant_category_map (one-to-many via restaurant_id)
+        
+        - restaurants → reviews (one-to-many via restaurant_id)
+        
+        
+        Menu Relationships:
+        
+        - menu_sections → menu_items (one-to-many via section_id)
+        
+        - menu_items → order_items (one-to-many via item_id)
+        
+        
+        Delivery Relationships:
+        
+        - deliveries → orders (one-to-one via order_id)
+        
+        - deliveries → delivery_agents (many-to-one via agent_id)
+        
+        - deliveries → agent_payouts (one-to-one via delivery_id)
+        
+        
+        Agent Relationships:
+        
+        - delivery_agents → deliveries (one-to-many via agent_id)
+        
+        - delivery_agents → agent_payouts (one-to-many via agent_id)
+        
+        - delivery_agents → reviews (one-to-many via agent_id)
+        
+        
+        Promotion Relationships:
+        
+        - promotions → order_promotions (one-to-many via promotion_id)
+        
+        
+        Category Relationships:
+        
+        - restaurant_categories → restaurant_category_map (one-to-many via category_id)
+        
+        - restaurant_category_map acts as a many-to-many bridge between restaurants and categories
+        
+        
+        METRIC CALCULATION GUIDANCE:
+        
+        
+        Revenue Metrics:
+        
+        - Total Revenue: Sum orders.total_amount from the orders dataset
+        
+        - Subtotal Revenue: Sum orders.subtotal from the orders dataset
+        
+        - Item Revenue: Sum order_items.line_total from the order_items dataset
+        
+        - Delivery Fee Revenue: Sum orders.delivery_fee from the orders dataset
+        
+        - Tax Revenue: Sum orders.tax from the orders dataset
+        
+        - Tip Revenue: Sum orders.tip from the orders dataset
+        
+        - Average Order Value: Total Revenue / Order Count
+        
+        - Revenue per Customer: Total Revenue / Customer Count
+        
+        
+        Order Metrics:
+        
+        - Order Count: Count distinct orders.order_id
+        
+        - Completed Order Count: Count orders where order_status = 'Delivered'
+        
+        - Cancelled Order Count: Count orders where order_status = 'Cancelled'
+        
+        - Average Items per Order: Count order_items / Count orders
+        
+        
+        Customer Metrics:
+        
+        - Customer Count: Count distinct customers.customer_id
+        
+        - Active Customer Count: Count customers where is_active = true
+        
+        - Premium Customer Count: Count customers where is_premium = true
+        
+        - Orders per Customer: Order Count / Customer Count
+        
+        
+        Restaurant Metrics:
+        
+        - Restaurant Count: Count distinct restaurants.restaurant_id
+        
+        - Active Restaurant Count: Count restaurants where is_active = true
+        
+        - Average Restaurant Rating: Average of restaurants.avg_rating
+        
+        - Orders per Restaurant: Order Count / Restaurant Count
+        
+        
+        Delivery Metrics:
+        
+        - Delivery Count: Count distinct deliveries.delivery_id
+        
+        - Completed Delivery Count: Count deliveries where delivery_status = 'Delivered'
+        
+        - Average Delivery Distance: Average of deliveries.distance_km
+        
+        - Average Delivery Time: Average of deliveries.actual_time_min
+        
+        - On-Time Delivery Rate: Count deliveries where actual_time_min <= estimated_time_min / Total Delivery Count
+        
+        - Delayed Delivery Count: Count deliveries where actual_time_min > estimated_time_min
+        
+        
+        Agent Metrics:
+        
+        - Agent Count: Count distinct delivery_agents.agent_id
+        
+        - Active Agent Count: Count agents where is_active = true
+        
+        - Average Agent Rating: Average of delivery_agents.avg_rating
+        
+        - Total Agent Payout: Sum agent_payouts.total_payout
+        
+        - Average Payout per Delivery: Total Agent Payout / Delivery Count
+        
+        
+        Payment Metrics:
+        
+        - Payment Count: Count distinct payments.payment_id
+        
+        - Settled Payment Count: Count payments where payment_status = 'Settled'
+        
+        - Total Payment Amount: Sum payments.amount
+        
+        
+        Promotion Metrics:
+        
+        - Promotion Count: Count distinct promotions.promotion_id
+        
+        - Active Promotion Count: Count promotions where is_active = true
+        
+        - Total Discount Amount: Sum order_promotions.discount_amount
+        
+        - Average Discount per Order: Total Discount Amount / Order Count with promotions
+        
+        - Promotion Usage Rate: Count orders with promotions / Total Order Count
+        
+        
+        Review Metrics:
+        
+        - Review Count: Count distinct reviews.review_id
+        
+        - Average Food Rating: Average of reviews.food_rating
+        
+        - Average Delivery Rating: Average of reviews.delivery_rating
+        
+        - Average Overall Rating: Average of reviews.overall_rating
+        
+        
+        Support Metrics:
+        
+        - Support Ticket Count: Count distinct support_tickets.ticket_id
+        
+        - Resolved Ticket Count: Count tickets where status = 'Resolved'
+        
+        - Open Ticket Count: Count tickets where status = 'Open'
+        
+        - Average Resolution Time: Average of (resolved_at - created_at)
+        
+        
+        QUERY RESTRICTIONS AND IMPORTANT NOTES:
+        
+        
+        1. Always verify the analytical grain before aggregating measures
+        
+        2. Use the appropriate date field for the analytical question
+        
+        3. Be cautious when joining orders to order_items - do not sum order-level amounts after the join
+        
+        4. For customer lifetime value, aggregate all orders per customer from the orders dataset
+        
+        5. For product performance, aggregate from order_items, not orders
+        
+        6. For delivery performance, use the deliveries dataset with appropriate date filters
+        
+        7. For agent performance, join deliveries to delivery_agents and aggregate appropriately
+        
+        8. For promotion effectiveness, join orders to order_promotions and compare with non-promoted orders
+        
+        9. For restaurant performance, aggregate orders by restaurant_id
+        
+        10. For time-series analysis, use the appropriate timestamp field and truncate to the desired grain (day, week, month, quarter, year)
+        
+        11. When calculating percentages and rates, always use safe division to avoid division by zero
+        
+        12. For customer segmentation, use customer attributes such as is_premium, preferred_language, and behavioral metrics
+        
+        13. For geographic analysis, use city and state fields from customers, customer_addresses, restaurants, and delivery_agents
+        
+        14. For menu analysis, join menu_items to menu_sections to restaurants
+        
+        15. For operating hours analysis, use the operating_hours dataset with day_of_week filtering
+
+    datasets:
+      - name: customers
+        business_name: Customers
+        description: >-
+          Contains customer master data. Each row represents one unique customer
+          registered on the food delivery platform. This dataset includes customer
+          identification, contact information, registration details, account status,
+          premium membership status, and language preferences. Grain: one row per customer_id.
+        source: food_delivery.customers
+        primary_key:
+          - customer_id
+        fields:
+          - name: customer_id
+            business_name: Customer Identifier
+            description: Unique identifier for a customer.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: first_name
+            business_name: First Name
+            description: Given name of the customer.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: last_name
+            business_name: Last Name
+            description: Family name of the customer.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: email
+            business_name: Email
+            description: Email address used to contact or authenticate the customer.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: phone
+            business_name: Phone
+            description: Phone number used to contact the customer.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: date_of_birth
+            business_name: Date Of Birth
+            description: Date of birth of the customer.
+            sql_type: DATE
+            constraints:
+              - PII
+          
+          - name: registered_at
+            business_name: Registered At
+            description: Timestamp recording when the customer registered for the service.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the customer account is currently active.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: is_premium
+            business_name: Is Premium
+            description: Indicates whether the customer is enrolled in a premium program.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: preferred_language
+            business_name: Preferred Language
+            description: Language preference used for communications with the customer.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+
+      - name: customer_addresses
+        business_name: Customer Addresses
+        description: >-
+          Contains customer delivery addresses. Each row represents one address
+          associated with a customer. Customers may have multiple addresses for
+          different delivery locations. Includes address type, geographic coordinates,
+          and default address indicator. Grain: one row per address_id.
+        source: food_delivery.customer_addresses
+        primary_key:
+          - address_id
+        fields:
+          - name: address_id
+            business_name: Address Identifier
+            description: Unique identifier for a customer address record.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: customer_id
+            business_name: Customer Reference
+            description: References the customer associated with the address.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: address_type
+            business_name: Address Type
+            description: Indicates the type of address, such as Home or Work.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: street_address
+            business_name: Street Address
+            description: Street address where the customer receives deliveries.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: apt_unit
+            business_name: Apartment Unit
+            description: Apartment, unit, or suite designation for the customer address.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: city
+            business_name: City
+            description: City where the customer address is located.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: state
+            business_name: State
+            description: State or region where the customer address is located.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: zip_code
+            business_name: Zip Code
+            description: Postal or ZIP code for the customer address.
+            sql_type: STRING(255)
+          
+          - name: latitude
+            business_name: Latitude
+            description: Geographic latitude coordinate of the customer address.
+            sql_type: DOUBLE
+          
+          - name: longitude
+            business_name: Longitude
+            description: Geographic longitude coordinate of the customer address.
+            sql_type: DOUBLE
+          
+          - name: is_default
+            business_name: Is Default
+            description: Indicates whether this is the customer's default delivery address.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+
+      - name: orders
+        business_name: Orders
+        description: >-
+          Contains customer order transactions. Each row represents one complete
+          order placed by a customer at a restaurant. Includes order status, financial
+          amounts (subtotal, fees, tax, tip, total), payment method, timestamps for
+          order lifecycle events, cancellation information, scheduling indicator, and
+          order channel. This is the primary fact table for order-level revenue analysis.
+          Grain: one row per order_id.
+        source: food_delivery.orders
+        primary_key:
+          - order_id
+        fields:
+          - name: order_id
+            business_name: Order Identifier
+            description: Unique identifier for a customer order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: customer_id
+            business_name: Customer Reference
+            description: References the customer who placed the order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant fulfilling the order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: order_status
+            business_name: Order Status
+            description: Indicates the current status of the order, such as Placed, Delivered, or Cancelled.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: subtotal
+            business_name: Subtotal
+            description: Monetary subtotal of the order before fees, taxes, and tips.
+            sql_type: DOUBLE
+            measure:
+              aggregation: SUM
+          
+          - name: delivery_fee
+            business_name: Delivery Fee
+            description: Monetary fee charged for delivery.
+            sql_type: DOUBLE
+            measure:
+              aggregation: SUM
+          
+          - name: tax
+            business_name: Tax
+            description: Monetary amount of tax applied to the order.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: tip
+            business_name: Tip
+            description: Monetary amount of tip provided by the customer.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: total_amount
+            business_name: Total Amount
+            description: Total monetary amount charged for the order including all fees, taxes, and tips.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: payment_method
+            business_name: Payment Method
+            description: Payment method used for the order, such as Credit Card or Digital Wallet.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+            dimension:
+              is_dimension: true
+          
+          - name: ordered_at
+            business_name: Ordered At
+            description: Timestamp recording when the order was placed.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: estimated_delivery_at
+            business_name: Estimated Delivery At
+            description: Timestamp indicating the estimated delivery time communicated to the customer.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: delivered_at
+            business_name: Delivered At
+            description: Timestamp recording when the order was actually delivered.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: cancelled_at
+            business_name: Cancelled At
+            description: Timestamp recording when the order was cancelled, if applicable.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: cancellation_reason
+            business_name: Cancellation Reason
+            description: Text describing the reason the order was cancelled.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: is_scheduled
+            business_name: Is Scheduled
+            description: Indicates whether the order was scheduled for a future time.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: channel
+            business_name: Channel
+            description: Order channel used, such as Mobile App, Web, or Partner Platform.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+
+      - name: order_items
+        business_name: Order Items
+        description: >-
+          Contains individual line items within customer orders. Each row represents
+          one menu item included in an order. Multiple items can belong to the same
+          order. Includes item identification, quantity, unit price, line total, and
+          special instructions. This is the primary fact table for item-level and
+          product-level revenue analysis. Grain: one row per order_item_id.
+        source: food_delivery.order_items
+        primary_key:
+          - order_item_id
+        fields:
+          - name: order_item_id
+            business_name: Order Item Identifier
+            description: Unique identifier for an item within a customer order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order that the item belongs to.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: item_id
+            business_name: Item Reference
+            description: References the menu item included in the order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: item_name
+            business_name: Item Name
+            description: Name of the item as recorded on the order.
+            sql_type: STRING(255)
+          
+          - name: quantity
+            business_name: Quantity
+            description: Number of units of the item ordered.
+            sql_type: BIGINT
+            measure:
+              aggregation: SUM
+          
+          - name: unit_price
+            business_name: Unit Price
+            description: Monetary price per unit of the item at the time of order.
+            sql_type: DOUBLE
+          
+          - name: line_total
+            business_name: Line Total
+            description: Total monetary amount for the item line, including quantity.
+            sql_type: DOUBLE
+            measure:
+              aggregation: SUM
+          
+          - name: special_instructions
+            business_name: Special Instructions
+            description: Customer-provided special instructions for preparing or delivering the item.
+            sql_type: STRING(255)
+
+      - name: order_promotions
+        business_name: Order Promotions
+        description: >-
+          Contains promotions applied to orders. Each row represents one promotion
+          applied to a specific order. Multiple promotions may be applied to the same
+          order. Includes promotion reference, discount amount, and application timestamp.
+          Grain: one row per order_promotion_id.
+        source: food_delivery.order_promotions
+        primary_key:
+          - order_promotion_id
+        fields:
+          - name: order_promotion_id
+            business_name: Order Promotion Identifier
+            description: Unique identifier for a promotion applied to an order.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order to which the promotion was applied.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: promotion_id
+            business_name: Promotion Reference
+            description: References the promotion definition that was used.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: discount_amount
+            business_name: Discount Amount
+            description: Monetary value of the discount applied to the order.
+            sql_type: DOUBLE
+            measure:
+              aggregation: SUM
+          
+          - name: applied_at
+            business_name: Applied At
+            description: Timestamp recording when the promotion was applied to the order.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+
+      - name: restaurants
+        business_name: Restaurants
+        description: >-
+          Contains restaurant master data. Each row represents one restaurant
+          partner on the food delivery platform. Includes restaurant identification,
+          contact information, location, ratings, delivery performance metrics,
+          order requirements, fees, and account status. Grain: one row per restaurant_id.
+        source: food_delivery.restaurants
+        primary_key:
+          - restaurant_id
+        fields:
+          - name: restaurant_id
+            business_name: Restaurant Identifier
+            description: Unique identifier for a restaurant.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: name
+            business_name: Name
+            description: Display name of the restaurant.
+            sql_type: STRING(255)
+          
+          - name: description
+            business_name: Description
+            description: Text description of the restaurant and its offerings.
+            sql_type: STRING(255)
+          
+          - name: phone
+            business_name: Phone
+            description: Contact phone number for the restaurant.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: email
+            business_name: Email
+            description: Contact email address for the restaurant.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: street_address
+            business_name: Street Address
+            description: Street address where the restaurant is located.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: city
+            business_name: City
+            description: City where the restaurant operates.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: state
+            business_name: State
+            description: State or region where the restaurant operates.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: zip_code
+            business_name: Zip Code
+            description: Postal or ZIP code for the restaurant location.
+            sql_type: STRING(255)
+          
+          - name: latitude
+            business_name: Latitude
+            description: Geographic latitude coordinate of the restaurant location.
+            sql_type: DOUBLE
+          
+          - name: longitude
+            business_name: Longitude
+            description: Geographic longitude coordinate of the restaurant location.
+            sql_type: DOUBLE
+          
+          - name: avg_rating
+            business_name: Average Rating
+            description: Average rating the restaurant has received from customer reviews.
+            sql_type: DOUBLE
+          
+          - name: total_reviews
+            business_name: Total Reviews
+            description: Total number of reviews the restaurant has received.
+            sql_type: BIGINT
+            measure:
+              aggregation: SUM
+          
+          - name: avg_delivery_time_min
+            business_name: Average Delivery Time Minutes
+            description: Average delivery time in minutes for orders fulfilled by the restaurant.
+            sql_type: BIGINT
+          
+          - name: min_order_amount
+            business_name: Minimum Order Amount
+            description: Minimum monetary order amount required by the restaurant.
+            sql_type: DOUBLE
+          
+          - name: delivery_fee
+            business_name: Delivery Fee
+            description: Standard delivery fee charged by the restaurant.
+            sql_type: DOUBLE
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the restaurant is currently active on the platform.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: created_at
+            business_name: Created At
+            description: Timestamp recording when the restaurant record was created on the platform.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+
+      - name: restaurant_categories
+        business_name: Restaurant Categories
+        description: >-
+          Contains restaurant category definitions. Each row represents one
+          category used to classify restaurants by cuisine type or service style.
+          Grain: one row per category_id.
+        source: food_delivery.restaurant_categories
+        primary_key:
+          - category_id
+        fields:
+          - name: category_id
+            business_name: Category Identifier
+            description: Unique identifier for a restaurant category.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: category_name
+            business_name: Category Name
+            description: Name of the restaurant category, such as Italian or Fast Food.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: description
+            business_name: Description
+            description: Text description of the restaurant category.
+            sql_type: STRING(255)
+
+      - name: restaurant_category_map
+        business_name: Restaurant Category Map
+        description: >-
+          Contains many-to-many mappings between restaurants and categories.
+          Each row represents one category assignment to a restaurant. A restaurant
+          may belong to multiple categories. Grain: one row per mapping_id.
+        source: food_delivery.restaurant_category_map
+        primary_key:
+          - mapping_id
+        fields:
+          - name: mapping_id
+            business_name: Mapping Identifier
+            description: Unique identifier for a restaurant-to-category mapping.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant being categorized.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: category_id
+            business_name: Category Reference
+            description: References the category assigned to the restaurant.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+
+      - name: menu_sections
+        business_name: Menu Sections
+        description: >-
+          Contains menu sections within restaurant menus. Each row represents
+          one section of a restaurant's menu, such as Appetizers, Entrees, or
+          Desserts. Includes display order and availability status. Grain: one
+          row per section_id.
+        source: food_delivery.menu_sections
+        primary_key:
+          - section_id
+        fields:
+          - name: section_id
+            business_name: Section Identifier
+            description: Unique identifier for a menu section.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant to which the menu section belongs.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: name
+            business_name: Name
+            description: Display name of the menu section, such as Appetizers or Desserts.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: display_order
+            business_name: Display Order
+            description: Numeric value indicating the order in which the section appears in the menu.
+            sql_type: BIGINT
+          
+          - name: is_available
+            business_name: Is Available
+            description: Indicates whether the menu section is currently available.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+
+      - name: menu_items
+        business_name: Menu Items
+        description: >-
+          Contains menu items offered by restaurants. Each row represents one
+          menu item available for ordering. Includes item details, pricing,
+          dietary attributes, nutritional information, and availability status.
+          Grain: one row per item_id.
+        source: food_delivery.menu_items
+        primary_key:
+          - item_id
+        fields:
+          - name: item_id
+            business_name: Item Identifier
+            description: Unique identifier for a menu item.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: section_id
+            business_name: Section Reference
+            description: References the menu section to which the item belongs.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant offering the menu item.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: name
+            business_name: Name
+            description: Display name of the menu item shown to customers.
+            sql_type: STRING(255)
+          
+          - name: description
+            business_name: Description
+            description: Text description of the menu item and its ingredients.
+            sql_type: STRING(255)
+          
+          - name: price
+            business_name: Price
+            description: Monetary price of the menu item.
+            sql_type: DOUBLE
+          
+          - name: is_vegetarian
+            business_name: Is Vegetarian
+            description: Indicates whether the menu item is suitable for vegetarians.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: is_vegan
+            business_name: Is Vegan
+            description: Indicates whether the menu item is suitable for vegans.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: is_gluten_free
+            business_name: Is Gluten Free
+            description: Indicates whether the menu item is gluten free.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: spice_level
+            business_name: Spice Level
+            description: Indicates the spice level of the menu item, such as Mild or Spicy.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: calories
+            business_name: Calories
+            description: Estimated number of calories contained in the menu item.
+            sql_type: BIGINT
+          
+          - name: is_available
+            business_name: Is Available
+            description: Indicates whether the menu item is currently available to order.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: is_popular
+            business_name: Is Popular
+            description: Indicates whether the menu item is marked as popular based on demand.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+
+      - name: operating_hours
+        business_name: Operating Hours
+        description: >-
+          Contains restaurant operating hours by day of week. Each row represents
+          the operating hours for one restaurant on one day of the week. Includes
+          open and close times and closure indicator. Grain: one row per hours_id.
+        source: food_delivery.operating_hours
+        primary_key:
+          - hours_id
+        fields:
+          - name: hours_id
+            business_name: Hours Identifier
+            description: Unique identifier for a restaurant operating hours record.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant whose operating hours are defined.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: day_of_week
+            business_name: Day Of Week
+            description: Day of the week for the operating hours, such as Monday or Friday.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: open_time
+            business_name: Open Time
+            description: Local time when the restaurant opens on the specified day.
+            sql_type: STRING(255)
+          
+          - name: close_time
+            business_name: Close Time
+            description: Local time when the restaurant closes on the specified day.
+            sql_type: STRING(255)
+          
+          - name: is_closed
+            business_name: Is Closed
+            description: Indicates whether the restaurant is closed on the specified day.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+
+      - name: deliveries
+        business_name: Deliveries
+        description: >-
+          Contains delivery execution records. Each row represents one delivery
+          associated with an order. Includes delivery agent assignment, status,
+          pickup and delivery timestamps, distance traveled, and estimated versus
+          actual delivery time. Grain: one row per delivery_id.
+        source: food_delivery.deliveries
+        primary_key:
+          - delivery_id
+        fields:
+          - name: delivery_id
+            business_name: Delivery Identifier
+            description: Unique identifier for a delivery.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order associated with the delivery.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: agent_id
+            business_name: Agent Reference
+            description: References the delivery agent handling the delivery.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: delivery_status
+            business_name: Delivery Status
+            description: Indicates the current status of the delivery, such as In Transit or Delivered.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: pickup_time
+            business_name: Pickup Time
+            description: Timestamp recording when the agent picked up the order from the restaurant.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: delivered_time
+            business_name: Delivered Time
+            description: Timestamp recording when the order was delivered to the customer.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: distance_km
+            business_name: Distance Km
+            description: Distance in kilometers traveled for the delivery.
+            sql_type: DOUBLE
+            measure:
+              aggregation: SUM
+          
+          - name: estimated_time_min
+            business_name: Estimated Time Minutes
+            description: Estimated delivery time in minutes provided to the customer.
+            sql_type: BIGINT
+          
+          - name: actual_time_min
+            business_name: Actual Time Minutes
+            description: Actual delivery time in minutes taken to complete the delivery.
+            sql_type: BIGINT
+
+      - name: delivery_agents
+        business_name: Delivery Agents
+        description: >-
+          Contains delivery agent master data. Each row represents one delivery
+          agent registered on the platform. Includes agent identification, contact
+          information, vehicle details, operating location, performance metrics,
+          account status, and onboarding date. Grain: one row per agent_id.
+        source: food_delivery.delivery_agents
+        primary_key:
+          - agent_id
+        fields:
+          - name: agent_id
+            business_name: Agent Identifier
+            description: Unique identifier for a delivery agent.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: first_name
+            business_name: First Name
+            description: Given name of the delivery agent.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: last_name
+            business_name: Last Name
+            description: Family name of the delivery agent.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: email
+            business_name: Email
+            description: Email address used to contact the delivery agent.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: phone
+            business_name: Phone
+            description: Phone number used to contact the delivery agent.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: vehicle_type
+            business_name: Vehicle Type
+            description: Type of vehicle used by the delivery agent, such as Bike or Car.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: license_plate
+            business_name: License Plate
+            description: Vehicle license plate associated with the delivery agent.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: city
+            business_name: City
+            description: City where the delivery agent primarily operates.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: state
+            business_name: State
+            description: State or region where the delivery agent primarily operates.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: avg_rating
+            business_name: Average Rating
+            description: Average customer rating received by the delivery agent.
+            sql_type: DOUBLE
+          
+          - name: total_deliveries
+            business_name: Total Deliveries
+            description: Total number of deliveries completed by the agent.
+            sql_type: BIGINT
+            measure:
+              aggregation: SUM
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the delivery agent is currently active on the platform.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: joined_at
+            business_name: Joined At
+            description: Timestamp recording when the delivery agent joined the platform.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+
+      - name: agent_payouts
+        business_name: Agent Payouts
+        description: >-
+          Contains agent payout records. Each row represents one payout to a
+          delivery agent for completing a delivery. Includes base pay, distance
+          bonus, tip amount, total payout, payout status, and payout date.
+          Grain: one row per payout_id.
+        source: food_delivery.agent_payouts
+        primary_key:
+          - payout_id
+        fields:
+          - name: payout_id
+            business_name: Payout Identifier
+            description: Unique identifier for an agent payout record.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: delivery_id
+            business_name: Delivery Reference
+            description: References the related delivery associated with the payout.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: agent_id
+            business_name: Agent Reference
+            description: References the delivery agent receiving the payout.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: base_pay
+            business_name: Base Pay
+            description: Base monetary amount paid to the delivery agent for the delivery.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: distance_bonus
+            business_name: Distance Bonus
+            description: Additional monetary amount paid to the agent based on delivery distance.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: tip_amount
+            business_name: Tip Amount
+            description: Monetary amount of customer tip included in the payout.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: total_payout
+            business_name: Total Payout
+            description: Total monetary amount paid to the delivery agent for the delivery.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: payout_status
+            business_name: Payout Status
+            description: Indicates the current status of the payout, such as Pending or Completed.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: payout_date
+            business_name: Payout Date
+            description: Timestamp recording when the payout was processed.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+
+      - name: payments
+        business_name: Payments
+        description: >-
+          Contains payment transaction records. Each row represents one payment
+          transaction associated with an order. Includes payment method, amount,
+          status, external transaction reference, processing timestamp, and card
+          information. Grain: one row per payment_id.
+        source: food_delivery.payments
+        primary_key:
+          - payment_id
+        fields:
+          - name: payment_id
+            business_name: Payment Identifier
+            description: Unique identifier for a payment transaction.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order associated with the payment.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: payment_method
+            business_name: Payment Method
+            description: Payment method used for the transaction, such as Credit Card or PayPal.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+            dimension:
+              is_dimension: true
+          
+          - name: amount
+            business_name: Amount
+            description: Monetary amount of the payment.
+            sql_type: DOUBLE
+            constraints:
+              - PII
+            measure:
+              aggregation: SUM
+          
+          - name: payment_status
+            business_name: Payment Status
+            description: Indicates the current status of the payment, such as Authorized or Settled.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: transaction_id
+            business_name: Transaction Identifier
+            description: External payment processor transaction reference.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+          
+          - name: processed_at
+            business_name: Processed At
+            description: Timestamp recording when the payment was processed.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: card_last_four
+            business_name: Card Last Four
+            description: Last four digits of the payment card used for the transaction.
+            sql_type: STRING(255)
+            constraints:
+              - PII
+
+      - name: promotions
+        business_name: Promotions
+        description: >-
+          Contains promotion definitions. Each row represents one promotion
+          offer available to customers. Includes promotion code, description,
+          discount type and value, order requirements, usage limits, validity
+          period, and active status. Grain: one row per promotion_id.
+        source: food_delivery.promotions
+        primary_key:
+          - promotion_id
+        fields:
+          - name: promotion_id
+            business_name: Promotion Identifier
+            description: Unique identifier for a promotion.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: code
+            business_name: Code
+            description: Promotion code entered by customers to redeem the offer.
+            sql_type: STRING(255)
+          
+          - name: description
+            business_name: Description
+            description: Text description of the promotion offer.
+            sql_type: STRING(255)
+          
+          - name: discount_type
+            business_name: Discount Type
+            description: Type of discount, such as Percentage or Fixed Amount.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: discount_value
+            business_name: Discount Value
+            description: Numeric value representing the discount offered.
+            sql_type: DOUBLE
+          
+          - name: min_order_amount
+            business_name: Minimum Order Amount
+            description: Minimum order value required to qualify for the promotion.
+            sql_type: DOUBLE
+          
+          - name: max_discount
+            business_name: Maximum Discount
+            description: Maximum monetary discount that can be applied under the promotion.
+            sql_type: DOUBLE
+          
+          - name: start_date
+            business_name: Start Date
+            description: Timestamp indicating when the promotion becomes active.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: end_date
+            business_name: End Date
+            description: Timestamp indicating when the promotion expires.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the promotion is currently active.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+          
+          - name: usage_limit
+            business_name: Usage Limit
+            description: Maximum number of times the promotion can be used.
+            sql_type: BIGINT
+          
+          - name: times_used
+            business_name: Times Used
+            description: Number of times the promotion has been redeemed.
+            sql_type: BIGINT
+            measure:
+              aggregation: SUM
+
+      - name: reviews
+        business_name: Reviews
+        description: >-
+          Contains customer review records. Each row represents one review
+          submitted by a customer for an order. Reviews can evaluate food quality,
+          delivery experience, restaurant, and delivery agent. Includes ratings,
+          comments, submission timestamp, and anonymity indicator. Grain: one
+          row per review_id.
+        source: food_delivery.reviews
+        primary_key:
+          - review_id
+        fields:
+          - name: review_id
+            business_name: Review Identifier
+            description: Unique identifier for a customer review.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order being reviewed.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: customer_id
+            business_name: Customer Reference
+            description: References the customer who submitted the review.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: restaurant_id
+            business_name: Restaurant Reference
+            description: References the restaurant being evaluated in the review.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: agent_id
+            business_name: Agent Reference
+            description: References the delivery agent being evaluated in the review.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: food_rating
+            business_name: Food Rating
+            description: Numeric rating given to the food quality.
+            sql_type: BIGINT
+            measure:
+              aggregation: AVG
+          
+          - name: delivery_rating
+            business_name: Delivery Rating
+            description: Numeric rating given to the delivery experience.
+            sql_type: BIGINT
+            measure:
+              aggregation: AVG
+          
+          - name: overall_rating
+            business_name: Overall Rating
+            description: Numeric rating summarizing the overall experience.
+            sql_type: BIGINT
+            measure:
+              aggregation: AVG
+          
+          - name: comment
+            business_name: Comment
+            description: Text comment provided by the customer about the order experience.
+            sql_type: STRING(255)
+          
+          - name: reviewed_at
+            business_name: Reviewed At
+            description: Timestamp recording when the review was submitted.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: is_anonymous
+            business_name: Is Anonymous
+            description: Indicates whether the review is displayed anonymously.
+            sql_type: BOOLEAN
+            dimension:
+              is_dimension: true
+
+      - name: support_tickets
+        business_name: Support Tickets
+        description: >-
+          Contains customer support ticket records. Each row represents one
+          support issue raised by a customer. Includes order reference, customer
+          reference, issue category, subject, description, priority, status,
+          timestamps, and resolution notes. Grain: one row per ticket_id.
+        source: food_delivery.support_tickets
+        primary_key:
+          - ticket_id
+        fields:
+          - name: ticket_id
+            business_name: Ticket Identifier
+            description: Unique identifier for a customer support ticket.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - PRIMARY KEY
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order associated with the support ticket.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: customer_id
+            business_name: Customer Reference
+            description: References the customer who raised the support ticket.
+            sql_type: BIGINT
+            constraints:
+              - NOT NULL
+              - FOREIGN KEY
+          
+          - name: category
+            business_name: Category
+            description: Category of the support issue, such as Delivery Problem or Payment Issue.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: subject
+            business_name: Subject
+            description: Short subject line summarizing the support ticket.
+            sql_type: STRING(255)
+          
+          - name: description
+            business_name: Description
+            description: Detailed description of the issue reported by the customer.
+            sql_type: STRING(255)
+          
+          - name: priority
+            business_name: Priority
+            description: Indicates the urgency level of the support ticket, such as Low, Medium, or High.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: status
+            business_name: Status
+            description: Current status of the support ticket, such as Open, In Progress, or Resolved.
+            sql_type: STRING(255)
+            dimension:
+              is_dimension: true
+          
+          - name: created_at
+            business_name: Created At
+            description: Timestamp recording when the support ticket was created.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: resolved_at
+            business_name: Resolved At
+            description: Timestamp recording when the support ticket was resolved.
+            sql_type: TIMESTAMP(29,9)
+            dimension:
+              is_time: true
+          
+          - name: resolution_notes
+            business_name: Resolution Notes
+            description: Notes entered by support staff describing how the ticket was resolved.
+            sql_type: STRING(255)
+
+    relationships:
+      - name: orders_to_customers
+        left_dataset: orders
+        right_dataset: customers
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Each order is placed by exactly one customer. Multiple orders can be
+          placed by the same customer. Join orders to customers using customer_id
+          to retrieve customer attributes for order analysis.
+
+      - name: orders_to_restaurants
+        left_dataset: orders
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each order is fulfilled by exactly one restaurant. Multiple orders can
+          be fulfilled by the same restaurant. Join orders to restaurants using
+          restaurant_id to retrieve restaurant attributes for order analysis.
+
+      - name: order_items_to_orders
+        left_dataset: order_items
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each order item belongs to exactly one order. Multiple items can belong
+          to the same order. Join order_items to orders using order_id. CRITICAL:
+          Do not sum order-level amounts (orders.subtotal, orders.total_amount,
+          orders.delivery_fee, orders.tax, orders.tip) after this join as it will
+          cause double counting. Use order_items.line_total for item-level revenue
+          analysis.
+
+      - name: order_items_to_menu_items
+        left_dataset: order_items
+        right_dataset: menu_items
+        relationship_type: many_to_one
+        join:
+          left:
+            - item_id
+          right:
+            - item_id
+        join_type: many_to_one
+        resolution: >-
+          Each order item references exactly one menu item. Multiple order items
+          can reference the same menu item. Join order_items to menu_items using
+          item_id to retrieve menu item attributes for product analysis.
+
+      - name: order_promotions_to_orders
+        left_dataset: order_promotions
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each order promotion application belongs to exactly one order. Multiple
+          promotions can be applied to the same order. Join order_promotions to
+          orders using order_id to analyze promotion effectiveness.
+
+      - name: order_promotions_to_promotions
+        left_dataset: order_promotions
+        right_dataset: promotions
+        relationship_type: many_to_one
+        join:
+          left:
+            - promotion_id
+          right:
+            - promotion_id
+        join_type: many_to_one
+        resolution: >-
+          Each order promotion application references exactly one promotion
+          definition. Multiple applications can reference the same promotion.
+          Join order_promotions to promotions using promotion_id to retrieve
+          promotion details.
+
+      - name: customer_addresses_to_customers
+        left_dataset: customer_addresses
+        right_dataset: customers
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Each customer address belongs to exactly one customer. Multiple addresses
+          can belong to the same customer. Join customer_addresses to customers
+          using customer_id to retrieve customer attributes.
+
+      - name: menu_sections_to_restaurants
+        left_dataset: menu_sections
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each menu section belongs to exactly one restaurant. Multiple sections
+          can belong to the same restaurant. Join menu_sections to restaurants
+          using restaurant_id to retrieve restaurant attributes.
+
+      - name: menu_items_to_menu_sections
+        left_dataset: menu_items
+        right_dataset: menu_sections
+        relationship_type: many_to_one
+        join:
+          left:
+            - section_id
+          right:
+            - section_id
+        join_type: many_to_one
+        resolution: >-
+          Each menu item belongs to exactly one menu section. Multiple items can
+          belong to the same section. Join menu_items to menu_sections using
+          section_id to retrieve section attributes.
+
+      - name: menu_items_to_restaurants
+        left_dataset: menu_items
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each menu item is offered by exactly one restaurant. Multiple items can
+          be offered by the same restaurant. Join menu_items to restaurants using
+          restaurant_id to retrieve restaurant attributes.
+
+      - name: operating_hours_to_restaurants
+        left_dataset: operating_hours
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each operating hours record belongs to exactly one restaurant. Multiple
+          operating hours records (one per day of week) belong to the same restaurant.
+          Join operating_hours to restaurants using restaurant_id to retrieve
+          restaurant attributes.
+
+      - name: deliveries_to_orders
+        left_dataset: deliveries
+        right_dataset: orders
+        relationship_type: one_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: one_to_one
+        resolution: >-
+          Each delivery is associated with exactly one order. Each order has at
+          most one delivery. Join deliveries to orders using order_id to retrieve
+          order attributes for delivery analysis.
+
+      - name: deliveries_to_delivery_agents
+        left_dataset: deliveries
+        right_dataset: delivery_agents
+        relationship_type: many_to_one
+        join:
+          left:
+            - agent_id
+          right:
+            - agent_id
+        join_type: many_to_one
+        resolution: >-
+          Each delivery is handled by exactly one delivery agent. Multiple deliveries
+          can be handled by the same agent. Join deliveries to delivery_agents
+          using agent_id to retrieve agent attributes for delivery analysis.
+
+      - name: agent_payouts_to_deliveries
+        left_dataset: agent_payouts
+        right_dataset: deliveries
+        relationship_type: one_to_one
+        join:
+          left:
+            - delivery_id
+          right:
+            - delivery_id
+        join_type: one_to_one
+        resolution: >-
+          Each agent payout is associated with exactly one delivery. Each delivery
+          has at most one payout. Join agent_payouts to deliveries using delivery_id
+          to retrieve delivery attributes for payout analysis.
+
+      - name: agent_payouts_to_delivery_agents
+        left_dataset: agent_payouts
+        right_dataset: delivery_agents
+        relationship_type: many_to_one
+        join:
+          left:
+            - agent_id
+          right:
+            - agent_id
+        join_type: many_to_one
+        resolution: >-
+          Each agent payout is paid to exactly one delivery agent. Multiple payouts
+          can be paid to the same agent. Join agent_payouts to delivery_agents
+          using agent_id to retrieve agent attributes for payout analysis.
+
+      - name: payments_to_orders
+        left_dataset: payments
+        right_dataset: orders
+        relationship_type: one_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: one_to_one
+        resolution: >-
+          Each payment is associated with exactly one order. Each order has exactly
+          one payment. Join payments to orders using order_id to retrieve order
+          attributes for payment analysis.
+
+      - name: reviews_to_orders
+        left_dataset: reviews
+        right_dataset: orders
+        relationship_type: one_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: one_to_one
+        resolution: >-
+          Each review is associated with exactly one order. Each order has at most
+          one review. Join reviews to orders using order_id to retrieve order
+          attributes for review analysis.
+
+      - name: reviews_to_customers
+        left_dataset: reviews
+        right_dataset: customers
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Each review is submitted by exactly one customer. Multiple reviews can
+          be submitted by the same customer. Join reviews to customers using
+          customer_id to retrieve customer attributes for review analysis.
+
+      - name: reviews_to_restaurants
+        left_dataset: reviews
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each review evaluates exactly one restaurant. Multiple reviews can
+          evaluate the same restaurant. Join reviews to restaurants using
+          restaurant_id to retrieve restaurant attributes for review analysis.
+
+      - name: reviews_to_delivery_agents
+        left_dataset: reviews
+        right_dataset: delivery_agents
+        relationship_type: many_to_one
+        join:
+          left:
+            - agent_id
+          right:
+            - agent_id
+        join_type: many_to_one
+        resolution: >-
+          Each review evaluates exactly one delivery agent. Multiple reviews can
+          evaluate the same agent. Join reviews to delivery_agents using agent_id
+          to retrieve agent attributes for review analysis.
+
+      - name: support_tickets_to_orders
+        left_dataset: support_tickets
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each support ticket is associated with exactly one order. Multiple
+          support tickets can be associated with the same order. Join support_tickets
+          to orders using order_id to retrieve order attributes for support analysis.
+
+      - name: support_tickets_to_customers
+        left_dataset: support_tickets
+        right_dataset: customers
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Each support ticket is raised by exactly one customer. Multiple support
+          tickets can be raised by the same customer. Join support_tickets to
+          customers using customer_id to retrieve customer attributes for support
+          analysis.
+
+      - name: restaurant_category_map_to_restaurants
+        left_dataset: restaurant_category_map
+        right_dataset: restaurants
+        relationship_type: many_to_one
+        join:
+          left:
+            - restaurant_id
+          right:
+            - restaurant_id
+        join_type: many_to_one
+        resolution: >-
+          Each restaurant-category mapping references exactly one restaurant.
+          Multiple mappings can reference the same restaurant. Join restaurant_category_map
+          to restaurants using restaurant_id to retrieve restaurant attributes.
+
+      - name: restaurant_category_map_to_restaurant_categories
+        left_dataset: restaurant_category_map
+        right_dataset: restaurant_categories
+        relationship_type: many_to_one
+        join:
+          left:
+            - category_id
+          right:
+            - category_id
+        join_type: many_to_one
+        resolution: >-
+          Each restaurant-category mapping references exactly one category. Multiple
+          mappings can reference the same category. Join restaurant_category_map
+          to restaurant_categories using category_id to retrieve category attributes.
+
+    metrics:
+      - name: total_revenue
+        business_name: Total Revenue
+        description: >-
+          Total revenue generated from all orders including subtotal, delivery fees,
+          taxes, and tips. This is the sum of the total_amount field from the orders
+          dataset. Use this metric for order-level revenue analysis.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.total_amount) AS total_revenue
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.total_amount
+
+      - name: subtotal_revenue
+        business_name: Subtotal Revenue
+        description: >-
+          Total subtotal revenue from all orders before delivery fees, taxes, and
+          tips. This is the sum of the subtotal field from the orders dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.subtotal) AS subtotal_revenue
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.subtotal
+
+      - name: delivery_fee_revenue
+        business_name: Delivery Fee Revenue
+        description: >-
+          Total revenue generated from delivery fees charged to customers. This is
+          the sum of the delivery_fee field from the orders dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.delivery_fee) AS delivery_fee_revenue
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.delivery_fee
+
+      - name: tax_revenue
+        business_name: Tax Revenue
+        description: >-
+          Total tax amount collected from all orders. This is the sum of the tax
+          field from the orders dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.tax) AS tax_revenue
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.tax
+
+      - name: tip_revenue
+        business_name: Tip Revenue
+        description: >-
+          Total tip amount provided by customers. This is the sum of the tip field
+          from the orders dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.tip) AS tip_revenue
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.tip
+
+      - name: order_count
+        business_name: Order Count
+        description: >-
+          Total number of orders placed on the platform. This is the count of
+          distinct order_id values from the orders dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT orders.order_id) AS order_count
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.order_id
+
+      - name: completed_order_count
+        business_name: Completed Order Count
+        description: >-
+          Total number of orders that have been successfully delivered. This is
+          the count of orders where order_status equals 'Delivered'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT orders.order_id) AS completed_order_count
+                FROM food_delivery.orders AS orders
+                WHERE orders.order_status = 'Delivered'
+              columns_used:
+                - orders.order_id
+                - orders.order_status
+
+      - name: cancelled_order_count
+        business_name: Cancelled Order Count
+        description: >-
+          Total number of orders that have been cancelled. This is the count of
+          orders where order_status equals 'Cancelled'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT orders.order_id) AS cancelled_order_count
+                FROM food_delivery.orders AS orders
+                WHERE orders.order_status = 'Cancelled'
+              columns_used:
+                - orders.order_id
+                - orders.order_status
+
+      - name: average_order_value
+        business_name: Average Order Value
+        description: >-
+          Average monetary value per order. This is calculated as total revenue
+          divided by order count. Uses safe division to avoid division by zero.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.order_id) = 0 THEN 0
+                    ELSE SUM(orders.total_amount) / COUNT(DISTINCT orders.order_id)
+                  END AS average_order_value
+                FROM food_delivery.orders AS orders
+              columns_used:
+                - orders.order_id
+                - orders.total_amount
+
+      - name: customer_count
+        business_name: Customer Count
+        description: >-
+          Total number of unique customers registered on the platform. This is
+          the count of distinct customer_id values from the customers dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT customers.customer_id) AS customer_count
+                FROM food_delivery.customers AS customers
+              columns_used:
+                - customers.customer_id
+
+      - name: active_customer_count
+        business_name: Active Customer Count
+        description: >-
+          Total number of customers with active accounts. This is the count of
+          customers where is_active equals true.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT customers.customer_id) AS active_customer_count
+                FROM food_delivery.customers AS customers
+                WHERE customers.is_active = true
+              columns_used:
+                - customers.customer_id
+                - customers.is_active
+
+      - name: premium_customer_count
+        business_name: Premium Customer Count
+        description: >-
+          Total number of customers enrolled in the premium program. This is the
+          count of customers where is_premium equals true.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT customers.customer_id) AS premium_customer_count
+                FROM food_delivery.customers AS customers
+                WHERE customers.is_premium = true
+              columns_used:
+                - customers.customer_id
+                - customers.is_premium
+
+      - name: orders_per_customer
+        business_name: Orders per Customer
+        description: >-
+          Average number of orders per customer. This is calculated as total order
+          count divided by total customer count. Uses safe division to avoid division
+          by zero.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT customers.customer_id) = 0 THEN 0
+                    ELSE CAST(COUNT(DISTINCT orders.order_id) AS DOUBLE) / COUNT(DISTINCT customers.customer_id)
+                  END AS orders_per_customer
+                FROM food_delivery.orders AS orders
+                INNER JOIN food_delivery.customers AS customers
+                  ON orders.customer_id = customers.customer_id
+              columns_used:
+                - orders.order_id
+                - customers.customer_id
+
+      - name: revenue_per_customer
+        business_name: Revenue per Customer
+        description: >-
+          Average revenue generated per customer. This is calculated as total
+          revenue divided by total customer count. Uses safe division to avoid
+          division by zero.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT customers.customer_id) = 0 THEN 0
+                    ELSE SUM(orders.total_amount) / COUNT(DISTINCT customers.customer_id)
+                  END AS revenue_per_customer
+                FROM food_delivery.orders AS orders
+                INNER JOIN food_delivery.customers AS customers
+                  ON orders.customer_id = customers.customer_id
+              columns_used:
+                - orders.total_amount
+                - customers.customer_id
+
+      - name: restaurant_count
+        business_name: Restaurant Count
+        description: >-
+          Total number of restaurants registered on the platform. This is the
+          count of distinct restaurant_id values from the restaurants dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT restaurants.restaurant_id) AS restaurant_count
+                FROM food_delivery.restaurants AS restaurants
+              columns_used:
+                - restaurants.restaurant_id
+
+      - name: active_restaurant_count
+        business_name: Active Restaurant Count
+        description: >-
+          Total number of restaurants currently active on the platform. This is
+          the count of restaurants where is_active equals true.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT restaurants.restaurant_id) AS active_restaurant_count
+                FROM food_delivery.restaurants AS restaurants
+                WHERE restaurants.is_active = true
+              columns_used:
+                - restaurants.restaurant_id
+                - restaurants.is_active
+
+      - name: orders_per_restaurant
+        business_name: Orders per Restaurant
+        description: >-
+          Average number of orders per restaurant. This is calculated as total
+          order count divided by total restaurant count. Uses safe division to
+          avoid division by zero.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT restaurants.restaurant_id) = 0 THEN 0
+                    ELSE CAST(COUNT(DISTINCT orders.order_id) AS DOUBLE) / COUNT(DISTINCT restaurants.restaurant_id)
+                  END AS orders_per_restaurant
+                FROM food_delivery.orders AS orders
+                INNER JOIN food_delivery.restaurants AS restaurants
+                  ON orders.restaurant_id = restaurants.restaurant_id
+              columns_used:
+                - orders.order_id
+                - restaurants.restaurant_id
+
+      - name: item_revenue
+        business_name: Item Revenue
+        description: >-
+          Total revenue from order items. This is the sum of line_total from the
+          order_items dataset. Use this metric for item-level and product-level
+          revenue analysis.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.line_total) AS item_revenue
+                FROM food_delivery.order_items AS order_items
+              columns_used:
+                - order_items.line_total
+
+      - name: total_quantity_sold
+        business_name: Total Quantity Sold
+        description: >-
+          Total quantity of items sold across all orders. This is the sum of
+          quantity from the order_items dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.quantity) AS total_quantity_sold
+                FROM food_delivery.order_items AS order_items
+              columns_used:
+                - order_items.quantity
+
+      - name: average_items_per_order
+        business_name: Average Items per Order
+        description: >-
+          Average number of items per order. This is calculated as total order
+          item count divided by total order count. Uses safe division to avoid
+          division by zero.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.order_id) = 0 THEN 0
+                    ELSE CAST(COUNT(DISTINCT order_items.order_item_id) AS DOUBLE) / COUNT(DISTINCT orders.order_id)
+                  END AS average_items_per_order
+                FROM food_delivery.order_items AS order_items
+                INNER JOIN food_delivery.orders AS orders
+                  ON order_items.order_id = orders.order_id
+              columns_used:
+                - order_items.order_item_id
+                - orders.order_id
+
+      - name: delivery_count
+        business_name: Delivery Count
+        description: >-
+          Total number of deliveries executed on the platform. This is the count
+          of distinct delivery_id values from the deliveries dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT deliveries.delivery_id) AS delivery_count
+                FROM food_delivery.deliveries AS deliveries
+              columns_used:
+                - deliveries.delivery_id
+
+      - name: completed_delivery_count
+        business_name: Completed Delivery Count
+        description: >-
+          Total number of deliveries that have been successfully completed. This
+          is the count of deliveries where delivery_status equals 'Delivered'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT deliveries.delivery_id) AS completed_delivery_count
+                FROM food_delivery.deliveries AS deliveries
+                WHERE deliveries.delivery_status = 'Delivered'
+              columns_used:
+                - deliveries.delivery_id
+                - deliveries.delivery_status
+
+      - name: average_delivery_distance_km
+        business_name: Average Delivery Distance (km)
+        description: >-
+          Average distance traveled per delivery in kilometers. This is the average
+          of distance_km from the deliveries dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  AVG(deliveries.distance_km) AS average_delivery_distance_km
+                FROM food_delivery.deliveries AS deliveries
+              columns_used:
+                - deliveries.distance_km
+
+      - name: total_delivery_distance_km
+        business_name: Total Delivery Distance (km)
+        description: >-
+          Total distance traveled across all deliveries in kilometers. This is
+          the sum of distance_km from the deliveries dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(deliveries.distance_km) AS total_delivery_distance_km
+                FROM food_delivery.deliveries AS deliveries
+              columns_used:
+                - deliveries.distance_km
+
+      - name: average_delivery_time_min
+        business_name: Average Delivery Time (minutes)
+        description: >-
+          Average actual delivery time in minutes. This is the average of
+          actual_time_min from the deliveries dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  AVG(deliveries.actual_time_min) AS average_delivery_time_min
+                FROM food_delivery.deliveries AS deliveries
+              columns_used:
+                - deliveries.actual_time_min
+
+      - name: on_time_delivery_count
+        business_name: On-Time Delivery Count
+        description: >-
+          Total number of deliveries completed on time or earlier than estimated.
+          This is the count of deliveries where actual_time_min is less than or
+          equal to estimated_time_min.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT deliveries.delivery_id) AS on_time_delivery_count
+                FROM food_delivery.deliveries AS deliveries
+                WHERE deliveries.actual_time_min <= deliveries.estimated_time_min
+              columns_used:
+                - deliveries.delivery_id
+                - deliveries.actual_time_min
+                - deliveries.estimated_time_min
+
+      - name: delayed_delivery_count
+        business_name: Delayed Delivery Count
+        description: >-
+          Total number of deliveries completed later than estimated. This is the
+          count of deliveries where actual_time_min is greater than estimated_time_min.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT deliveries.delivery_id) AS delayed_delivery_count
+                FROM food_delivery.deliveries AS deliveries
+                WHERE deliveries.actual_time_min > deliveries.estimated_time_min
+              columns_used:
+                - deliveries.delivery_id
+                - deliveries.actual_time_min
+                - deliveries.estimated_time_min
+
+      - name: on_time_delivery_rate_pct
+        business_name: On-Time Delivery Rate (%)
+        description: >-
+          Percentage of deliveries completed on time or earlier than estimated.
+          This is calculated as on-time delivery count divided by total delivery
+          count, multiplied by 100. Uses safe division to avoid division by zero.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT deliveries.delivery_id) = 0 THEN 0
+                    ELSE (
+                      CAST(COUNT(DISTINCT CASE WHEN deliveries.actual_time_min <= deliveries.estimated_time_min THEN deliveries.delivery_id END) AS DOUBLE)
+                      / COUNT(DISTINCT deliveries.delivery_id)
+                    ) * 100
+                  END AS on_time_delivery_rate_pct
+                FROM food_delivery.deliveries AS deliveries
+              columns_used:
+                - deliveries.delivery_id
+                - deliveries.actual_time_min
+                - deliveries.estimated_time_min
+
+      - name: agent_count
+        business_name: Agent Count
+        description: >-
+          Total number of delivery agents registered on the platform. This is the
+          count of distinct agent_id values from the delivery_agents dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT delivery_agents.agent_id) AS agent_count
+                FROM food_delivery.delivery_agents AS delivery_agents
+              columns_used:
+                - delivery_agents.agent_id
+
+      - name: active_agent_count
+        business_name: Active Agent Count
+        description: >-
+          Total number of delivery agents currently active on the platform. This
+          is the count of agents where is_active equals true.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT delivery_agents.agent_id) AS active_agent_count
+                FROM food_delivery.delivery_agents AS delivery_agents
+                WHERE delivery_agents.is_active = true
+              columns_used:
+                - delivery_agents.agent_id
+                - delivery_agents.is_active
+
+      - name: total_agent_payout
+        business_name: Total Agent Payout
+        description: >-
+          Total monetary amount paid to delivery agents. This is the sum of
+          total_payout from the agent_payouts dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(agent_payouts.total_payout) AS total_agent_payout
+                FROM food_delivery.agent_payouts AS agent_payouts
+              columns_used:
+                - agent_payouts.total_payout
+
+      - name: total_base_pay
+        business_name: Total Base Pay
+        description: >-
+          Total base pay amount paid to delivery agents. This is the sum of
+          base_pay from the agent_payouts dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(agent_payouts.base_pay) AS total_base_pay
+                FROM food_delivery.agent_payouts AS agent_payouts
+              columns_used:
+                - agent_payouts.base_pay
+
+      - name: total_distance_bonus
+        business_name: Total Distance Bonus
+        description: >-
+          Total distance bonus amount paid to delivery agents. This is the sum
+          of distance_bonus from the agent_payouts dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(agent_payouts.distance_bonus) AS total_distance_bonus
+                FROM food_delivery.agent_payouts AS agent_payouts
+              columns_used:
+                - agent_payouts.distance_bonus
+
+      - name: average_payout_per_delivery
+        business_name: Average Payout per Delivery
+        description: >-
+          Average payout amount per delivery. This is calculated as total agent
+          payout divided by delivery count. Uses safe division to avoid division
+          by zero.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT agent_payouts.delivery_id) = 0 THEN 0
+                    ELSE SUM(agent_payouts.total_payout) / COUNT(DISTINCT agent_payouts.delivery_id)
+                  END AS average_payout_per_delivery
+                FROM food_delivery.agent_payouts AS agent_payouts
+              columns_used:
+                - agent_payouts.total_payout
+                - agent_payouts.delivery_id
+
+      - name: payment_count
+        business_name: Payment Count
+        description: >-
+          Total number of payment transactions processed. This is the count of
+          distinct payment_id values from the payments dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT payments.payment_id) AS payment_count
+                FROM food_delivery.payments AS payments
+              columns_used:
+                - payments.payment_id
+
+      - name: settled_payment_count
+        business_name: Settled Payment Count
+        description: >-
+          Total number of payments that have been successfully settled. This is
+          the count of payments where payment_status equals 'Settled'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT payments.payment_id) AS settled_payment_count
+                FROM food_delivery.payments AS payments
+                WHERE payments.payment_status = 'Settled'
+              columns_used:
+                - payments.payment_id
+                - payments.payment_status
+
+      - name: total_payment_amount
+        business_name: Total Payment Amount
+        description: >-
+          Total monetary amount processed through payments. This is the sum of
+          amount from the payments dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(payments.amount) AS total_payment_amount
+                FROM food_delivery.payments AS payments
+              columns_used:
+                - payments.amount
+
+      - name: promotion_count
+        business_name: Promotion Count
+        description: >-
+          Total number of promotions defined on the platform. This is the count
+          of distinct promotion_id values from the promotions dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT promotions.promotion_id) AS promotion_count
+                FROM food_delivery.promotions AS promotions
+              columns_used:
+                - promotions.promotion_id
+
+      - name: active_promotion_count
+        business_name: Active Promotion Count
+        description: >-
+          Total number of promotions currently active. This is the count of
+          promotions where is_active equals true.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT promotions.promotion_id) AS active_promotion_count
+                FROM food_delivery.promotions AS promotions
+                WHERE promotions.is_active = true
+              columns_used:
+                - promotions.promotion_id
+                - promotions.is_active
+
+      - name: total_discount_amount
+        business_name: Total Discount Amount
+        description: >-
+          Total monetary discount amount applied through promotions. This is the
+          sum of discount_amount from the order_promotions dataset.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_promotions.discount_amount) AS total_discount_amount
+                FROM food_delivery.order_promotions AS order_promotions
+              columns_used:
+                - order_promotions.discount_amount
+
+      - name: orders_with_promotion_count
+        business_name: Orders with Promotion Count
+        description: >-
+          Total number of orders that had at least one promotion applied. This
+          is the count of distinct order_id values from the order_promotions dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT order_promotions.order_id) AS orders_with_promotion_count
+                FROM food_delivery.order_promotions AS order_promotions
+              columns_used:
+                - order_promotions.order_id
+
+      - name: promotion_usage_rate_pct
+        business_name: Promotion Usage Rate (%)
+        description: >-
+          Percentage of orders that used at least one promotion. This is calculated
+          as orders with promotion count divided by total order count, multiplied
+          by 100. Uses safe division to avoid division by zero.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.order_id) = 0 THEN 0
+                    ELSE (
+                      CAST(COUNT(DISTINCT order_promotions.order_id) AS DOUBLE)
+                      / COUNT(DISTINCT orders.order_id)
+                    ) * 100
+                  END AS promotion_usage_rate_pct
+                FROM food_delivery.orders AS orders
+                LEFT JOIN food_delivery.order_promotions AS order_promotions
+                  ON orders.order_id = order_promotions.order_id
+              columns_used:
+                - orders.order_id
+                - order_promotions.order_id
+
+      - name: average_discount_per_promoted_order
+        business_name: Average Discount per Promoted Order
+        description: >-
+          Average discount amount per order that used a promotion. This is
+          calculated as total discount amount divided by orders with promotion
+          count. Uses safe division to avoid division by zero.
+        return_type: currency_usd
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT order_promotions.order_id) = 0 THEN 0
+                    ELSE SUM(order_promotions.discount_amount) / COUNT(DISTINCT order_promotions.order_id)
+                  END AS average_discount_per_promoted_order
+                FROM food_delivery.order_promotions AS order_promotions
+              columns_used:
+                - order_promotions.discount_amount
+                - order_promotions.order_id
+
+      - name: review_count
+        business_name: Review Count
+        description: >-
+          Total number of reviews submitted by customers. This is the count of
+          distinct review_id values from the reviews dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT reviews.review_id) AS review_count
+                FROM food_delivery.reviews AS reviews
+              columns_used:
+                - reviews.review_id
+
+      - name: average_food_rating
+        business_name: Average Food Rating
+        description: >-
+          Average food quality rating across all reviews. This is the average of
+          food_rating from the reviews dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  AVG(reviews.food_rating) AS average_food_rating
+                FROM food_delivery.reviews AS reviews
+              columns_used:
+                - reviews.food_rating
+
+      - name: average_delivery_rating
+        business_name: Average Delivery Rating
+        description: >-
+          Average delivery experience rating across all reviews. This is the
+          average of delivery_rating from the reviews dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  AVG(reviews.delivery_rating) AS average_delivery_rating
+                FROM food_delivery.reviews AS reviews
+              columns_used:
+                - reviews.delivery_rating
+
+      - name: average_overall_rating
+        business_name: Average Overall Rating
+        description: >-
+          Average overall experience rating across all reviews. This is the
+          average of overall_rating from the reviews dataset.
+        return_type: decimal
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  AVG(reviews.overall_rating) AS average_overall_rating
+                FROM food_delivery.reviews AS reviews
+              columns_used:
+                - reviews.overall_rating
+
+      - name: support_ticket_count
+        business_name: Support Ticket Count
+        description: >-
+          Total number of support tickets raised by customers. This is the count
+          of distinct ticket_id values from the support_tickets dataset.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT support_tickets.ticket_id) AS support_ticket_count
+                FROM food_delivery.support_tickets AS support_tickets
+              columns_used:
+                - support_tickets.ticket_id
+
+      - name: resolved_ticket_count
+        business_name: Resolved Ticket Count
+        description: >-
+          Total number of support tickets that have been resolved. This is the
+          count of tickets where status equals 'Resolved'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT support_tickets.ticket_id) AS resolved_ticket_count
+                FROM food_delivery.support_tickets AS support_tickets
+                WHERE support_tickets.status = 'Resolved'
+              columns_used:
+                - support_tickets.ticket_id
+                - support_tickets.status
+
+      - name: open_ticket_count
+        business_name: Open Ticket Count
+        description: >-
+          Total number of support tickets currently open. This is the count of
+          tickets where status equals 'Open'.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT support_tickets.ticket_id) AS open_ticket_count
+                FROM food_delivery.support_tickets AS support_tickets
+                WHERE support_tickets.status = 'Open'
+              columns_used:
+                - support_tickets.ticket_id
+                - support_tickets.status
+
+      - name: ticket_resolution_rate_pct
+        business_name: Ticket Resolution Rate (%)
+        description: >-
+          Percentage of support tickets that have been resolved. This is calculated
+          as resolved ticket count divided by total ticket count, multiplied by
+          100. Uses safe division to avoid division by zero.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT support_tickets.ticket_id) = 0 THEN 0
+                    ELSE (
+                      CAST(COUNT(DISTINCT CASE WHEN support_tickets.status = 'Resolved' THEN support_tickets.ticket_id END) AS DOUBLE)
+                      / COUNT(DISTINCT support_tickets.ticket_id)
+                    ) * 100
+                  END AS ticket_resolution_rate_pct
+                FROM food_delivery.support_tickets AS support_tickets
+              columns_used:
+                - support_tickets.ticket_id
+                - support_tickets.status
+
+      - name: monthly_revenue
+        business_name: Monthly Revenue
+        description: >-
+          Total revenue aggregated by month. This metric groups orders by month
+          using the ordered_at timestamp and sums the total_amount. Use this for
+          monthly revenue trend analysis.
+        return_type: currency_usd
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  DATE_TRUNC('MONTH', orders.ordered_at) AS order_month,
+                  SUM(orders.total_amount) AS monthly_revenue
+                FROM food_delivery.orders AS orders
+                GROUP BY DATE_TRUNC('MONTH', orders.ordered_at)
+                ORDER BY order_month
+              columns_used:
+                - orders.ordered_at
+                - orders.total_amount
+
+      - name: monthly_order_count
+        business_name: Monthly Order Count
+        description: >-
+          Total order count aggregated by month. This metric groups orders by
+          month using the ordered_at timestamp and counts distinct order_id values.
+          Use this for monthly order volume trend analysis.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  DATE_TRUNC('MONTH', orders.ordered_at) AS order_month,
+                  COUNT(DISTINCT orders.order_id) AS monthly_order_count
+                FROM food_delivery.orders AS orders
+                GROUP BY DATE_TRUNC('MONTH', orders.ordered_at)
+                ORDER BY order_month
+              columns_used:
+                - orders.ordered_at
+                - orders.order_id
+
+      - name: revenue_by_restaurant
+        business_name: Revenue by Restaurant
+        description: >-
+          Total revenue aggregated by restaurant. This metric groups orders by
+          restaurant_id and sums the total_amount. Use this for restaurant
+          performance analysis.
+        return_type: currency_usd
+        result_grain: one row per restaurant
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  restaurants.restaurant_id,
+                  restaurants.name AS restaurant_name,
+                  SUM(orders.total_amount) AS revenue_by_restaurant
+                FROM food_delivery.orders AS orders
+                INNER JOIN food_delivery.restaurants AS restaurants
+                  ON orders.restaurant_id = restaurants.restaurant_id
+                GROUP BY restaurants.restaurant_id, restaurants.name
+                ORDER BY revenue_by_restaurant DESC
+              columns_used:
+                - orders.restaurant_id
+                - orders.total_amount
+                - restaurants.restaurant_id
+                - restaurants.name
+
+      - name: revenue_by_customer
+        business_name: Revenue by Customer
+        description: >-
+          Total revenue aggregated by customer. This metric groups orders by
+          customer_id and sums the total_amount. Use this for customer lifetime
+          value analysis.
+        return_type: currency_usd
+        result_grain: one row per customer
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  customers.customer_id,
+                  customers.first_name,
+                  customers.last_name,
+                  SUM(orders.total_amount) AS revenue_by_customer
+                FROM food_delivery.orders AS orders
+                INNER JOIN food_delivery.customers AS customers
+                  ON orders.customer_id = customers.customer_id
+                GROUP BY customers.customer_id, customers.first_name, customers.last_name
+                ORDER BY revenue_by_customer DESC
+              columns_used:
+                - orders.customer_id
+                - orders.total_amount
+                - customers.customer_id
+                - customers.first_name
+                - customers.last_name
+
+      - name: revenue_by_menu_item
+        business_name: Revenue by Menu Item
+        description: >-
+          Total revenue aggregated by menu item. This metric groups order_items
+          by item_id and sums the line_total. Use this for product performance
+          analysis.
+        return_type: currency_usd
+        result_grain: one row per menu item
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  menu_items.item_id,
+                  menu_items.name AS item_name,
+                  SUM(order_items.line_total) AS revenue_by_menu_item
+                FROM food_delivery.order_items AS order_items
+                INNER JOIN food_delivery.menu_items AS menu_items
+                  ON order_items.item_id = menu_items.item_id
+                GROUP BY menu_items.item_id, menu_items.name
+                ORDER BY revenue_by_menu_item DESC
+              columns_used:
+                - order_items.item_id
+                - order_items.line_total
+                - menu_items.item_id
+                - menu_items.name
+
+      - name: deliveries_by_agent
+        business_name: Deliveries by Agent
+        description: >-
+          Total delivery count aggregated by delivery agent. This metric groups
+          deliveries by agent_id and counts distinct delivery_id values. Use this
+          for agent performance analysis.
+        return_type: integer
+        result_grain: one row per agent
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  delivery_agents.agent_id,
+                  delivery_agents.first_name,
+                  delivery_agents.last_name,
+                  COUNT(DISTINCT deliveries.delivery_id) AS deliveries_by_agent
+                FROM food_delivery.deliveries AS deliveries
+                INNER JOIN food_delivery.delivery_agents AS delivery_agents
+                  ON deliveries.agent_id = delivery_agents.agent_id
+                GROUP BY delivery_agents.agent_id, delivery_agents.first_name, delivery_agents.last_name
+                ORDER BY deliveries_by_agent DESC
+              columns_used:
+                - deliveries.agent_id
+                - deliveries.delivery_id
+                - delivery_agents.agent_id
+                - delivery_agents.first_name
+                - delivery_agents.last_name
