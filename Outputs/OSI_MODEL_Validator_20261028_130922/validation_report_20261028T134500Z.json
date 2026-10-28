@@ -1,0 +1,103 @@
+{
+  "overall_validation_score": 94.7,
+  "accuracy_score": 98.0,
+  "efficiency_score": 85.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation",
+      "issue": "All 18 datasets in the semantic model have corresponding tables in the glossary with complete metadata coverage.",
+      "recommendation": "No action required. Maintain current documentation standards."
+    },
+    {
+      "severity": "Low",
+      "area": "Relationships",
+      "issue": "All 30 relationships defined in the semantic model have matching FK constraints in the glossary.",
+      "recommendation": "No action required. Continue enforcing referential integrity."
+    },
+    {
+      "severity": "Low",
+      "area": "Metrics",
+      "issue": "All 60 metrics reference only columns that exist in the glossary datasets.",
+      "recommendation": "No action required. Maintain metric validation process."
+    },
+    {
+      "severity": "Low",
+      "area": "Attributes",
+      "issue": "All 172 columns in the glossary have business terms, descriptions, and data types documented.",
+      "recommendation": "No action required. Continue comprehensive column documentation."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Data Types",
+      "issue": "All data types in the glossary (BIGINT, DOUBLE, STRING, BOOLEAN, TIMESTAMP, DATE) match the sql_type declarations in the semantic model.",
+      "recommendation": "No action required. Type consistency is maintained."
+    },
+    {
+      "severity": "Low",
+      "area": "PII Flags",
+      "issue": "27 PII fields are consistently marked in both the glossary (PII constraint) and semantic model (PII constraint).",
+      "recommendation": "No action required. Continue PII governance practices."
+    },
+    {
+      "severity": "Medium",
+      "area": "Business Definitions",
+      "issue": "The semantic model's ai_context provides extensive grain definitions and double-counting prevention guidance that is not explicitly documented in the glossary tables.",
+      "recommendation": "Consider adding grain definitions and analytical usage notes to the glossary table descriptions to improve alignment."
+    },
+    {
+      "severity": "Low",
+      "area": "Relationship Cardinality",
+      "issue": "All relationship types (one-to-one, one-to-many, many-to-one) declared in the semantic model align with the FK/PK constraints documented in the glossary.",
+      "recommendation": "No action required. Relationship accuracy is verified."
+    },
+    {
+      "severity": "Low",
+      "area": "Naming Conventions",
+      "issue": "Consistent snake_case naming convention is applied across all tables, columns, and fields in both artifacts.",
+      "recommendation": "No action required. Naming standards are properly enforced."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Metric Definitions",
+      "issue": "Multiple count metrics (order_count, customer_count, restaurant_count, delivery_count, agent_count, payment_count, promotion_count, review_count, support_ticket_count) follow identical patterns with only the table name varying.",
+      "recommendation": "Consider creating a parameterized count metric template or macro to reduce repetition and improve maintainability."
+    },
+    {
+      "severity": "Medium",
+      "area": "Redundant Documentation",
+      "issue": "Several metrics have nearly identical descriptions that differ only in the entity name (e.g., \"Total number of X registered on the platform\").",
+      "recommendation": "Standardize metric description templates to reduce verbosity while maintaining clarity."
+    },
+    {
+      "severity": "Low",
+      "area": "Aggregation Patterns",
+      "issue": "Revenue metrics (total_revenue, subtotal_revenue, delivery_fee_revenue, tax_revenue, tip_revenue) use identical SUM aggregation patterns on different columns from the same orders table.",
+      "recommendation": "Consider creating a base revenue CTE that computes all revenue components in a single scan, then reference it in individual metrics."
+    },
+    {
+      "severity": "Medium",
+      "area": "Time-Series Metrics",
+      "issue": "Monthly aggregation metrics (monthly_revenue, monthly_order_count) duplicate the DATE_TRUNC logic and could benefit from a shared time dimension.",
+      "recommendation": "Introduce a reusable time dimension or date spine table to standardize time-series aggregations across all metrics."
+    },
+    {
+      "severity": "Low",
+      "area": "Join Patterns",
+      "issue": "Several metrics (orders_per_customer, revenue_per_customer, orders_per_restaurant) perform similar joins and could share a common base query.",
+      "recommendation": "Refactor related metrics to use shared CTEs or views to reduce query complexity and improve performance."
+    },
+    {
+      "severity": "Medium",
+      "area": "Safe Division",
+      "issue": "Multiple metrics implement identical CASE WHEN division-by-zero checks.",
+      "recommendation": "Create a reusable safe_divide function or macro to eliminate repetitive null-handling logic."
+    }
+  ]
+}
