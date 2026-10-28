@@ -1,0 +1,878 @@
+version: 1.1
+
+comment: |-
+  Databricks Unity Catalog Metric View for Food Delivery Platform Analytics
+  
+  Generated from OSI Semantic Model: food_delivery_semantic_model
+  Spine Dataset: order_items (one row per order line item)
+  Warehouse: dex-demo
+  Schema: food_delivery
+  
+  This metric view enables comprehensive analysis of food delivery operations including:
+  - Order and revenue analysis at item and order levels
+  - Customer behavior and segmentation
+  - Restaurant performance and menu analytics
+  - Delivery operations and agent performance
+  - Payment processing and promotion effectiveness
+  - Customer satisfaction through reviews
+  - Support ticket analysis
+  
+  Relationships Implemented:
+  - orders_to_customers: Each order placed by one customer
+  - orders_to_restaurants: Each order fulfilled by one restaurant
+  - orders_to_order_items: Each order contains one or more items
+  - order_items_to_menu_items: Each item references a menu item
+  - menu_items_to_menu_sections: Each menu item belongs to a section
+  - menu_items_to_restaurants: Each menu item offered by one restaurant
+  - orders_to_deliveries: Each order has at most one delivery
+  - deliveries_to_delivery_agents: Each delivery handled by one agent
+  - deliveries_to_agent_payouts: Each delivery has at most one payout
+  - orders_to_payments: Each order has at most one payment
+  - orders_to_order_promotions: Each order can have multiple promotions
+  - order_promotions_to_promotions: Each promotion usage references a promotion
+  - orders_to_reviews: Each order can have at most one review
+  - reviews_to_customers: Each review submitted by one customer
+  - reviews_to_restaurants: Each review evaluates one restaurant
+  - reviews_to_delivery_agents: Each review evaluates one agent
+  - orders_to_support_tickets: Each order can have multiple tickets
+  - restaurants_to_restaurant_category_map: Many-to-many restaurant categories
+  - restaurant_category_map_to_restaurant_categories: Category mapping
+  - restaurants_to_operating_hours: Restaurant hours by day
+  - customers_to_customer_addresses: Customer delivery addresses
+  
+  PII Mode: restricted (PII fields excluded except city/state with access restrictions)
+  Dedup Mode: off (order-level measures not represented to avoid duplication)
+  
+  NOT REPRESENTED (require order-grain view to avoid duplication):
+  - total_order_revenue (orders.total_amount duplicates per line)
+  - total_order_subtotal (orders.subtotal duplicates per line)
+  - total_delivery_fees (orders.delivery_fee duplicates per line)
+  - total_tax_collected (orders.tax duplicates per line)
+  - total_tips (orders.tip duplicates per line)
+
+source: '`dex-demo`.food_delivery.order_items'
+
+joins:
+  - name: orders
+    source: '`dex-demo`.food_delivery.orders'
+    "on": source.order_id = orders.order_id
+    joins:
+      - name: customers
+        source: '`dex-demo`.food_delivery.customers'
+        "on": orders.customer_id = customers.customer_id
+        rely:
+          at_most_one_match: true
+      - name: payments
+        source: '`dex-demo`.food_delivery.payments'
+        "on": orders.order_id = payments.order_id
+      - name: deliveries
+        source: '`dex-demo`.food_delivery.deliveries'
+        "on": orders.order_id = deliveries.order_id
+        joins:
+          - name: delivery_agents
+            source: '`dex-demo`.food_delivery.delivery_agents'
+            "on": deliveries.agent_id = delivery_agents.agent_id
+            rely:
+              at_most_one_match: true
+          - name: agent_payouts
+            source: '`dex-demo`.food_delivery.agent_payouts'
+            "on": deliveries.delivery_id = agent_payouts.delivery_id
+      - name: reviews
+        source: '`dex-demo`.food_delivery.reviews'
+        "on": orders.order_id = reviews.order_id
+      - name: order_promotions
+        source: '`dex-demo`.food_delivery.order_promotions'
+        "on": orders.order_id = order_promotions.order_id
+        joins:
+          - name: promotions
+            source: '`dex-demo`.food_delivery.promotions'
+            "on": order_promotions.promotion_id = promotions.promotion_id
+            rely:
+              at_most_one_match: true
+    rely:
+      at_most_one_match: true
+  - name: restaurants
+    source: '`dex-demo`.food_delivery.restaurants'
+    "on": orders.restaurant_id = restaurants.restaurant_id
+    joins:
+      - name: restaurant_category_map
+        source: '`dex-demo`.food_delivery.restaurant_category_map'
+        "on": restaurants.restaurant_id = restaurant_category_map.restaurant_id
+        joins:
+          - name: restaurant_categories
+            source: '`dex-demo`.food_delivery.restaurant_categories'
+            "on": restaurant_category_map.category_id = restaurant_categories.category_id
+            rely:
+              at_most_one_match: true
+    rely:
+      at_most_one_match: true
+  - name: menu_items
+    source: '`dex-demo`.food_delivery.menu_items'
+    "on": source.item_id = menu_items.item_id
+    joins:
+      - name: menu_sections
+        source: '`dex-demo`.food_delivery.menu_sections'
+        "on": menu_items.section_id = menu_sections.section_id
+        rely:
+          at_most_one_match: true
+    rely:
+      at_most_one_match: true
+
+dimensions:
+  - name: order_item_id
+    expr: source.order_item_id
+    display_name: Order Item ID
+    comment: Unique identifier for an item within a customer order.
+    synonyms:
+      - line item id
+      - item id
+      - line id
+
+  - name: order_id
+    expr: source.order_id
+    display_name: Order ID
+    comment: Unique identifier for a customer order.
+    synonyms:
+      - order number
+      - order reference
+
+  - name: item_id
+    expr: source.item_id
+    display_name: Menu Item ID
+    comment: References the menu item included in the order.
+    synonyms:
+      - product id
+      - menu item reference
+
+  - name: item_name
+    expr: source.item_name
+    display_name: Item Name
+    comment: Name of the item as recorded on the order.
+    synonyms:
+      - product name
+      - menu item name
+      - dish name
+
+  - name: customer_id
+    expr: orders.customers.customer_id
+    display_name: Customer ID
+    comment: Unique identifier for a customer.
+    synonyms:
+      - customer number
+      - customer reference
+
+  - name: customer_registered_at
+    expr: orders.customers.registered_at
+    display_name: Customer Registered At
+    comment: Timestamp recording when the customer registered for the service.
+
+  - name: customer_registration_month
+    expr: DATE_TRUNC('MONTH', orders.customers.registered_at)
+    display_name: Customer Registration Month
+    comment: Month when the customer registered, derived from registration timestamp.
+    synonyms:
+      - registration month
+      - signup month
+
+  - name: customer_is_active
+    expr: orders.customers.is_active
+    display_name: Customer Is Active
+    comment: Indicates whether the customer account is currently active.
+    synonyms:
+      - active customer
+      - customer active status
+
+  - name: customer_is_premium
+    expr: orders.customers.is_premium
+    display_name: Customer Is Premium
+    comment: Indicates whether the customer is enrolled in a premium program.
+    synonyms:
+      - premium customer
+      - premium member
+
+  - name: customer_preferred_language
+    expr: orders.customers.preferred_language
+    display_name: Customer Preferred Language
+    comment: Language preference used for communications with the customer.
+    synonyms:
+      - language preference
+      - preferred language
+
+  - name: customer_city
+    expr: orders.customers.city
+    display_name: Customer City
+    comment: City where the customer is located. PII - restrict access
+    synonyms:
+      - city
+
+  - name: customer_state
+    expr: orders.customers.state
+    display_name: Customer State
+    comment: State or region where the customer is located. PII - restrict access
+    synonyms:
+      - state
+
+  - name: restaurant_id
+    expr: restaurants.restaurant_id
+    display_name: Restaurant ID
+    comment: Unique identifier for a restaurant.
+    synonyms:
+      - restaurant number
+      - restaurant reference
+
+  - name: restaurant_name
+    expr: restaurants.name
+    display_name: Restaurant Name
+    comment: Display name of the restaurant.
+    synonyms:
+      - restaurant
+
+  - name: restaurant_city
+    expr: restaurants.city
+    display_name: Restaurant City
+    comment: City where the restaurant operates.
+    synonyms:
+      - restaurant location city
+
+  - name: restaurant_state
+    expr: restaurants.state
+    display_name: Restaurant State
+    comment: State or region where the restaurant operates.
+    synonyms:
+      - restaurant location state
+
+  - name: restaurant_zip_code
+    expr: restaurants.zip_code
+    display_name: Restaurant Zip Code
+    comment: Postal or ZIP code for the restaurant location.
+
+  - name: restaurant_is_active
+    expr: restaurants.is_active
+    display_name: Restaurant Is Active
+    comment: Indicates whether the restaurant is currently active on the platform.
+    synonyms:
+      - active restaurant
+
+  - name: restaurant_created_at
+    expr: restaurants.created_at
+    display_name: Restaurant Created At
+    comment: Timestamp recording when the restaurant record was created on the platform.
+
+  - name: category_id
+    expr: restaurants.restaurant_category_map.restaurant_categories.category_id
+    display_name: Category ID
+    comment: Unique identifier for a restaurant category.
+
+  - name: category_name
+    expr: restaurants.restaurant_category_map.restaurant_categories.category_name
+    display_name: Category Name
+    comment: Name of the restaurant category, such as Italian or Fast Food.
+    synonyms:
+      - cuisine type
+      - restaurant category
+      - food category
+
+  - name: menu_section_id
+    expr: menu_items.menu_sections.section_id
+    display_name: Menu Section ID
+    comment: Unique identifier for a menu section.
+
+  - name: menu_section_name
+    expr: menu_items.menu_sections.name
+    display_name: Menu Section Name
+    comment: Display name of the menu section, such as Appetizers or Desserts.
+    synonyms:
+      - section name
+      - menu category
+
+  - name: menu_section_is_available
+    expr: menu_items.menu_sections.is_available
+    display_name: Menu Section Is Available
+    comment: Indicates whether the menu section is currently available.
+
+  - name: menu_item_is_vegetarian
+    expr: menu_items.is_vegetarian
+    display_name: Is Vegetarian
+    comment: Indicates whether the menu item is suitable for vegetarians.
+    synonyms:
+      - vegetarian
+
+  - name: menu_item_is_vegan
+    expr: menu_items.is_vegan
+    display_name: Is Vegan
+    comment: Indicates whether the menu item is suitable for vegans.
+    synonyms:
+      - vegan
+
+  - name: menu_item_is_gluten_free
+    expr: menu_items.is_gluten_free
+    display_name: Is Gluten Free
+    comment: Indicates whether the menu item is gluten free.
+    synonyms:
+      - gluten free
+
+  - name: menu_item_spice_level
+    expr: menu_items.spice_level
+    display_name: Spice Level
+    comment: Indicates the spice level of the menu item, such as Mild or Spicy.
+    synonyms:
+      - spiciness
+
+  - name: menu_item_is_available
+    expr: menu_items.is_available
+    display_name: Menu Item Is Available
+    comment: Indicates whether the menu item is currently available to order.
+    synonyms:
+      - item available
+
+  - name: menu_item_is_popular
+    expr: menu_items.is_popular
+    display_name: Is Popular
+    comment: Indicates whether the menu item is marked as popular based on demand.
+    synonyms:
+      - popular item
+
+  - name: order_status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current status of the order, such as Placed, Delivered, or Cancelled.
+    synonyms:
+      - status
+      - order state
+
+  - name: order_ordered_at
+    expr: orders.ordered_at
+    display_name: Order Ordered At
+    comment: Timestamp recording when the order was placed.
+    synonyms:
+      - order date
+      - order time
+
+  - name: order_month
+    expr: DATE_TRUNC('MONTH', orders.ordered_at)
+    display_name: Order Month
+    comment: Month when the order was placed, derived from order timestamp.
+    synonyms:
+      - order period
+      - month
+
+  - name: order_estimated_delivery_at
+    expr: orders.estimated_delivery_at
+    display_name: Estimated Delivery At
+    comment: Timestamp indicating the estimated delivery time communicated to the customer.
+
+  - name: order_delivered_at
+    expr: orders.delivered_at
+    display_name: Order Delivered At
+    comment: Timestamp recording when the order was actually delivered.
+
+  - name: order_cancelled_at
+    expr: orders.cancelled_at
+    display_name: Order Cancelled At
+    comment: Timestamp recording when the order was cancelled, if applicable.
+
+  - name: order_cancellation_reason
+    expr: orders.cancellation_reason
+    display_name: Cancellation Reason
+    comment: Text describing the reason the order was cancelled.
+    synonyms:
+      - cancel reason
+
+  - name: order_is_scheduled
+    expr: orders.is_scheduled
+    display_name: Is Scheduled
+    comment: Indicates whether the order was scheduled for a future time.
+    synonyms:
+      - scheduled order
+
+  - name: order_channel
+    expr: orders.channel
+    display_name: Order Channel
+    comment: Order channel used, such as Mobile App, Web, or Partner Platform.
+    synonyms:
+      - channel
+      - sales channel
+
+  - name: payment_id
+    expr: orders.payments.payment_id
+    display_name: Payment ID
+    comment: Unique identifier for a payment transaction.
+
+  - name: payment_status
+    expr: orders.payments.payment_status
+    display_name: Payment Status
+    comment: Indicates the current status of the payment, such as Authorized or Settled.
+    synonyms:
+      - payment state
+
+  - name: payment_processed_at
+    expr: orders.payments.processed_at
+    display_name: Payment Processed At
+    comment: Timestamp recording when the payment was processed.
+
+  - name: paid_month
+    expr: DATE_TRUNC('MONTH', orders.payments.processed_at)
+    display_name: Payment Month
+    comment: Month when the payment was processed, derived from payment timestamp.
+
+  - name: delivery_id
+    expr: orders.deliveries.delivery_id
+    display_name: Delivery ID
+    comment: Unique identifier for a delivery.
+
+  - name: delivery_status
+    expr: orders.deliveries.delivery_status
+    display_name: Delivery Status
+    comment: Indicates the current status of the delivery, such as In Transit or Delivered.
+    synonyms:
+      - shipment status
+
+  - name: delivery_pickup_time
+    expr: orders.deliveries.pickup_time
+    display_name: Delivery Pickup Time
+    comment: Timestamp recording when the agent picked up the order from the restaurant.
+
+  - name: delivery_delivered_time
+    expr: orders.deliveries.delivered_time
+    display_name: Delivery Delivered Time
+    comment: Timestamp recording when the order was delivered to the customer.
+
+  - name: shipped_month
+    expr: DATE_TRUNC('MONTH', orders.deliveries.pickup_time)
+    display_name: Shipped Month
+    comment: Month when the delivery was picked up, derived from pickup timestamp.
+
+  - name: agent_id
+    expr: orders.deliveries.delivery_agents.agent_id
+    display_name: Agent ID
+    comment: Unique identifier for a delivery agent.
+
+  - name: agent_vehicle_type
+    expr: orders.deliveries.delivery_agents.vehicle_type
+    display_name: Agent Vehicle Type
+    comment: Type of vehicle used by the delivery agent, such as Bike or Car.
+    synonyms:
+      - vehicle type
+
+  - name: agent_city
+    expr: orders.deliveries.delivery_agents.city
+    display_name: Agent City
+    comment: City where the delivery agent primarily operates.
+
+  - name: agent_state
+    expr: orders.deliveries.delivery_agents.state
+    display_name: Agent State
+    comment: State or region where the delivery agent primarily operates.
+
+  - name: agent_is_active
+    expr: orders.deliveries.delivery_agents.is_active
+    display_name: Agent Is Active
+    comment: Indicates whether the delivery agent is currently active on the platform.
+    synonyms:
+      - active agent
+
+  - name: agent_joined_at
+    expr: orders.deliveries.delivery_agents.joined_at
+    display_name: Agent Joined At
+    comment: Timestamp recording when the delivery agent joined the platform.
+
+  - name: payout_id
+    expr: orders.deliveries.agent_payouts.payout_id
+    display_name: Payout ID
+    comment: Unique identifier for an agent payout record.
+
+  - name: payout_status
+    expr: orders.deliveries.agent_payouts.payout_status
+    display_name: Payout Status
+    comment: Indicates the current status of the payout, such as Pending or Completed.
+
+  - name: payout_date
+    expr: orders.deliveries.agent_payouts.payout_date
+    display_name: Payout Date
+    comment: Timestamp recording when the payout was processed.
+
+  - name: promotion_id
+    expr: orders.order_promotions.promotions.promotion_id
+    display_name: Promotion ID
+    comment: Unique identifier for a promotion.
+
+  - name: promotion_code
+    expr: orders.order_promotions.promotions.code
+    display_name: Promotion Code
+    comment: Promotion code entered by customers to redeem the offer.
+    synonyms:
+      - promo code
+      - coupon code
+
+  - name: promotion_discount_type
+    expr: orders.order_promotions.promotions.discount_type
+    display_name: Discount Type
+    comment: Type of discount, such as Percentage or Fixed Amount.
+    synonyms:
+      - discount category
+
+  - name: promotion_is_active
+    expr: orders.order_promotions.promotions.is_active
+    display_name: Promotion Is Active
+    comment: Indicates whether the promotion is currently active.
+    synonyms:
+      - active promotion
+
+  - name: promotion_start_date
+    expr: orders.order_promotions.promotions.start_date
+    display_name: Promotion Start Date
+    comment: Timestamp indicating when the promotion becomes active.
+
+  - name: promotion_end_date
+    expr: orders.order_promotions.promotions.end_date
+    display_name: Promotion End Date
+    comment: Timestamp indicating when the promotion expires.
+
+  - name: review_id
+    expr: orders.reviews.review_id
+    display_name: Review ID
+    comment: Unique identifier for a customer review.
+
+  - name: review_reviewed_at
+    expr: orders.reviews.reviewed_at
+    display_name: Reviewed At
+    comment: Timestamp recording when the review was submitted.
+
+  - name: review_is_anonymous
+    expr: orders.reviews.is_anonymous
+    display_name: Is Anonymous Review
+    comment: Indicates whether the review is displayed anonymously.
+    synonyms:
+      - anonymous review
+
+measures:
+  - name: total_line_item_revenue
+    expr: SUM(source.line_total)
+    display_name: Total Line Item Revenue
+    comment: Total revenue from order items at the item level. Use this metric for product-level revenue analysis.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - item revenue
+      - line revenue
+      - product revenue
+
+  - name: total_units_sold
+    expr: SUM(source.quantity)
+    display_name: Total Units Sold
+    comment: Total quantity of items sold across all orders.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - quantity sold
+      - items sold
+      - units
+
+  - name: average_unit_price
+    expr: AVG(source.unit_price)
+    display_name: Average Unit Price
+    comment: Average price per unit of items ordered.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg price
+      - mean unit price
+
+  - name: average_line_item_value
+    expr: ROUND(MEASURE(total_line_item_revenue) / NULLIF(COUNT(source.order_item_id), 0), 2)
+    display_name: Average Line Item Value
+    comment: Average revenue per order line item.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg line value
+      - average item value
+
+  - name: order_count
+    expr: COUNT(DISTINCT orders.order_id)
+    display_name: Order Count
+    comment: Counts only orders with at least one line item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of orders
+      - order volume
+      - total orders
+
+  - name: average_units_per_order
+    expr: ROUND(CAST(MEASURE(total_units_sold) AS DOUBLE) / NULLIF(MEASURE(order_count), 0), 2)
+    display_name: Average Units Per Order
+    comment: Average number of items per order.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg items per order
+      - items per order
+
+  - name: customer_count
+    expr: COUNT(DISTINCT orders.customers.customer_id)
+    display_name: Customer Count
+    comment: Counts only customers that appear on at least one order with line items.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of customers
+      - total customers
+
+  - name: active_customer_count
+    expr: COUNT(DISTINCT CASE WHEN orders.customers.is_active = TRUE THEN orders.customers.customer_id END)
+    display_name: Active Customer Count
+    comment: Counts only active customers that appear on at least one order with line items.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - active customers
+
+  - name: restaurant_count
+    expr: COUNT(DISTINCT restaurants.restaurant_id)
+    display_name: Restaurant Count
+    comment: Counts only restaurants that appear on at least one order with line items.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of restaurants
+      - total restaurants
+
+  - name: menu_item_count
+    expr: COUNT(DISTINCT menu_items.item_id)
+    display_name: Menu Item Count
+    comment: Counts only menu items that appear on at least one order line.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - product count
+      - item count
+
+  - name: delivery_count
+    expr: COUNT(DISTINCT orders.deliveries.delivery_id)
+    display_name: Delivery Count
+    comment: Deliveries are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of deliveries
+      - shipment count
+
+  - name: delivery_time_days
+    expr: ROUND(AVG(DATEDIFF(orders.deliveries.delivered_time, orders.deliveries.pickup_time)), 2)
+    display_name: Delivery Time Days
+    comment: Average time in days from pickup to delivery. Deliveries are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg delivery time
+      - delivery duration
+
+  - name: total_distance_delivered_km
+    expr: SUM(orders.deliveries.distance_km)
+    display_name: Total Distance Delivered (KM)
+    comment: Total distance in kilometers traveled across all deliveries. Deliveries are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - total distance
+      - distance traveled
+
+  - name: average_delivery_distance_km
+    expr: ROUND(AVG(orders.deliveries.distance_km), 2)
+    display_name: Average Delivery Distance (KM)
+    comment: Average distance in kilometers per delivery.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg distance
+      - mean delivery distance
+
+  - name: average_actual_delivery_time_min
+    expr: ROUND(AVG(orders.deliveries.actual_time_min), 2)
+    display_name: Average Actual Delivery Time (Minutes)
+    comment: Average actual delivery time in minutes.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg delivery time
+      - actual time
+
+  - name: average_estimated_delivery_time_min
+    expr: ROUND(AVG(orders.deliveries.estimated_time_min), 2)
+    display_name: Average Estimated Delivery Time (Minutes)
+    comment: Average estimated delivery time in minutes.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - estimated time
+
+  - name: total_discount_amount
+    expr: SUM(orders.order_promotions.discount_amount)
+    display_name: Total Discount Amount
+    comment: Total discount amount given through promotions.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - discount total
+      - promotion discount
+
+  - name: promotion_usage_count
+    expr: COUNT(orders.order_promotions.order_promotion_id)
+    display_name: Promotion Usage Count
+    comment: Total number of times promotions have been applied to orders.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - promo usage
+      - promotion count
+
+  - name: average_food_rating
+    expr: ROUND(AVG(orders.reviews.food_rating), 2)
+    display_name: Average Food Rating
+    comment: Average food quality rating from customer reviews.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - food rating
+      - avg food score
+
+  - name: average_delivery_rating
+    expr: ROUND(AVG(orders.reviews.delivery_rating), 2)
+    display_name: Average Delivery Rating
+    comment: Average delivery experience rating from customer reviews.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - delivery rating
+      - avg delivery score
+
+  - name: average_overall_rating
+    expr: ROUND(AVG(orders.reviews.overall_rating), 2)
+    display_name: Average Overall Rating
+    comment: Average overall experience rating from customer reviews.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - overall rating
+      - avg rating
+
+  - name: review_count
+    expr: COUNT(DISTINCT orders.reviews.review_id)
+    display_name: Review Count
+    comment: Total number of customer reviews submitted.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of reviews
+      - total reviews
+
+  - name: agent_count
+    expr: COUNT(DISTINCT orders.deliveries.delivery_agents.agent_id)
+    display_name: Agent Count
+    comment: Total number of delivery agents that appear on at least one delivery.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - number of agents
+      - total agents
+
+  - name: average_menu_item_price
+    expr: ROUND(AVG(menu_items.price), 2)
+    display_name: Average Menu Item Price
+    comment: Average price of menu items.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg item price
+      - mean price
+
+  - name: average_menu_item_calories
+    expr: ROUND(AVG(menu_items.calories), 2)
+    display_name: Average Menu Item Calories
+    comment: Average number of calories per menu item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg calories
+      - calorie average
