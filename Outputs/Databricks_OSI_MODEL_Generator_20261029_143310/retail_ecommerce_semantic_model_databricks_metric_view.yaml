@@ -1,0 +1,640 @@
+version: 1.1
+
+comment: |-
+  Databricks Unity Catalog Metric View for retail_ecommerce_semantic_model
+  Generated from OSI Semantic Model version 1.0
+  
+  Spine: order_items (ecom_bronze.order_items)
+  Warehouse: dex-demo
+  Schema: ecom_bronze
+  
+  Relationships represented (7):
+  - orders_to_customers: orders.customer_id = customers.customer_id
+  - order_items_to_orders: order_items.order_id = orders.order_id
+  - order_items_to_products: order_items.product_id = products.product_id
+  - products_to_product_categories: products.category_id = product_categories.category_id
+  - product_categories_hierarchy: product_categories.parent_category_id = parent_categories.category_id
+  - payments_to_orders: payments.order_id = orders.order_id
+  - shipments_to_orders: shipments.order_id = orders.order_id
+  
+  Grouped metrics (measure + dimension pairings):
+  - revenue_by_customer_segment: total_line_item_revenue + customer_segment
+  - revenue_by_sales_channel: total_line_item_revenue + sales_channel
+  - revenue_by_product: total_line_item_revenue + product_name
+  - revenue_by_category: total_line_item_revenue + category_name
+  - revenue_by_brand: total_line_item_revenue + product_brand
+  - revenue_by_payment_method: total_payment_amount + payment_method
+  - orders_by_status: order_count + order_status
+  - shipments_by_status: shipment_count + shipment_status
+  - payments_by_status: payment_transaction_count + payment_status
+  - revenue_by_month: total_line_item_revenue + order_month
+  - orders_by_month: order_count + order_month
+  - customers_by_month: customer_count + order_month (counts only customers who ordered)
+  
+  PII_MODE: restricted
+  DEDUP_MODE: off
+  
+  NOT REPRESENTED (require different grain or DEDUP_MODE on):
+  - total_revenue (order-level, requires DEDUP_MODE on)
+  - total_subtotal_revenue (order-level, requires DEDUP_MODE on)
+  - total_discount_amount (order-level, requires DEDUP_MODE on)
+  - total_tax_amount (order-level, requires DEDUP_MODE on)
+  - total_shipping_fee (order-level, requires DEDUP_MODE on)
+  - total_inventory_value (requires products table as grain)
+  - stock_quantity (requires products table as grain)
+  - average_cost_price (requires products table as grain)
+  - catalog_unit_price (requires products table as grain)
+
+source: '`dex-demo`.ecom_bronze.order_items'
+
+joins:
+  - name: orders
+    source: '`dex-demo`.ecom_bronze.orders'
+    "on": source.order_id = orders.order_id
+    joins:
+      - name: customers
+        source: '`dex-demo`.ecom_bronze.customers'
+        "on": orders.customer_id = customers.customer_id
+        rely:
+          at_most_one_match: true
+      - name: payments
+        source: '`dex-demo`.ecom_bronze.payments'
+        "on": orders.order_id = payments.order_id
+      - name: shipments
+        source: '`dex-demo`.ecom_bronze.shipments'
+        "on": orders.order_id = shipments.order_id
+    rely:
+      at_most_one_match: true
+  - name: products
+    source: '`dex-demo`.ecom_bronze.products'
+    "on": source.product_id = products.product_id
+    joins:
+      - name: product_categories
+        source: '`dex-demo`.ecom_bronze.product_categories'
+        "on": products.category_id = product_categories.category_id
+        joins:
+          - name: parent_categories
+            source: '`dex-demo`.ecom_bronze.product_categories'
+            "on": product_categories.parent_category_id = parent_categories.category_id
+            rely:
+              at_most_one_match: true
+        rely:
+          at_most_one_match: true
+    rely:
+      at_most_one_match: true
+
+dimensions:
+  - name: order_item_id
+    expr: source.order_item_id
+    display_name: Order Item ID
+    comment: Unique identifier for an order line item.
+    synonyms:
+      - line item id
+      - item id
+  
+  - name: order_id
+    expr: source.order_id
+    display_name: Order ID
+    comment: References the related order record.
+    synonyms:
+      - order identifier
+  
+  - name: line_number
+    expr: source.line_number
+    display_name: Line Number
+    comment: Sequential line number of the item within the order.
+  
+  - name: product_id
+    expr: source.product_id
+    display_name: Product ID
+    comment: References the related product record.
+    synonyms:
+      - product identifier
+  
+  - name: customer_id
+    expr: orders.customers.customer_id
+    display_name: Customer ID
+    comment: Unique identifier for a customer.
+    synonyms:
+      - customer identifier
+  
+  - name: customer_code
+    expr: orders.customers.customer_code
+    display_name: Customer Code
+    comment: Business-defined code used to uniquely reference the customer.
+  
+  - name: gender
+    expr: orders.customers.gender
+    display_name: Gender
+    comment: Indicates the gender of the customer as provided. PII - restrict access
+  
+  - name: customer_city
+    expr: orders.customers.city
+    display_name: Customer City
+    comment: City of the customer's primary address. PII - restrict access
+    synonyms:
+      - city
+  
+  - name: customer_state
+    expr: orders.customers.state
+    display_name: Customer State
+    comment: State or region of the customer's primary address. PII - restrict access
+    synonyms:
+      - state
+  
+  - name: customer_country
+    expr: orders.customers.country
+    display_name: Customer Country
+    comment: Country of the customer's primary address. PII - restrict access
+    synonyms:
+      - country
+  
+  - name: customer_segment
+    expr: orders.customers.customer_segment
+    display_name: Customer Segment
+    comment: Segment or classification of the customer for marketing or analytics.
+    synonyms:
+      - segment
+  
+  - name: customer_registration_date
+    expr: orders.customers.registration_date
+    display_name: Customer Registration Date
+    comment: Date when the customer registered or was first created in the system.
+    synonyms:
+      - registration date
+  
+  - name: customer_registration_month
+    expr: DATE_TRUNC('MONTH', orders.customers.registration_date)
+    display_name: Customer Registration Month
+    comment: Month when the customer registered, derived from registration date.
+    synonyms:
+      - registration month
+  
+  - name: is_active_customer
+    expr: orders.customers.is_active
+    display_name: Is Active Customer
+    comment: Indicates whether the customer account is currently active.
+    synonyms:
+      - active customer
+  
+  - name: order_number
+    expr: orders.order_number
+    display_name: Order Number
+    comment: Business-facing order number used to identify the order.
+  
+  - name: order_date
+    expr: orders.order_date
+    display_name: Order Date
+    comment: Timestamp recording when the order was placed.
+    synonyms:
+      - order timestamp
+  
+  - name: order_month
+    expr: DATE_TRUNC('MONTH', orders.order_date)
+    display_name: Order Month
+    comment: Month when the order was placed, derived from order date.
+    synonyms:
+      - order period
+  
+  - name: order_status
+    expr: orders.order_status
+    display_name: Order Status
+    comment: Indicates the current status of the order.
+    synonyms:
+      - status
+  
+  - name: sales_channel
+    expr: orders.sales_channel
+    display_name: Sales Channel
+    comment: Channel through which the order was placed, such as online or in-store.
+    synonyms:
+      - channel
+  
+  - name: order_ship_city
+    expr: orders.ship_city
+    display_name: Order Ship City
+    comment: City for the shipment destination address. PII - restrict access
+  
+  - name: order_ship_state
+    expr: orders.ship_state
+    display_name: Order Ship State
+    comment: State or region for the shipment destination address. PII - restrict access
+  
+  - name: order_currency
+    expr: orders.currency
+    display_name: Order Currency
+    comment: Currency code used for monetary amounts in the order.
+    synonyms:
+      - currency
+  
+  - name: product_sku
+    expr: products.sku
+    display_name: Product SKU
+    comment: Stock-keeping unit code used to uniquely identify the product.
+    synonyms:
+      - sku
+  
+  - name: product_name
+    expr: products.product_name
+    display_name: Product Name
+    comment: Name or title of the product as presented to customers.
+    synonyms:
+      - product
+  
+  - name: category_id
+    expr: products.product_categories.category_id
+    display_name: Category ID
+    comment: Unique identifier for a product category.
+    synonyms:
+      - category identifier
+  
+  - name: category_name
+    expr: products.product_categories.category_name
+    display_name: Category Name
+    comment: Name of the product category.
+    synonyms:
+      - category
+  
+  - name: parent_category_id
+    expr: products.product_categories.parent_categories.category_id
+    display_name: Parent Category ID
+    comment: Unique identifier for the parent product category.
+  
+  - name: parent_category_name
+    expr: products.product_categories.parent_categories.category_name
+    display_name: Parent Category Name
+    comment: Name of the parent product category.
+    synonyms:
+      - parent category
+  
+  - name: is_active_category
+    expr: products.product_categories.is_active
+    display_name: Is Active Category
+    comment: Indicates whether the product category is currently active.
+  
+  - name: is_active_parent_category
+    expr: products.product_categories.parent_categories.is_active
+    display_name: Is Active Parent Category
+    comment: Indicates whether the parent product category is currently active.
+  
+  - name: product_brand
+    expr: products.brand
+    display_name: Product Brand
+    comment: Brand or manufacturer of the product.
+    synonyms:
+      - brand
+  
+  - name: product_currency
+    expr: products.currency
+    display_name: Product Currency
+    comment: Currency code used for product pricing.
+  
+  - name: is_active_product
+    expr: products.is_active
+    display_name: Is Active Product
+    comment: Indicates whether the product is currently active and available for sale.
+    synonyms:
+      - active product
+  
+  - name: product_created_at
+    expr: products.created_at
+    display_name: Product Created At
+    comment: Timestamp when the product record was created in the source system.
+  
+  - name: payment_id
+    expr: orders.payments.payment_id
+    display_name: Payment ID
+    comment: Unique identifier for a payment transaction.
+    synonyms:
+      - payment identifier
+  
+  - name: payment_method
+    expr: orders.payments.payment_method
+    display_name: Payment Method
+    comment: Method used to pay for the order, such as credit card or PayPal.
+    synonyms:
+      - payment type
+  
+  - name: payment_status
+    expr: orders.payments.payment_status
+    display_name: Payment Status
+    comment: Indicates the current status of the payment transaction.
+  
+  - name: payment_currency
+    expr: orders.payments.currency
+    display_name: Payment Currency
+    comment: Currency code of the payment amount.
+  
+  - name: payment_gateway
+    expr: orders.payments.gateway
+    display_name: Payment Gateway
+    comment: Name of the payment gateway processing the transaction.
+    synonyms:
+      - gateway
+  
+  - name: paid_at
+    expr: orders.payments.paid_at
+    display_name: Paid At
+    comment: Timestamp when the payment was successfully completed.
+    synonyms:
+      - payment date
+  
+  - name: paid_month
+    expr: DATE_TRUNC('MONTH', orders.payments.paid_at)
+    display_name: Paid Month
+    comment: Month when the payment was completed, derived from paid at timestamp.
+    synonyms:
+      - payment month
+  
+  - name: shipment_id
+    expr: orders.shipments.shipment_id
+    display_name: Shipment ID
+    comment: Unique identifier for a shipment.
+    synonyms:
+      - shipment identifier
+  
+  - name: carrier
+    expr: orders.shipments.carrier
+    display_name: Carrier
+    comment: Name of the shipping carrier handling the shipment.
+  
+  - name: shipment_status
+    expr: orders.shipments.shipment_status
+    display_name: Shipment Status
+    comment: Indicates the current status of the shipment.
+  
+  - name: shipped_at
+    expr: orders.shipments.shipped_at
+    display_name: Shipped At
+    comment: Timestamp when the shipment was dispatched.
+    synonyms:
+      - ship date
+  
+  - name: shipped_month
+    expr: DATE_TRUNC('MONTH', orders.shipments.shipped_at)
+    display_name: Shipped Month
+    comment: Month when the shipment was dispatched, derived from shipped at timestamp.
+    synonyms:
+      - ship month
+  
+  - name: delivered_at
+    expr: orders.shipments.delivered_at
+    display_name: Delivered At
+    comment: Timestamp when the shipment was delivered to the customer.
+    synonyms:
+      - delivery date
+  
+  - name: shipment_ship_city
+    expr: orders.shipments.ship_city
+    display_name: Shipment Ship City
+    comment: City for the shipment destination address. PII - restrict access
+  
+  - name: shipment_ship_state
+    expr: orders.shipments.ship_state
+    display_name: Shipment Ship State
+    comment: State or region for the shipment destination address. PII - restrict access
+
+measures:
+  - name: total_line_item_revenue
+    expr: SUM(source.line_total)
+    display_name: Total Line Item Revenue
+    comment: Total revenue from order line items after discounts and before tax.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - line revenue
+      - item revenue
+      - product revenue
+  
+  - name: total_units_sold
+    expr: SUM(source.quantity)
+    display_name: Total Units Sold
+    comment: Total number of product units sold across all order items.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - units sold
+      - quantity sold
+      - items sold
+  
+  - name: average_unit_price
+    expr: AVG(source.unit_price)
+    display_name: Average Unit Price
+    comment: Average price per unit across all order items.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg unit price
+      - mean unit price
+  
+  - name: average_discount_pct
+    expr: ROUND(AVG(source.discount_pct), 2)
+    display_name: Average Discount Percentage
+    comment: Average discount percentage applied across all order items.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg discount
+      - mean discount
+  
+  - name: average_line_item_value
+    expr: ROUND(MEASURE(total_line_item_revenue) / NULLIF(COUNT(source.order_item_id), 0), 2)
+    display_name: Average Line Item Value
+    comment: Average revenue per line item.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg line value
+      - mean item value
+  
+  - name: total_cogs
+    expr: SUM(source.quantity * products.cost_price)
+    display_name: Total Cost of Goods Sold
+    comment: Total cost of goods sold. Lines whose product has no cost_price are excluded from COGS, which overstates gross profit.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - cogs
+      - cost of sales
+  
+  - name: gross_profit
+    expr: MEASURE(total_line_item_revenue) - MEASURE(total_cogs)
+    display_name: Gross Profit
+    comment: Total gross profit after product costs. Lines whose product has no cost_price are excluded from COGS, which overstates gross profit.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - profit
+      - margin
+  
+  - name: gross_margin_pct
+    expr: MEASURE(gross_profit) / NULLIF(MEASURE(total_line_item_revenue), 0)
+    display_name: Gross Margin Percentage
+    comment: Gross margin as a fraction (0.25 = 25%). Represents profitability percentage after product costs.
+    format:
+      type: percentage
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - margin percent
+      - profit margin
+  
+  - name: order_count
+    expr: COUNT(DISTINCT orders.order_id)
+    display_name: Order Count
+    comment: Total number of orders. Counts only orders with at least one line item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - orders
+      - order volume
+      - number of orders
+  
+  - name: average_order_value
+    expr: ROUND(MEASURE(total_line_item_revenue) / NULLIF(MEASURE(order_count), 0), 2)
+    display_name: Average Order Value
+    comment: Average revenue per order. Based on line item revenue, so it excludes order-level tax, shipping and order discounts.
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - aov
+      - avg order value
+      - mean order value
+  
+  - name: average_units_per_order
+    expr: ROUND(CAST(MEASURE(total_units_sold) AS DOUBLE) / NULLIF(MEASURE(order_count), 0), 2)
+    display_name: Average Units Per Order
+    comment: Average number of units per order.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - avg units per order
+      - units per order
+  
+  - name: customer_count
+    expr: COUNT(DISTINCT orders.customers.customer_id)
+    display_name: Customer Count
+    comment: Total number of customers. Counts only customers that appear on one order with at least one line item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - customers
+      - number of customers
+  
+  - name: active_customer_count
+    expr: COUNT(DISTINCT CASE WHEN orders.customers.is_active = TRUE THEN orders.customers.customer_id END)
+    display_name: Active Customer Count
+    comment: Number of active customers. Counts only customers that appear on one order with at least one line item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - active customers
+  
+  - name: product_count
+    expr: COUNT(DISTINCT products.product_id)
+    display_name: Product Count
+    comment: Total number of products. Counts only products that appear on one order with at least one line item.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - products
+      - number of products
+  
+  - name: payment_transaction_count
+    expr: COUNT(DISTINCT orders.payments.payment_id)
+    display_name: Payment Transaction Count
+    comment: Total number of payment transactions. Payments and shipments are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - payment count
+      - transactions
+  
+  - name: total_payment_amount
+    expr: SUM(orders.payments.amount)
+    display_name: Total Payment Amount
+    comment: "WARNING: order payments repeat once per order line, so this total is inflated unless the query groups by order_id. Use payment_transaction_count for counts."
+    format:
+      type: currency
+      currency_code: USD
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - payments received
+      - payment total
+  
+  - name: shipment_count
+    expr: COUNT(DISTINCT orders.shipments.shipment_id)
+    display_name: Shipment Count
+    comment: Total number of shipments. Payments and shipments are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 0
+    synonyms:
+      - shipments
+      - number of shipments
+  
+  - name: delivery_time_days
+    expr: ROUND(AVG(DATEDIFF(orders.shipments.delivered_at, orders.shipments.shipped_at)), 2)
+    display_name: Delivery Time (Days)
+    comment: Average delivery time in days from shipment dispatch to delivery. Payments and shipments are joined many-to-one; if an order has more than one, only the first match is used, so these undercount.
+    format:
+      type: number
+      decimal_places:
+        type: exact
+        places: 2
+    synonyms:
+      - delivery days
+      - avg delivery time
