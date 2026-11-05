@@ -1,0 +1,73 @@
+{
+  "overall_validation_score": 91.67,
+  "accuracy_score": 85.0,
+  "efficiency_score": 90.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No completeness issues found",
+      "recommendation": "All datasets, fields, relationships, and documentation are complete and properly mapped between the semantic model and data glossary."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Medium",
+      "area": "Type Consistency - products.sku",
+      "issue": "Glossary specifies STRING(255) but semantic model shows STRING without precision specification",
+      "recommendation": "Align type definitions to include precision/length specifications in the semantic model to match glossary detail level"
+    },
+    {
+      "severity": "Medium",
+      "area": "Type Consistency - TIMESTAMP fields",
+      "issue": "Glossary specifies TIMESTAMP(29,9) for multiple fields (_loaded_at, order_date, paid_at, shipped_at, delivered_at, created_at) but semantic model shows TIMESTAMP without precision",
+      "recommendation": "Standardize TIMESTAMP type definitions across both artifacts to include precision specifications"
+    },
+    {
+      "severity": "Medium",
+      "area": "Type Consistency - DECIMAL fields",
+      "issue": "Glossary specifies precise DECIMAL types (e.g., DECIMAL(12,2), DECIMAL(14,2), DECIMAL(5,2)) but semantic model shows DECIMAL without precision",
+      "recommendation": "Add precision and scale specifications to all DECIMAL type definitions in the semantic model to match glossary"
+    },
+    {
+      "severity": "Low",
+      "area": "PII Classification - orders.tax_amount",
+      "issue": "Glossary marks tax_amount as PII, but tax amounts are typically not considered personally identifiable information",
+      "recommendation": "Review and correct PII classification for tax_amount field; tax amounts are generally not PII unless they can uniquely identify an individual"
+    },
+    {
+      "severity": "Low",
+      "area": "Constraint Documentation - products.cost_price",
+      "issue": "Glossary marks cost_price as PII but semantic model constraints section does not document access restrictions or sensitivity level",
+      "recommendation": "Document sensitivity level and access restrictions in semantic model constraints for PII-marked fields like cost_price"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation Redundancy - Metadata Fields",
+      "issue": "Descriptions for _source_system, _batch_id, and _loaded_at are repeated verbatim across all 7 tables with only the table name changing",
+      "recommendation": "Create a shared metadata field definition pattern or reference documentation to reduce redundancy and improve maintainability"
+    },
+    {
+      "severity": "Low",
+      "area": "Metric Filter Redundancy",
+      "issue": "Multiple metrics (total_revenue, average_order_value, revenue_per_customer, product_revenue, units_sold, etc.) repeat the identical filter 'WHERE orders.order_status = Completed'",
+      "recommendation": "Consider creating a base view or CTE for completed orders to centralize this common filter logic and improve query maintainability"
+    },
+    {
+      "severity": "Low",
+      "area": "Join Pattern Redundancy",
+      "issue": "Several metrics repeat the same join sequences (order_items → orders, order_items → products, products → product_categories)",
+      "recommendation": "Create reusable base views or CTEs for common join patterns to reduce code duplication and improve query performance"
+    },
+    {
+      "severity": "Low",
+      "area": "Sample Value Standardization",
+      "issue": "Glossary uses multiple redaction patterns ([REDACTED_PERSON_NAME_1], [REDACTED_EMAIL_ADDRESS_1], [REDACTED_CITY_1], etc.) that could be standardized",
+      "recommendation": "Standardize PII redaction patterns to a single consistent format (e.g., [REDACTED_PII]) to improve documentation consistency"
+    }
+  ]
+}
