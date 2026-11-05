@@ -1,0 +1,37 @@
+{
+  "overall_validation_score": 98.3,
+  "accuracy_score": 100.0,
+  "efficiency_score": 95.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS",
+  "completeness_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No completeness issues found",
+      "recommendation": "All tables, columns, relationships, metrics, and documentation are complete and properly mapped between the semantic model and data glossary."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No accuracy issues found",
+      "recommendation": "All data types, business definitions, relationships, and naming conventions are accurate and consistent between the semantic model and data glossary."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Metadata Documentation",
+      "issue": "Audit metadata columns (_source_system, _batch_id, _loaded_at) have identical descriptions repeated across all six tables in both the glossary and semantic model.",
+      "recommendation": "Consider creating a shared metadata definition or reference documentation for common audit columns to reduce redundancy and improve maintainability."
+    },
+    {
+      "severity": "Low",
+      "area": "Metric Reusability",
+      "issue": "Revenue-by-dimension metrics (revenue_by_month, revenue_by_customer_segment, revenue_by_product, revenue_by_sales_channel) follow similar patterns but are implemented as separate metrics.",
+      "recommendation": "Consider creating a parameterized metric template or macro for 'revenue by dimension' analysis to improve reusability and reduce code duplication in future metric definitions."
+    }
+  ]
+}
