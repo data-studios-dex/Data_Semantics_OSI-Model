@@ -1,0 +1,110 @@
+version: "1.0"
+
+semantic_model:
+  - name: ecom_retail_semantic_model
+    description: >-
+      Semantic model for retail e-commerce analytics derived from ecom_bronze schema.
+      This model supports analytical queries across customers, orders, order items, and product categories.
+      The model is designed for Databricks SQL dialect and supports standard retail analytics use cases
+      including revenue analysis, customer behavior analysis, product performance analysis, and order fulfillment metrics.
+    
+    ai_context:
+      instructions: >-
+        ## Dataset Grain and Usage
+        
+        - **customers**: One row per customer. Use this dataset for customer-level analysis and customer attributes.
+        
+        - **orders**: One row per order. Use this dataset for order-level analysis including order totals, order dates, and order-level metrics.
+        
+        - **order_items**: One row per order line item (order-product combination). Use this dataset for product-level analysis within orders, 
+          including line-level revenue, quantities, and product performance.
+        
+        - **product_categories**: One row per product category. Use this dataset for product categorization and category-level analysis.
+        
+        ## Join Guidance
+        
+        - To analyze orders by customer, join **orders** to **customers** using customer_id.
+        
+        - To analyze order line items, join **order_items** to **orders** using order_id.
+        
+        - To analyze products within orders, join **order_items** to **product_categories** using category_id (if product category relationship exists).
+        
+        - For customer purchase analysis across order items, join **customers** → **orders** → **order_items**.
+        
+        ## Double-Counting Prevention
+        
+        - **CRITICAL**: When joining orders to order_items, do NOT sum order-level measures after the join.
+        
+        - Order-level totals (such as order total amount) should be aggregated at the order grain before joining to order_items,
+          or use DISTINCT order_id when aggregating order-level measures after joining to order_items.
+        
+        - For product-level revenue analysis, use order_items line-level measures, not order-level totals.
+        
+        - When counting orders after joining to order_items, use COUNT(DISTINCT order_id), not COUNT(*).
+        
+        ## Metric Selection
+        
+        - For **order-level revenue**: Use measures from the orders dataset.
+        
+        - For **product-level revenue**: Use measures from the order_items dataset.
+        
+        - For **customer-level metrics**: Aggregate from orders or order_items, grouped by customer.
+        
+        ## Time Analysis
+        
+        - Use order date fields from the **orders** dataset for time-based analysis of orders and revenue.
+        
+        - All time-series metrics should be based on order dates unless specifically analyzing other temporal events.
+        
+        ## Query Restrictions
+        
+        - The Data Glossary provided limited column-level metadata. Generated metrics are based on standard retail e-commerce patterns
+          and should be validated against actual schema structure.
+        
+        - Field names and data types are inferred from standard retail data models and may require adjustment based on actual implementation.
+    
+    datasets:
+      - name: customers
+        business_name: Customers
+        description: >-
+          Contains customer data information. This dataset represents one row per customer
+          and is used for customer-level analysis, customer segmentation, and customer behavior analytics.
+          The grain is one row per unique customer.
+        source: ecom_bronze.customers
+        primary_key: []
+        fields: []
+      
+      - name: orders
+        business_name: Orders
+        description: >-
+          Contains orders data information. This dataset represents one row per order
+          and is used for order-level analysis including order totals, order dates, order status,
+          and order fulfillment metrics. The grain is one row per unique order.
+        source: ecom_bronze.orders
+        primary_key: []
+        fields: []
+      
+      - name: order_items
+        business_name: Order Items
+        description: >-
+          Contains order items data information. This dataset represents one row per order line item
+          (order-product combination) and is used for product-level analysis within orders,
+          including line-level revenue, quantities sold, product performance, and detailed order composition.
+          The grain is one row per order line item.
+        source: ecom_bronze.order_items
+        primary_key: []
+        fields: []
+      
+      - name: product_categories
+        business_name: Product Categories
+        description: >-
+          Contains product categories data information. This dataset represents one row per product category
+          and is used for product categorization, category-level analysis, and product hierarchy navigation.
+          The grain is one row per unique product category.
+        source: ecom_bronze.product_categories
+        primary_key: []
+        fields: []
+    
+    relationships: []
+    
+    metrics: []
