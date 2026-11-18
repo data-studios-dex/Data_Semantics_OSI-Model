@@ -1,0 +1,1611 @@
+version: "1.0"
+
+semantic_model:
+  - name: ecom_retail_semantic_model
+    description: >-
+      Comprehensive semantic model for e-commerce retail analytics derived from the ecom_bronze schema.
+      This model supports analytical queries across customers, orders, order items, products, product categories,
+      payments, and shipments. The model enables revenue analysis, customer behavior analysis, product performance
+      analysis, fulfillment tracking, and payment analytics.
+    
+    ai_context:
+      instructions: >-
+        ## Dataset Grain Overview
+        
+        - **customers**: One row per customer. Use for customer-level analysis and customer attributes.
+        - **orders**: One row per order. Use for order-level revenue, order counts, and order-level aggregations.
+        - **order_items**: One row per order line item. Multiple rows per order. Use for product-level revenue analysis and line-item details.
+        - **products**: One row per product. Use for product attributes, pricing, and inventory.
+        - **product_categories**: One row per product category. Supports hierarchical category analysis via parent_category_id.
+        - **payments**: One row per payment transaction. Use for payment method analysis and payment status tracking.
+        - **shipments**: One row per shipment. Use for fulfillment analysis and delivery tracking.
+        
+        ## Critical Double-Counting Prevention
+        
+        **Order-Level vs Line-Level Revenue:**
+        - Use `orders.total_amount` for order-level revenue analysis.
+        - Use `order_items.line_total` for product-level or line-item-level revenue analysis.
+        - **NEVER** sum `orders.total_amount` after joining orders to order_items, as this will duplicate order totals.
+        - When analyzing revenue by product, always use `order_items.line_total`.
+        - When analyzing revenue by customer or order date without product detail, use `orders.total_amount`.
+        
+        **Order Components:**
+        - `orders.subtotal` = merchandise total before discounts
+        - `orders.discount_amount` = total order discount
+        - `orders.tax_amount` = total order tax
+        - `orders.shipping_fee` = shipping charges
+        - `orders.total_amount` = final order total (subtotal - discount + tax + shipping)
+        
+        **Line-Level Components:**
+        - `order_items.quantity` = units ordered per line
+        - `order_items.unit_price` = price per unit
+        - `order_items.discount_pct` = percentage discount on line
+        - `order_items.line_total` = final line total after discount
+        
+        ## Join Guidance
+        
+        **Standard Relationships:**
+        - orders → customers via `orders.customer_id = customers.customer_id`
+        - order_items → orders via `order_items.order_id = orders.order_id`
+        - order_items → products via `order_items.product_id = products.product_id`
+        - products → product_categories via `products.category_id = product_categories.category_id`
+        - payments → orders via `payments.order_id = orders.order_id`
+        - shipments → orders via `shipments.order_id = orders.order_id`
+        
+        **Hierarchical Relationship:**
+        - product_categories → product_categories (self-join) via `product_categories.parent_category_id = product_categories.category_id`
+        - This enables category hierarchy traversal for multi-level category analysis.
+        
+        ## Time Analysis
+        
+        **Order Analysis:**
+        - Use `orders.order_date` for order placement time analysis.
+        - This is the primary date for revenue trending and order volume analysis.
+        
+        **Payment Analysis:**
+        - Use `payments.paid_at` for payment completion time analysis.
+        - May differ from order_date if payment is delayed.
+        
+        **Shipment Analysis:**
+        - Use `shipments.shipped_at` for shipment dispatch time analysis.
+        - Use `shipments.delivered_at` for delivery completion time analysis.
+        - Calculate delivery time as the difference between delivered_at and shipped_at.
+        
+        **Customer Registration:**
+        - Use `customers.registration_date` for customer acquisition analysis.
+        
+        ## Metric Selection Guidance
+        
+        **Revenue Metrics:**
+        - Total Revenue: Sum `orders.total_amount` at order grain
+        - Product Revenue: Sum `order_items.line_total` at line-item grain
+        - Subtotal: Sum `orders.subtotal`
+        - Discount Amount: Sum `orders.discount_amount`
+        - Tax Amount: Sum `orders.tax_amount`
+        - Shipping Revenue: Sum `orders.shipping_fee`
+        
+        **Profitability Metrics:**
+        - Use `products.cost_price` and `order_items.quantity` to calculate cost
+        - Gross Profit = Revenue - Cost
+        - Gross Margin % = (Revenue - Cost) / Revenue * 100
+        
+        **Volume Metrics:**
+        - Order Count: Count distinct `orders.order_id`
+        - Customer Count: Count distinct `customers.customer_id`
+        - Product Count: Count distinct `products.product_id`
+        - Units Sold: Sum `order_items.quantity`
+        
+        **Average Metrics:**
+        - Average Order Value: Total Revenue / Order Count
+        - Average Selling Price: Product Revenue / Units Sold
+        - Average Discount %: (Total Discount / Total Subtotal) * 100
+        
+        **Customer Metrics:**
+        - Orders per Customer: Order Count / Customer Count
+        - Revenue per Customer: Total Revenue / Customer Count
+        
+        **Fulfillment Metrics:**
+        - Shipment Count: Count distinct `shipments.shipment_id`
+        - Delivered Shipment Count: Count shipments where `shipment_status = 'Delivered'`
+        - On-Time Delivery Rate: Delivered Count / Total Shipment Count
+        
+        ## Query Restrictions
+        
+        - Always filter by `customers.is_active = true` for active customer analysis unless historical analysis is required.
+        - Always filter by `products.is_active = true` for active product analysis unless historical analysis is required.
+        - Always filter by `product_categories.is_active = true` for active category analysis unless historical analysis is required.
+        - When joining orders to order_items, be aware of the one-to-many relationship and aggregate appropriately.
+        - When calculating product-level metrics, always join through order_items, not directly from orders.
+        - Currency is stored in multiple tables (orders, products, payments). Ensure currency consistency when aggregating.
+        
+        ## Hierarchical Category Analysis
+        
+        The product_categories table contains a self-referencing foreign key `parent_category_id` that enables hierarchical category analysis.
+        To traverse the category hierarchy, use a recursive query or multiple self-joins depending on the depth required.
+        Example: A product in "Headphones" category might roll up to "Audio" and then to "Electronics".
+
+    datasets:
+      - name: customers
+        business_name: Customers
+        description: >-
+          Contains customer master data. One row per customer.
+          Includes customer identifiers, contact information, address details, customer segmentation,
+          registration information, and activity status. This is the primary dataset for customer analysis
+          and customer-level aggregations.
+        source: ecom_bronze.customers
+        primary_key:
+          - customer_id
+        fields:
+          - name: customer_id
+            business_name: Customer Identifier
+            description: Unique identifier for a customer.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: customer_code
+            business_name: Customer Code
+            description: Business-defined code used to reference the customer.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: first_name
+            business_name: First Name
+            description: Given name of the customer.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: last_name
+            business_name: Last Name
+            description: Family name of the customer.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: email
+            business_name: Email
+            description: Email address used to contact the customer.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: phone
+            business_name: Phone
+            description: Primary phone number of the customer.
+            sql_type: STRING
+          
+          - name: gender
+            business_name: Gender
+            description: Indicates the gender of the customer.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: date_of_birth
+            business_name: Date Of Birth
+            description: Date of birth of the customer.
+            sql_type: DATE
+            dimension:
+              is_time: true
+          
+          - name: city
+            business_name: City
+            description: City of the customer's primary address.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: state
+            business_name: State
+            description: State or region of the customer's primary address.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: country
+            business_name: Country
+            description: Country of the customer's primary address.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: postal_code
+            business_name: Postal Code
+            description: Postal or ZIP code of the customer's primary address.
+            sql_type: STRING
+          
+          - name: customer_segment
+            business_name: Customer Segment
+            description: Segment or classification assigned to the customer for marketing or analysis.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: registration_date
+            business_name: Registration Date
+            description: Date when the customer registered or was first created in the system.
+            sql_type: DATE
+            dimension:
+              is_time: true
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the customer record is currently active.
+            sql_type: BOOLEAN
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the customer record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the customer record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the customer record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: orders
+        business_name: Orders
+        description: >-
+          Contains order header data. One row per order.
+          Includes order identifiers, customer reference, order timing, order status, sales channel,
+          shipping destination, and order financial totals including subtotal, discounts, taxes, shipping fees,
+          and final total amount. This is the primary dataset for order-level revenue analysis and order metrics.
+        source: ecom_bronze.orders
+        primary_key:
+          - order_id
+        fields:
+          - name: order_id
+            business_name: Order Identifier
+            description: Unique identifier for an order.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: order_number
+            business_name: Order Number
+            description: Business order number used to reference the order in source systems.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: customer_id
+            business_name: Customer Reference
+            description: References the customer who placed the order.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: order_date
+            business_name: Order Date
+            description: Timestamp when the order was created.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+          
+          - name: order_status
+            business_name: Order Status
+            description: Indicates the current status of the order.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: sales_channel
+            business_name: Sales Channel
+            description: Sales channel through which the order was placed.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: ship_city
+            business_name: Ship City
+            description: Destination city for the order shipment.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: ship_state
+            business_name: Ship State
+            description: Destination state or region for the order shipment.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: ship_postal_code
+            business_name: Ship Postal Code
+            description: Destination postal or ZIP code for the order shipment.
+            sql_type: STRING
+          
+          - name: subtotal
+            business_name: Subtotal
+            description: Total merchandise amount of the order before discounts, taxes, and shipping.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: discount_amount
+            business_name: Discount Amount
+            description: Total monetary discount applied to the order.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: tax_amount
+            business_name: Tax Amount
+            description: Total tax amount applied to the order.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: shipping_fee
+            business_name: Shipping Fee
+            description: Total shipping charges applied to the order.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: total_amount
+            business_name: Total Amount
+            description: Final total amount charged for the order.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: currency
+            business_name: Currency
+            description: Currency code used for monetary amounts on the order.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the order record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the order record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the order record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: order_items
+        business_name: Order Items
+        description: >-
+          Contains order line item data. One row per order line item. Multiple rows per order.
+          Includes order reference, line sequence, product reference, quantity ordered, unit pricing,
+          line-level discount percentage, and line total amount. This is the primary dataset for
+          product-level revenue analysis and detailed order composition analysis.
+        source: ecom_bronze.order_items
+        primary_key:
+          - order_item_id
+        fields:
+          - name: order_item_id
+            business_name: Order Item Identifier
+            description: Unique identifier for an order line item.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the related order record.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: line_number
+            business_name: Line Number
+            description: Sequential number of the item within the order.
+            sql_type: INT
+            constraints:
+              - NOT NULL
+          
+          - name: product_id
+            business_name: Product Reference
+            description: References the related product record.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: quantity
+            business_name: Quantity
+            description: Number of units of the product ordered on this line.
+            sql_type: INT
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: unit_price
+            business_name: Unit Price
+            description: Selling price per unit of the product for this line item.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: AVG
+          
+          - name: discount_pct
+            business_name: Discount Percentage
+            description: Percentage discount applied to this line item.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+          
+          - name: line_total
+            business_name: Line Total
+            description: Total monetary amount for this line after discounts.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the order item record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the order item record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the order item record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: products
+        business_name: Products
+        description: >-
+          Contains product master data. One row per product.
+          Includes product identifiers, SKU, product name, category reference, brand, description,
+          pricing (unit price and cost price), currency, inventory quantity, and product status.
+          This is the primary dataset for product attributes and product-level analysis.
+        source: ecom_bronze.products
+        primary_key:
+          - product_id
+        fields:
+          - name: product_id
+            business_name: Product Identifier
+            description: Unique identifier for a product.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: sku
+            business_name: SKU
+            description: Stock keeping unit code used to uniquely identify the product in inventory systems.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+          
+          - name: product_name
+            business_name: Product Name
+            description: Name or title of the product.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: category_id
+            business_name: Category Reference
+            description: References the product category to which the product belongs.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: brand
+            business_name: Brand
+            description: Brand or manufacturer of the product.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: description
+            business_name: Description
+            description: Longer description or marketing text for the product.
+            sql_type: STRING
+          
+          - name: unit_price
+            business_name: Unit Price
+            description: Standard selling price per unit of the product.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: AVG
+          
+          - name: cost_price
+            business_name: Cost Price
+            description: Cost price per unit of the product to the retailer.
+            sql_type: DECIMAL
+            measure:
+              aggregation: AVG
+          
+          - name: currency
+            business_name: Currency
+            description: Currency code used for product prices.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: stock_quantity
+            business_name: Stock Quantity
+            description: Current quantity of the product available in inventory.
+            sql_type: INT
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the product is currently active and sellable.
+            sql_type: BOOLEAN
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: created_at
+            business_name: Created At
+            description: Timestamp when the product record was created in the source system.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the product record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the product record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the product record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: product_categories
+        business_name: Product Categories
+        description: >-
+          Contains product category master data. One row per product category.
+          Includes category identifier, category name, parent category reference for hierarchical relationships,
+          category description, and category status. Supports hierarchical category analysis through the
+          self-referencing parent_category_id foreign key.
+        source: ecom_bronze.product_categories
+        primary_key:
+          - category_id
+        fields:
+          - name: category_id
+            business_name: Category Identifier
+            description: Unique identifier for a product category.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: category_name
+            business_name: Category Name
+            description: Name of the product category.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: parent_category_id
+            business_name: Parent Category Reference
+            description: References the parent category in the category hierarchy, if any.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+          
+          - name: description
+            business_name: Description
+            description: Text description of the product category.
+            sql_type: STRING
+          
+          - name: is_active
+            business_name: Is Active
+            description: Indicates whether the product category is currently active.
+            sql_type: BOOLEAN
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the product category record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the product category record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the product category record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: payments
+        business_name: Payments
+        description: >-
+          Contains payment transaction data. One row per payment transaction.
+          Includes payment identifier, order reference, payment method, payment status, payment amount,
+          currency, transaction reference, payment gateway, and payment completion timestamp.
+          This is the primary dataset for payment method analysis and payment status tracking.
+        source: ecom_bronze.payments
+        primary_key:
+          - payment_id
+        fields:
+          - name: payment_id
+            business_name: Payment Identifier
+            description: Unique identifier for a payment transaction.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order to which this payment applies.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: payment_method
+            business_name: Payment Method
+            description: Method used to make the payment, such as card, PayPal, or bank transfer.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: payment_status
+            business_name: Payment Status
+            description: Indicates the current status of the payment transaction.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: amount
+            business_name: Amount
+            description: Monetary amount of the payment.
+            sql_type: DECIMAL
+            constraints:
+              - NOT NULL
+            measure:
+              aggregation: SUM
+          
+          - name: currency
+            business_name: Currency
+            description: Currency code used for the payment amount.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: transaction_ref
+            business_name: Transaction Reference
+            description: Reference code from the payment gateway for this transaction.
+            sql_type: STRING
+          
+          - name: gateway
+            business_name: Gateway
+            description: Name of the payment gateway or processor handling the transaction.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: paid_at
+            business_name: Paid At
+            description: Timestamp when the payment was successfully completed.
+            sql_type: TIMESTAMP
+            dimension:
+              is_time: true
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the payment record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the payment record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the payment record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+      - name: shipments
+        business_name: Shipments
+        description: >-
+          Contains shipment data. One row per shipment.
+          Includes shipment identifier, order reference, carrier information, tracking number,
+          shipment status, shipment and delivery timestamps, and shipping destination.
+          This is the primary dataset for fulfillment analysis and delivery tracking.
+        source: ecom_bronze.shipments
+        primary_key:
+          - shipment_id
+        fields:
+          - name: shipment_id
+            business_name: Shipment Identifier
+            description: Unique identifier for a shipment.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+          
+          - name: order_id
+            business_name: Order Reference
+            description: References the order associated with this shipment.
+            sql_type: BIGINT
+            constraints:
+              - FOREIGN KEY
+              - NOT NULL
+          
+          - name: carrier
+            business_name: Carrier
+            description: Name of the shipping carrier handling the shipment.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: tracking_number
+            business_name: Tracking Number
+            description: Tracking number assigned to the shipment by the carrier.
+            sql_type: STRING
+          
+          - name: shipment_status
+            business_name: Shipment Status
+            description: Indicates the current status of the shipment.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_categorical: true
+          
+          - name: shipped_at
+            business_name: Shipped At
+            description: Timestamp when the shipment was dispatched.
+            sql_type: TIMESTAMP
+            dimension:
+              is_time: true
+          
+          - name: delivered_at
+            business_name: Delivered At
+            description: Timestamp when the shipment was delivered to the recipient.
+            sql_type: TIMESTAMP
+            dimension:
+              is_time: true
+          
+          - name: ship_city
+            business_name: Ship City
+            description: Destination city for the shipment.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: ship_state
+            business_name: Ship State
+            description: Destination state or region for the shipment.
+            sql_type: STRING
+            dimension:
+              is_categorical: true
+          
+          - name: ship_postal_code
+            business_name: Ship Postal Code
+            description: Destination postal or ZIP code for the shipment.
+            sql_type: STRING
+          
+          - name: _source_system
+            business_name: Source System
+            description: Name or code of the source system from which the shipment record was loaded.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: Identifier of the batch load that ingested the shipment record.
+            sql_type: BIGINT
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: Timestamp when the shipment record was loaded into the data platform.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+
+    relationships:
+      - name: orders_to_customers
+        left_dataset: orders
+        right_dataset: customers
+        relationship_type: many_to_one
+        join:
+          left:
+            - customer_id
+          right:
+            - customer_id
+        join_type: many_to_one
+        resolution: >-
+          Each order is placed by exactly one customer. Multiple orders can be placed by the same customer.
+          Join orders to customers using customer_id to retrieve customer attributes for order analysis.
+
+      - name: order_items_to_orders
+        left_dataset: order_items
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each order line item belongs to exactly one order. Each order can have multiple line items.
+          Join order_items to orders using order_id to retrieve order-level attributes.
+          CRITICAL: When aggregating order-level measures after this join, use DISTINCT or aggregate at order grain
+          to avoid duplicating order totals across multiple line items.
+
+      - name: order_items_to_products
+        left_dataset: order_items
+        right_dataset: products
+        relationship_type: many_to_one
+        join:
+          left:
+            - product_id
+          right:
+            - product_id
+        join_type: many_to_one
+        resolution: >-
+          Each order line item references exactly one product. The same product can appear in multiple order line items.
+          Join order_items to products using product_id to retrieve product attributes for line-item analysis.
+
+      - name: products_to_product_categories
+        left_dataset: products
+        right_dataset: product_categories
+        relationship_type: many_to_one
+        join:
+          left:
+            - category_id
+          right:
+            - category_id
+        join_type: many_to_one
+        resolution: >-
+          Each product belongs to exactly one product category. Multiple products can belong to the same category.
+          Join products to product_categories using category_id to retrieve category attributes for product analysis.
+
+      - name: product_categories_hierarchy
+        left_dataset: product_categories
+        right_dataset: product_categories
+        relationship_type: many_to_one
+        join:
+          left:
+            - parent_category_id
+          right:
+            - category_id
+        join_type: many_to_one
+        resolution: >-
+          This is a recursive self-referencing relationship enabling hierarchical category analysis.
+          Each category can have a parent category, creating a category hierarchy tree.
+          Categories with NULL parent_category_id are top-level categories.
+          To traverse the full hierarchy, use recursive CTEs or multiple self-joins.
+          Example: Headphones → Audio → Electronics.
+
+      - name: payments_to_orders
+        left_dataset: payments
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each payment transaction is associated with exactly one order. An order may have multiple payment transactions
+          if split payments or payment retries occur. Join payments to orders using order_id to retrieve order details
+          for payment analysis.
+
+      - name: shipments_to_orders
+        left_dataset: shipments
+        right_dataset: orders
+        relationship_type: many_to_one
+        join:
+          left:
+            - order_id
+          right:
+            - order_id
+        join_type: many_to_one
+        resolution: >-
+          Each shipment is associated with exactly one order. An order may have multiple shipments if items are shipped
+          separately. Join shipments to orders using order_id to retrieve order details for shipment analysis.
+
+    metrics:
+      - name: total_revenue
+        business_name: Total Revenue
+        description: >-
+          Total revenue from all orders, calculated as the sum of the final order total amount.
+          This metric represents the complete revenue including merchandise, taxes, and shipping fees,
+          minus any discounts applied.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.total_amount) AS total_revenue
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.total_amount
+
+      - name: total_subtotal
+        business_name: Total Subtotal
+        description: >-
+          Total merchandise amount from all orders before discounts, taxes, and shipping fees.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.subtotal) AS total_subtotal
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.subtotal
+
+      - name: total_discount_amount
+        business_name: Total Discount Amount
+        description: >-
+          Total monetary discount amount applied across all orders.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.discount_amount) AS total_discount_amount
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.discount_amount
+
+      - name: total_tax_amount
+        business_name: Total Tax Amount
+        description: >-
+          Total tax amount collected across all orders.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.tax_amount) AS total_tax_amount
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.tax_amount
+
+      - name: total_shipping_revenue
+        business_name: Total Shipping Revenue
+        description: >-
+          Total shipping fees collected across all orders.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(orders.shipping_fee) AS total_shipping_revenue
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.shipping_fee
+
+      - name: product_revenue
+        business_name: Product Revenue
+        description: >-
+          Total revenue at the product line-item level, calculated as the sum of line totals.
+          Use this metric for product-level revenue analysis and revenue by product.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.line_total) AS product_revenue
+                FROM ecom_bronze.order_items AS order_items
+              columns_used:
+                - order_items.line_total
+
+      - name: total_cost
+        business_name: Total Cost
+        description: >-
+          Total cost of goods sold, calculated as the sum of quantity multiplied by product cost price
+          across all order line items.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.quantity * products.cost_price) AS total_cost
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+              columns_used:
+                - order_items.quantity
+                - order_items.product_id
+                - products.product_id
+                - products.cost_price
+
+      - name: gross_profit
+        business_name: Gross Profit
+        description: >-
+          Gross profit calculated as product revenue minus total cost of goods sold.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.line_total) - SUM(order_items.quantity * products.cost_price) AS gross_profit
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+              columns_used:
+                - order_items.line_total
+                - order_items.quantity
+                - order_items.product_id
+                - products.product_id
+                - products.cost_price
+
+      - name: gross_margin_pct
+        business_name: Gross Margin Percentage
+        description: >-
+          Gross margin percentage calculated as (product revenue - total cost) / product revenue * 100.
+          Represents the percentage of revenue retained after cost of goods sold.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN SUM(order_items.line_total) = 0 THEN 0
+                    ELSE (SUM(order_items.line_total) - SUM(order_items.quantity * products.cost_price)) 
+                         / SUM(order_items.line_total) * 100
+                  END AS gross_margin_pct
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+              columns_used:
+                - order_items.line_total
+                - order_items.quantity
+                - order_items.product_id
+                - products.product_id
+                - products.cost_price
+
+      - name: order_count
+        business_name: Order Count
+        description: >-
+          Total number of orders placed.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT orders.order_id) AS order_count
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.order_id
+
+      - name: customer_count
+        business_name: Customer Count
+        description: >-
+          Total number of distinct customers.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT customers.customer_id) AS customer_count
+                FROM ecom_bronze.customers AS customers
+              columns_used:
+                - customers.customer_id
+
+      - name: active_customer_count
+        business_name: Active Customer Count
+        description: >-
+          Total number of distinct active customers where is_active is true.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT customers.customer_id) AS active_customer_count
+                FROM ecom_bronze.customers AS customers
+                WHERE customers.is_active = true
+              columns_used:
+                - customers.customer_id
+                - customers.is_active
+
+      - name: product_count
+        business_name: Product Count
+        description: >-
+          Total number of distinct products.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT products.product_id) AS product_count
+                FROM ecom_bronze.products AS products
+              columns_used:
+                - products.product_id
+
+      - name: units_sold
+        business_name: Units Sold
+        description: >-
+          Total number of product units sold across all order line items.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  SUM(order_items.quantity) AS units_sold
+                FROM ecom_bronze.order_items AS order_items
+              columns_used:
+                - order_items.quantity
+
+      - name: average_order_value
+        business_name: Average Order Value
+        description: >-
+          Average order value calculated as total revenue divided by order count.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.order_id) = 0 THEN 0
+                    ELSE SUM(orders.total_amount) / COUNT(DISTINCT orders.order_id)
+                  END AS average_order_value
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.total_amount
+                - orders.order_id
+
+      - name: average_selling_price
+        business_name: Average Selling Price
+        description: >-
+          Average selling price per unit calculated as product revenue divided by units sold.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN SUM(order_items.quantity) = 0 THEN 0
+                    ELSE SUM(order_items.line_total) / SUM(order_items.quantity)
+                  END AS average_selling_price
+                FROM ecom_bronze.order_items AS order_items
+              columns_used:
+                - order_items.line_total
+                - order_items.quantity
+
+      - name: average_discount_pct
+        business_name: Average Discount Percentage
+        description: >-
+          Average discount percentage calculated as total discount amount divided by total subtotal multiplied by 100.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN SUM(orders.subtotal) = 0 THEN 0
+                    ELSE (SUM(orders.discount_amount) / SUM(orders.subtotal)) * 100
+                  END AS average_discount_pct
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.discount_amount
+                - orders.subtotal
+
+      - name: revenue_per_customer
+        business_name: Revenue Per Customer
+        description: >-
+          Average revenue per customer calculated as total revenue divided by distinct customer count.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.customer_id) = 0 THEN 0
+                    ELSE SUM(orders.total_amount) / COUNT(DISTINCT orders.customer_id)
+                  END AS revenue_per_customer
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.total_amount
+                - orders.customer_id
+
+      - name: orders_per_customer
+        business_name: Orders Per Customer
+        description: >-
+          Average number of orders per customer calculated as order count divided by distinct customer count.
+        return_type: DECIMAL
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  CASE
+                    WHEN COUNT(DISTINCT orders.customer_id) = 0 THEN 0
+                    ELSE CAST(COUNT(DISTINCT orders.order_id) AS DECIMAL) / COUNT(DISTINCT orders.customer_id)
+                  END AS orders_per_customer
+                FROM ecom_bronze.orders AS orders
+              columns_used:
+                - orders.order_id
+                - orders.customer_id
+
+      - name: shipment_count
+        business_name: Shipment Count
+        description: >-
+          Total number of shipments.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT shipments.shipment_id) AS shipment_count
+                FROM ecom_bronze.shipments AS shipments
+              columns_used:
+                - shipments.shipment_id
+
+      - name: delivered_shipment_count
+        business_name: Delivered Shipment Count
+        description: >-
+          Total number of shipments with status 'Delivered'.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT shipments.shipment_id) AS delivered_shipment_count
+                FROM ecom_bronze.shipments AS shipments
+                WHERE shipments.shipment_status = 'Delivered'
+              columns_used:
+                - shipments.shipment_id
+                - shipments.shipment_status
+
+      - name: payment_count
+        business_name: Payment Count
+        description: >-
+          Total number of payment transactions.
+        return_type: BIGINT
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  COUNT(DISTINCT payments.payment_id) AS payment_count
+                FROM ecom_bronze.payments AS payments
+              columns_used:
+                - payments.payment_id
+
+      - name: revenue_by_month
+        business_name: Revenue By Month
+        description: >-
+          Monthly revenue calculated by grouping orders by month and summing total amount.
+          Returns one row per month with the corresponding revenue.
+        return_type: DECIMAL
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  DATE_TRUNC('MONTH', orders.order_date) AS order_month,
+                  SUM(orders.total_amount) AS monthly_revenue
+                FROM ecom_bronze.orders AS orders
+                GROUP BY DATE_TRUNC('MONTH', orders.order_date)
+                ORDER BY order_month
+              columns_used:
+                - orders.order_date
+                - orders.total_amount
+
+      - name: revenue_by_customer_segment
+        business_name: Revenue By Customer Segment
+        description: >-
+          Revenue grouped by customer segment. Returns one row per customer segment with the corresponding revenue.
+        return_type: DECIMAL
+        result_grain: one row per customer segment
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  customers.customer_segment,
+                  SUM(orders.total_amount) AS segment_revenue
+                FROM ecom_bronze.orders AS orders
+                INNER JOIN ecom_bronze.customers AS customers
+                  ON orders.customer_id = customers.customer_id
+                GROUP BY customers.customer_segment
+                ORDER BY segment_revenue DESC
+              columns_used:
+                - orders.customer_id
+                - orders.total_amount
+                - customers.customer_id
+                - customers.customer_segment
+
+      - name: revenue_by_product
+        business_name: Revenue By Product
+        description: >-
+          Revenue grouped by product. Returns one row per product with the corresponding line-item revenue.
+          Uses order_items.line_total for accurate product-level revenue.
+        return_type: DECIMAL
+        result_grain: one row per product
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  products.product_id,
+                  products.product_name,
+                  SUM(order_items.line_total) AS product_revenue
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+                GROUP BY products.product_id, products.product_name
+                ORDER BY product_revenue DESC
+              columns_used:
+                - order_items.product_id
+                - order_items.line_total
+                - products.product_id
+                - products.product_name
+
+      - name: revenue_by_category
+        business_name: Revenue By Category
+        description: >-
+          Revenue grouped by product category. Returns one row per category with the corresponding revenue.
+        return_type: DECIMAL
+        result_grain: one row per category
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  product_categories.category_id,
+                  product_categories.category_name,
+                  SUM(order_items.line_total) AS category_revenue
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+                INNER JOIN ecom_bronze.product_categories AS product_categories
+                  ON products.category_id = product_categories.category_id
+                GROUP BY product_categories.category_id, product_categories.category_name
+                ORDER BY category_revenue DESC
+              columns_used:
+                - order_items.product_id
+                - order_items.line_total
+                - products.product_id
+                - products.category_id
+                - product_categories.category_id
+                - product_categories.category_name
+
+      - name: revenue_by_sales_channel
+        business_name: Revenue By Sales Channel
+        description: >-
+          Revenue grouped by sales channel. Returns one row per sales channel with the corresponding revenue.
+        return_type: DECIMAL
+        result_grain: one row per sales channel
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  orders.sales_channel,
+                  SUM(orders.total_amount) AS channel_revenue
+                FROM ecom_bronze.orders AS orders
+                GROUP BY orders.sales_channel
+                ORDER BY channel_revenue DESC
+              columns_used:
+                - orders.sales_channel
+                - orders.total_amount
+
+      - name: revenue_by_payment_method
+        business_name: Revenue By Payment Method
+        description: >-
+          Revenue grouped by payment method. Returns one row per payment method with the corresponding payment amount.
+        return_type: DECIMAL
+        result_grain: one row per payment method
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  payments.payment_method,
+                  SUM(payments.amount) AS payment_method_revenue
+                FROM ecom_bronze.payments AS payments
+                GROUP BY payments.payment_method
+                ORDER BY payment_method_revenue DESC
+              columns_used:
+                - payments.payment_method
+                - payments.amount
+
+      - name: top_customers_by_revenue
+        business_name: Top Customers By Revenue
+        description: >-
+          Customers ranked by total revenue. Returns one row per customer with revenue and rank.
+        return_type: DECIMAL
+        result_grain: one row per customer
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  customers.customer_id,
+                  customers.first_name,
+                  customers.last_name,
+                  customers.customer_segment,
+                  SUM(orders.total_amount) AS customer_revenue,
+                  RANK() OVER (ORDER BY SUM(orders.total_amount) DESC) AS revenue_rank
+                FROM ecom_bronze.orders AS orders
+                INNER JOIN ecom_bronze.customers AS customers
+                  ON orders.customer_id = customers.customer_id
+                GROUP BY customers.customer_id, customers.first_name, customers.last_name, customers.customer_segment
+                ORDER BY customer_revenue DESC
+              columns_used:
+                - orders.customer_id
+                - orders.total_amount
+                - customers.customer_id
+                - customers.first_name
+                - customers.last_name
+                - customers.customer_segment
+
+      - name: top_products_by_revenue
+        business_name: Top Products By Revenue
+        description: >-
+          Products ranked by total revenue. Returns one row per product with revenue and rank.
+        return_type: DECIMAL
+        result_grain: one row per product
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                  products.product_id,
+                  products.product_name,
+                  products.brand,
+                  SUM(order_items.line_total) AS product_revenue,
+                  RANK() OVER (ORDER BY SUM(order_items.line_total) DESC) AS revenue_rank
+                FROM ecom_bronze.order_items AS order_items
+                INNER JOIN ecom_bronze.products AS products
+                  ON order_items.product_id = products.product_id
+                GROUP BY products.product_id, products.product_name, products.brand
+                ORDER BY product_revenue DESC
+              columns_used:
+                - order_items.product_id
+                - order_items.line_total
+                - products.product_id
+                - products.product_name
+                - products.brand
