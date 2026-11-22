@@ -1,0 +1,528 @@
+version: "1.0"
+
+semantic_model:
+  - name: ecom_retail_semantic_model
+    description: >-
+      Semantic model for retail e-commerce customer analytics derived from the ecom_bronze schema.
+      This model provides a comprehensive view of customer data including demographics, segmentation,
+      and registration information for analytical and business intelligence purposes.
+    
+    ai_context:
+      instructions: >-
+        This semantic model represents customer data from a retail e-commerce system.
+        
+        DATASET GRAIN:
+        - customers: One row per customer. Each customer is uniquely identified by customer_id (primary key)
+          and customer_code (unique business identifier).
+        
+        ANALYTICAL DIMENSIONS:
+        - Customer Demographics: Use first_name, last_name, gender, date_of_birth, city, state, country, postal_code
+          for demographic analysis. Note that most demographic fields contain PII and should be handled accordingly.
+        - Customer Segmentation: Use customer_segment for marketing and business segment analysis (e.g., Premium, Standard).
+        - Geographic Analysis: Use city, state, country, postal_code for location-based analytics.
+        - Time Analysis: Use registration_date for customer acquisition and cohort analysis.
+        - Customer Status: Use is_active to filter active vs inactive customers.
+        
+        TIME DIMENSIONS:
+        - registration_date: Use this field for customer acquisition analysis, registration trends, cohort analysis,
+          and time-series customer growth metrics. This represents when the customer first registered in the system.
+        - date_of_birth: Use this field for age-based segmentation and demographic analysis.
+        - _loaded_at: Technical timestamp indicating when the record was loaded into the data platform.
+          Use for data lineage and audit purposes, not for business analytics.
+        
+        CUSTOMER IDENTIFICATION:
+        - Primary identifier: customer_id (system-generated unique identifier)
+        - Business identifier: customer_code (business-assigned unique code, e.g., CUST-000123)
+        - Both fields are unique and can be used for customer identification.
+        
+        CUSTOMER METRICS:
+        - Customer Count: Count distinct customers using customer_id.
+        - Active Customer Count: Count distinct customers where is_active = true.
+        - Customer Registration Trends: Aggregate customers by registration_date to analyze acquisition patterns.
+        - Customer Segmentation Distribution: Group by customer_segment to analyze segment composition.
+        - Geographic Distribution: Group by country, state, or city to analyze customer location patterns.
+        
+        PII HANDLING:
+        - The following fields contain PII and must be handled according to data privacy regulations:
+          first_name, last_name, email, phone, gender, date_of_birth, city, state, postal_code.
+        - When generating queries involving PII fields, ensure appropriate access controls and masking are applied.
+        - For analytical queries, prefer aggregated metrics over individual PII field exposure.
+        
+        DATA LINEAGE:
+        - _source_system: Identifies the upstream source system (e.g., CRM_SYSTEM_1).
+        - _batch_id: Identifies the ingestion batch.
+        - _loaded_at: Timestamp of data platform ingestion.
+        - These fields are useful for data quality monitoring and audit trails.
+        
+        QUERY GUIDANCE:
+        - For customer counts, always use COUNT(DISTINCT customer_id) to ensure accurate counts.
+        - When filtering active customers, use WHERE is_active = true.
+        - For time-based analysis, use registration_date as the primary time dimension.
+        - For geographic analysis, country is the only non-PII geographic field; use aggregations for state/city.
+        - Customer segment analysis should group by customer_segment.
+        
+        IMPORTANT NOTES:
+        - This dataset contains a single table (customers) with no foreign key relationships to other tables.
+        - All customer analysis is self-contained within this dataset.
+        - The dataset represents a snapshot of customer master data.
+        - For historical customer analysis, additional SCD Type-2 tables would be required (not present in this glossary).
+
+    datasets:
+      - name: customers
+        business_name: Customers
+        description: >-
+          Customer master data containing one row per customer. This dataset includes customer identification,
+          demographics, contact information, geographic location, segmentation, registration information,
+          and account status. The grain is one row per unique customer identified by customer_id.
+          This is a core dimension table for customer analytics in the retail e-commerce domain.
+        source: ecom_bronze.customers
+        primary_key:
+          - customer_id
+        
+        fields:
+          - name: customer_id
+            business_name: Customer Identifier
+            description: >-
+              Unique system-generated identifier for a customer. This is the primary key and serves as the
+              main technical identifier for customer records. Use this field for joins and customer counting.
+            sql_type: BIGINT
+            constraints:
+              - PRIMARY KEY
+              - NOT NULL
+              - UNIQUE
+            dimension:
+              is_time: false
+          
+          - name: customer_code
+            business_name: Customer Code
+            description: >-
+              Business-assigned unique code used to reference the customer in business processes and external systems.
+              This is a human-readable business identifier (e.g., CUST-000123) that complements the technical customer_id.
+              This field is unique and can be used as an alternative customer identifier.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+            dimension:
+              is_time: false
+          
+          - name: first_name
+            business_name: First Name
+            description: >-
+              Given name of the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for personalization and
+              customer service purposes with appropriate access controls.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: last_name
+            business_name: Last Name
+            description: >-
+              Family or surname of the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for personalization and
+              customer service purposes with appropriate access controls.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: email
+            business_name: Email
+            description: >-
+              Email address used to contact the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. This field is unique and can be used for
+              customer identification and communication purposes with appropriate access controls.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+              - UNIQUE
+            dimension:
+              is_time: false
+          
+          - name: phone
+            business_name: Phone
+            description: >-
+              Telephone number used to contact the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. This field is optional and may be null.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: gender
+            business_name: Gender
+            description: >-
+              Self-identified gender of the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for demographic analysis and segmentation
+              with appropriate aggregation to protect individual privacy.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: date_of_birth
+            business_name: Date Of Birth
+            description: >-
+              Date of birth of the customer. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for age-based segmentation and
+              demographic analysis with appropriate aggregation to protect individual privacy.
+              Can be used to derive customer age and age cohorts.
+            sql_type: DATE
+            constraints: []
+            dimension:
+              is_time: true
+          
+          - name: city
+            business_name: City
+            description: >-
+              City where the customer resides. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for geographic analysis with
+              appropriate aggregation to protect individual privacy.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: state
+            business_name: State
+            description: >-
+              State or region where the customer resides. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for geographic analysis with
+              appropriate aggregation to protect individual privacy.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: country
+            business_name: Country
+            description: >-
+              Country where the customer resides. This is a key dimension for geographic analysis and is not
+              classified as PII at the country level. Use for international customer distribution analysis
+              and country-level segmentation.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: postal_code
+            business_name: Postal Code
+            description: >-
+              Postal or ZIP code of the customer's address. This field contains personally identifiable information (PII)
+              and must be handled according to data privacy regulations. Use for geographic analysis with
+              appropriate aggregation to protect individual privacy.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: customer_segment
+            business_name: Customer Segment
+            description: >-
+              Marketing or business segment classification of the customer (e.g., Premium, Standard, Basic).
+              This is a key dimension for customer segmentation analysis, targeted marketing, and business strategy.
+              Use this field to analyze customer distribution across segments and segment-specific metrics.
+            sql_type: STRING
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: registration_date
+            business_name: Registration Date
+            description: >-
+              Date when the customer registered or was first created in the system. This is the primary time dimension
+              for customer acquisition analysis. Use this field for customer registration trends, cohort analysis,
+              customer lifetime analysis, and time-series customer growth metrics.
+            sql_type: DATE
+            constraints: []
+            dimension:
+              is_time: true
+          
+          - name: is_active
+            business_name: Is Active
+            description: >-
+              Boolean indicator of whether the customer account is currently active. Use this field to filter
+              active customers (is_active = true) vs inactive customers (is_active = false). This is essential
+              for calculating active customer metrics and understanding customer churn.
+            sql_type: BOOLEAN
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: _source_system
+            business_name: Source System
+            description: >-
+              Identifier of the upstream source system from which the customer record was loaded (e.g., CRM_SYSTEM_1).
+              This is a technical metadata field used for data lineage, audit trails, and data quality monitoring.
+              Use this field to track data provenance and troubleshoot data issues.
+            sql_type: STRING
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: false
+          
+          - name: _batch_id
+            business_name: Batch Identifier
+            description: >-
+              Identifier of the ingestion batch that loaded this customer record. This is a technical metadata field
+              used for data lineage, audit trails, and data quality monitoring. Use this field to track which
+              ingestion batch loaded the record and troubleshoot data loading issues.
+            sql_type: BIGINT
+            constraints: []
+            dimension:
+              is_time: false
+          
+          - name: _loaded_at
+            business_name: Loaded At
+            description: >-
+              Timestamp when the customer record was loaded into the data platform. This is a technical metadata field
+              used for data lineage, audit trails, and data quality monitoring. Use this field to track data freshness
+              and troubleshoot data loading issues. This is not a business time dimension.
+            sql_type: TIMESTAMP
+            constraints:
+              - NOT NULL
+            dimension:
+              is_time: true
+
+    relationships: []
+
+    metrics:
+      - name: total_customer_count
+        business_name: Total Customer Count
+        description: >-
+          Total count of all customers in the system. This metric counts all customer records
+          regardless of active status. Use this metric to understand the total customer base size.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT customers.customer_id) AS total_customer_count
+                FROM ecom_bronze.customers AS customers
+              columns_used:
+                - customers.customer_id
+      
+      - name: active_customer_count
+        business_name: Active Customer Count
+        description: >-
+          Count of customers with active accounts (is_active = true). This metric represents the current
+          active customer base and is essential for understanding customer engagement and retention.
+          Use this metric to track active customer growth over time.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT customers.customer_id) AS active_customer_count
+                FROM ecom_bronze.customers AS customers
+                WHERE customers.is_active = true
+              columns_used:
+                - customers.customer_id
+                - customers.is_active
+      
+      - name: inactive_customer_count
+        business_name: Inactive Customer Count
+        description: >-
+          Count of customers with inactive accounts (is_active = false). This metric represents customers
+          who have churned or deactivated their accounts. Use this metric to understand customer attrition
+          and identify opportunities for reactivation campaigns.
+        return_type: integer
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    COUNT(DISTINCT customers.customer_id) AS inactive_customer_count
+                FROM ecom_bronze.customers AS customers
+                WHERE customers.is_active = false
+              columns_used:
+                - customers.customer_id
+                - customers.is_active
+      
+      - name: customer_count_by_segment
+        business_name: Customer Count by Segment
+        description: >-
+          Count of customers grouped by customer segment. This metric shows the distribution of customers
+          across different business segments (e.g., Premium, Standard, Basic). Use this metric to understand
+          segment composition and identify segment-specific opportunities.
+        return_type: integer
+        result_grain: one row per customer segment
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    customers.customer_segment,
+                    COUNT(DISTINCT customers.customer_id) AS customer_count
+                FROM ecom_bronze.customers AS customers
+                GROUP BY customers.customer_segment
+              columns_used:
+                - customers.customer_segment
+                - customers.customer_id
+      
+      - name: active_customer_count_by_segment
+        business_name: Active Customer Count by Segment
+        description: >-
+          Count of active customers grouped by customer segment. This metric shows the distribution of
+          active customers across different business segments. Use this metric to understand active
+          customer composition by segment and track segment-specific retention.
+        return_type: integer
+        result_grain: one row per customer segment
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    customers.customer_segment,
+                    COUNT(DISTINCT customers.customer_id) AS active_customer_count
+                FROM ecom_bronze.customers AS customers
+                WHERE customers.is_active = true
+                GROUP BY customers.customer_segment
+              columns_used:
+                - customers.customer_segment
+                - customers.customer_id
+                - customers.is_active
+      
+      - name: customer_count_by_country
+        business_name: Customer Count by Country
+        description: >-
+          Count of customers grouped by country. This metric shows the geographic distribution of customers
+          at the country level. Use this metric for international market analysis and geographic expansion planning.
+        return_type: integer
+        result_grain: one row per country
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    customers.country,
+                    COUNT(DISTINCT customers.customer_id) AS customer_count
+                FROM ecom_bronze.customers AS customers
+                GROUP BY customers.country
+              columns_used:
+                - customers.country
+                - customers.customer_id
+      
+      - name: customer_registrations_by_date
+        business_name: Customer Registrations by Date
+        description: >-
+          Count of customer registrations grouped by registration date. This metric shows daily customer
+          acquisition trends. Use this metric to analyze registration patterns, identify acquisition spikes,
+          and measure the effectiveness of marketing campaigns.
+        return_type: integer
+        result_grain: one row per registration date
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    customers.registration_date,
+                    COUNT(DISTINCT customers.customer_id) AS registration_count
+                FROM ecom_bronze.customers AS customers
+                GROUP BY customers.registration_date
+                ORDER BY customers.registration_date
+              columns_used:
+                - customers.registration_date
+                - customers.customer_id
+      
+      - name: customer_registrations_by_month
+        business_name: Customer Registrations by Month
+        description: >-
+          Count of customer registrations grouped by month. This metric shows monthly customer acquisition trends.
+          Use this metric to analyze long-term registration patterns and measure monthly acquisition performance.
+        return_type: integer
+        result_grain: one row per month
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    DATE_TRUNC('MONTH', customers.registration_date) AS registration_month,
+                    COUNT(DISTINCT customers.customer_id) AS registration_count
+                FROM ecom_bronze.customers AS customers
+                GROUP BY DATE_TRUNC('MONTH', customers.registration_date)
+                ORDER BY registration_month
+              columns_used:
+                - customers.registration_date
+                - customers.customer_id
+      
+      - name: customer_registrations_by_year
+        business_name: Customer Registrations by Year
+        description: >-
+          Count of customer registrations grouped by year. This metric shows annual customer acquisition trends.
+          Use this metric to analyze year-over-year customer growth and long-term acquisition patterns.
+        return_type: integer
+        result_grain: one row per year
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    YEAR(customers.registration_date) AS registration_year,
+                    COUNT(DISTINCT customers.customer_id) AS registration_count
+                FROM ecom_bronze.customers AS customers
+                GROUP BY YEAR(customers.registration_date)
+                ORDER BY registration_year
+              columns_used:
+                - customers.registration_date
+                - customers.customer_id
+      
+      - name: active_customer_percentage
+        business_name: Active Customer Percentage
+        description: >-
+          Percentage of customers with active accounts out of total customers. This metric represents
+          the customer retention rate and is calculated as (active customers / total customers) * 100.
+          Use this metric to track overall customer retention and identify retention trends.
+        return_type: percentage
+        result_grain: single value
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    CASE
+                        WHEN COUNT(DISTINCT customers.customer_id) = 0 THEN 0
+                        ELSE
+                            (COUNT(DISTINCT CASE WHEN customers.is_active = true THEN customers.customer_id END) * 100.0)
+                            / COUNT(DISTINCT customers.customer_id)
+                    END AS active_customer_percentage
+                FROM ecom_bronze.customers AS customers
+              columns_used:
+                - customers.customer_id
+                - customers.is_active
+      
+      - name: cumulative_customer_registrations
+        business_name: Cumulative Customer Registrations
+        description: >-
+          Running total of customer registrations over time. This metric shows the cumulative growth
+          of the customer base from the earliest registration date to each subsequent date.
+          Use this metric to visualize customer base growth trajectory over time.
+        return_type: integer
+        result_grain: one row per registration date
+        expression:
+          dialects:
+            - dialect: DATABRICKS
+              expression: |
+                SELECT
+                    customers.registration_date,
+                    SUM(COUNT(DISTINCT customers.customer_id)) OVER (
+                        ORDER BY customers.registration_date
+                        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                    ) AS cumulative_registrations
+                FROM ecom_bronze.customers AS customers
+                GROUP BY customers.registration_date
+                ORDER BY customers.registration_date
+              columns_used:
+                - customers.registration_date
+                - customers.customer_id
