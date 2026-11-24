@@ -1,0 +1,1070 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xml:base="http://example.org/ontology/ecom-retail-analytics/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:ont="http://example.org/ontology/ecom-retail-analytics/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:dcterms="http://purl.org/dc/terms/">
+
+    <!-- ============================================================
+         ONTOLOGY HEADER
+         ============================================================ -->
+
+    <owl:Ontology rdf:about="http://example.org/ontology/ecom-retail-analytics/">
+        <owl:versionIRI rdf:resource="http://example.org/ontology/ecom-retail-analytics/1.0/"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <rdfs:label>Ecom Retail Analytics</rdfs:label>
+        <rdfs:comment>Comprehensive semantic model for e-commerce retail analytics derived from the ecom_bronze schema. This model supports analytical queries across customers, orders, payments, order items, products, and shipments. The model enables revenue analysis, customer behavior analysis, product performance analysis, fulfillment analysis, and payment processing analysis. The model is designed to support business intelligence queries while preventing common analytical errors such as double-counting and grain mismatches.</rdfs:comment>
+        <dcterms:source>test-06.yaml</dcterms:source>
+        <ont:sourceFormat>OSI Semantic Model</ont:sourceFormat>
+    </owl:Ontology>
+
+    <!--
+        Source file      : test-06.yaml
+        Detected format  : Format A — OSI Semantic Model (version 1.0)
+        Excluded datasets: none
+        Icon choices     : all classes matched known or curated emoji list; all unique
+        Classes          : 6
+        Data properties  : 69
+        Measure properties: 0
+        Object properties: 10
+        Data bindings    : 6
+    -->
+
+    <!-- ============================================================
+         ANNOTATION PROPERTY DECLARATIONS
+         ============================================================ -->
+
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/icon"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/iconCode"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/color"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/propertyType"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/isIdentifier"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/isPII"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/isMeasure"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/isDerived"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/expression"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/typeInferred"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/unit"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/enumValues"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/cardinality"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/cardinalitySource"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/fromEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/toEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/joinKey"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/sourceRelationship"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/sourceFormat"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/boundClass"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/boundEntityId"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/source"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/table"/>
+    <owl:AnnotationProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/columnMapping"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#altLabel"/>
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/source"/>
+
+    <!-- ============================================================
+         ENTITY TYPES (CLASSES)
+         ============================================================ -->
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/Customer">
+        <rdfs:label>Customer</rdfs:label>
+        <skos:prefLabel>Customers</skos:prefLabel>
+        <rdfs:comment>A registered individual who places orders and whose demographic, contact, address, and segmentation attributes are tracked for customer-level analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>👤</ont:icon>
+        <ont:iconCode>U+1F464</ont:iconCode>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/Order">
+        <rdfs:label>Order</rdfs:label>
+        <skos:prefLabel>Orders</skos:prefLabel>
+        <rdfs:comment>A commercial transaction placed by a customer, capturing order timing, status, sales channel, shipping address, and pre-calculated order-level financial totals.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>🧾</ont:icon>
+        <ont:iconCode>U+1F9FE</ont:iconCode>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/OrderItem">
+        <rdfs:label>OrderItem</rdfs:label>
+        <skos:prefLabel>Order Items</skos:prefLabel>
+        <rdfs:comment>A single line item within an order, linking a product to its ordered quantity, unit price, discount percentage, and computed line total for product-level revenue analysis.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>🛒</ont:icon>
+        <ont:iconCode>U+1F6D2</ont:iconCode>
+        <ont:color>#00B7C3</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/Product">
+        <rdfs:label>Product</rdfs:label>
+        <skos:prefLabel>Products</skos:prefLabel>
+        <rdfs:comment>An item in the product catalog described by its SKU, name, category, brand, pricing, inventory quantity, and active status.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>📦</ont:icon>
+        <ont:iconCode>U+1F4E6</ont:iconCode>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/Payment">
+        <rdfs:label>Payment</rdfs:label>
+        <skos:prefLabel>Payments</skos:prefLabel>
+        <rdfs:comment>A payment transaction associated with an order, recording the payment method, status, amount, currency, gateway, and the timestamp when payment was captured.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>💳</ont:icon>
+        <ont:iconCode>U+1F4B3</ont:iconCode>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/ecom-retail-analytics/Shipment">
+        <rdfs:label>Shipment</rdfs:label>
+        <skos:prefLabel>Shipments</skos:prefLabel>
+        <rdfs:comment>A fulfillment shipment linked to an order, capturing carrier details, tracking number, shipment status, dispatch and delivery timestamps, and destination address.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://example.org/ontology/ecom-retail-analytics/"/>
+        <ont:icon>🚚</ont:icon>
+        <ont:iconCode>U+1F69A</ont:iconCode>
+        <ont:color>#D83B01</ont:color>
+    </owl:Class>
+
+    <!-- ============================================================
+         DATA PROPERTIES — Customer
+         ============================================================ -->
+
+    <!-- Customer properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_customerCode">
+        <rdfs:label>customerCode</rdfs:label>
+        <skos:prefLabel>Customer Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Business-assigned code used to reference the customer in source systems.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_firstName">
+        <rdfs:label>firstName</rdfs:label>
+        <skos:prefLabel>First Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Given first name of the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_lastName">
+        <rdfs:label>lastName</rdfs:label>
+        <skos:prefLabel>Last Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Family or surname of the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_email">
+        <rdfs:label>email</rdfs:label>
+        <skos:prefLabel>Email</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Email address used to contact the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_phone">
+        <rdfs:label>phone</rdfs:label>
+        <skos:prefLabel>Phone</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Telephone number used to contact the customer.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_gender">
+        <rdfs:label>gender</rdfs:label>
+        <skos:prefLabel>Gender</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the gender of the customer, if provided.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_dateOfBirth">
+        <rdfs:label>dateOfBirth</rdfs:label>
+        <skos:prefLabel>Date Of Birth</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Date of birth of the customer.</rdfs:comment>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_city">
+        <rdfs:label>city</rdfs:label>
+        <skos:prefLabel>City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City component of the customer&apos;s address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_state">
+        <rdfs:label>state</rdfs:label>
+        <skos:prefLabel>State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or province component of the customer&apos;s address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_country">
+        <rdfs:label>country</rdfs:label>
+        <skos:prefLabel>Country</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Country associated with the customer&apos;s address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_postalCode">
+        <rdfs:label>postalCode</rdfs:label>
+        <skos:prefLabel>Postal Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Postal or ZIP code component of the customer&apos;s address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_customerSegment">
+        <rdfs:label>customerSegment</rdfs:label>
+        <skos:prefLabel>Customer Segment</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Segment or classification of the customer based on behavior or value.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_registrationDate">
+        <rdfs:label>registrationDate</rdfs:label>
+        <skos:prefLabel>Registration Date</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Date when the customer registered or was first created in the system.</rdfs:comment>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the customer record is currently active.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         DATA PROPERTIES — Order
+         ============================================================ -->
+
+    <!-- Order properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a customer order.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_orderNumber">
+        <rdfs:label>orderNumber</rdfs:label>
+        <skos:prefLabel>Order Number</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Business-facing order reference number assigned to the transaction.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_customerId">
+        <rdfs:label>customerId</rdfs:label>
+        <skos:prefLabel>Customer Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related customer record who placed the order.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_orderDate">
+        <rdfs:label>orderDate</rdfs:label>
+        <skos:prefLabel>Order Date</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp when the order was placed.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_orderStatus">
+        <rdfs:label>orderStatus</rdfs:label>
+        <skos:prefLabel>Order Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current processing status of the order.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_salesChannel">
+        <rdfs:label>salesChannel</rdfs:label>
+        <skos:prefLabel>Sales Channel</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Channel through which the order was placed, such as online store or marketplace.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_shipCity">
+        <rdfs:label>shipCity</rdfs:label>
+        <skos:prefLabel>Ship City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City component of the shipping address for the order.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_shipState">
+        <rdfs:label>shipState</rdfs:label>
+        <skos:prefLabel>Ship State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or province component of the shipping address for the order.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_shipPostalCode">
+        <rdfs:label>shipPostalCode</rdfs:label>
+        <skos:prefLabel>Ship Postal Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Postal or ZIP code component of the shipping address for the order.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_subtotal">
+        <rdfs:label>subtotal</rdfs:label>
+        <skos:prefLabel>Subtotal</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount representing the order total before discounts and taxes. This is an order-level aggregate measure.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_discountAmount">
+        <rdfs:label>discountAmount</rdfs:label>
+        <skos:prefLabel>Discount Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of discounts applied to the order. This is an order-level aggregate measure.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_taxAmount">
+        <rdfs:label>taxAmount</rdfs:label>
+        <skos:prefLabel>Tax Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount of taxes applied to the order. This is an order-level aggregate measure.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_shippingFee">
+        <rdfs:label>shippingFee</rdfs:label>
+        <skos:prefLabel>Shipping Fee</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount charged for shipping the order. This is an order-level aggregate measure.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_totalAmount">
+        <rdfs:label>totalAmount</rdfs:label>
+        <skos:prefLabel>Total Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Final monetary amount charged for the order including discounts, taxes, and fees. This is an order-level aggregate measure. Formula: subtotal - discount_amount + tax_amount + shipping_fee.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_currency">
+        <rdfs:label>currency</rdfs:label>
+        <skos:prefLabel>Currency</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Currency code in which the order amounts are recorded.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         DATA PROPERTIES — OrderItem
+         ============================================================ -->
+
+    <!-- OrderItem properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_orderItemId">
+        <rdfs:label>orderItemId</rdfs:label>
+        <skos:prefLabel>Order Item Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for an order line item.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related order to which the line item belongs.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_lineNumber">
+        <rdfs:label>lineNumber</rdfs:label>
+        <skos:prefLabel>Line Number</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Sequential line number of the item within the order.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_productId">
+        <rdfs:label>productId</rdfs:label>
+        <skos:prefLabel>Product Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related product included in the order line item.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_quantity">
+        <rdfs:label>quantity</rdfs:label>
+        <skos:prefLabel>Quantity</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Number of product units ordered for the line item.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_unitPrice">
+        <rdfs:label>unitPrice</rdfs:label>
+        <skos:prefLabel>Unit Price</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary price per unit of the product at the time of ordering.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_discountPct">
+        <rdfs:label>discountPct</rdfs:label>
+        <skos:prefLabel>Discount Percentage</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Percentage discount applied to the line item.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_lineTotal">
+        <rdfs:label>lineTotal</rdfs:label>
+        <skos:prefLabel>Line Total</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary total for the line item after discounts. This is a line-level measure that can be aggregated for product-level revenue analysis. Formula: quantity * unit_price * (1 - discount_pct / 100).</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         DATA PROPERTIES — Product
+         ============================================================ -->
+
+    <!-- Product properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_productId">
+        <rdfs:label>productId</rdfs:label>
+        <skos:prefLabel>Product Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a product in the catalog.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_sku">
+        <rdfs:label>sku</rdfs:label>
+        <skos:prefLabel>SKU</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Stock keeping unit code used to uniquely identify the product.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_productName">
+        <rdfs:label>productName</rdfs:label>
+        <skos:prefLabel>Product Name</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name or title of the product as presented to customers.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_categoryId">
+        <rdfs:label>categoryId</rdfs:label>
+        <skos:prefLabel>Category Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the category under which the product is classified.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_brand">
+        <rdfs:label>brand</rdfs:label>
+        <skos:prefLabel>Brand</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Brand name associated with the product.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_description">
+        <rdfs:label>description</rdfs:label>
+        <skos:prefLabel>Description</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Short descriptive text explaining the product features or usage.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_unitPrice">
+        <rdfs:label>unitPrice</rdfs:label>
+        <skos:prefLabel>Unit Price</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary price at which the product is sold per unit.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_costPrice">
+        <rdfs:label>costPrice</rdfs:label>
+        <skos:prefLabel>Cost Price</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary cost of acquiring or producing one unit of the product.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_currency">
+        <rdfs:label>currency</rdfs:label>
+        <skos:prefLabel>Currency</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Currency code in which the product prices are expressed.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_stockQuantity">
+        <rdfs:label>stockQuantity</rdfs:label>
+        <skos:prefLabel>Stock Quantity</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Number of units of the product currently available in stock.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_isActive">
+        <rdfs:label>isActive</rdfs:label>
+        <skos:prefLabel>Is Active</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Indicates whether the product is currently active and available for sale.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_createdAt">
+        <rdfs:label>createdAt</rdfs:label>
+        <skos:prefLabel>Created At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp when the product record was first created.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         DATA PROPERTIES — Payment
+         ============================================================ -->
+
+    <!-- Payment properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_paymentId">
+        <rdfs:label>paymentId</rdfs:label>
+        <skos:prefLabel>Payment Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a payment transaction.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related order for which the payment was made.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_paymentMethod">
+        <rdfs:label>paymentMethod</rdfs:label>
+        <skos:prefLabel>Payment Method</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Method used to pay for the order, such as credit card or PayPal.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_paymentStatus">
+        <rdfs:label>paymentStatus</rdfs:label>
+        <skos:prefLabel>Payment Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current processing status of the payment.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_amount">
+        <rdfs:label>amount</rdfs:label>
+        <skos:prefLabel>Amount</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Monetary amount processed in the payment.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_currency">
+        <rdfs:label>currency</rdfs:label>
+        <skos:prefLabel>Currency</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Currency code in which the payment amount is recorded.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_transactionRef">
+        <rdfs:label>transactionRef</rdfs:label>
+        <skos:prefLabel>Transaction Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Reference code provided by the payment gateway for the transaction.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_gateway">
+        <rdfs:label>gateway</rdfs:label>
+        <skos:prefLabel>Gateway</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the payment gateway or processor handling the transaction.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_paidAt">
+        <rdfs:label>paidAt</rdfs:label>
+        <skos:prefLabel>Paid At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp when the payment was completed or captured.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         DATA PROPERTIES — Shipment
+         ============================================================ -->
+
+    <!-- Shipment properties -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shipmentId">
+        <rdfs:label>shipmentId</rdfs:label>
+        <skos:prefLabel>Shipment Identifier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Unique identifier for a shipment.</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_orderId">
+        <rdfs:label>orderId</rdfs:label>
+        <skos:prefLabel>Order Reference</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>References the related order associated with the shipment.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_carrier">
+        <rdfs:label>carrier</rdfs:label>
+        <skos:prefLabel>Carrier</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Name of the shipping carrier handling the shipment.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_trackingNumber">
+        <rdfs:label>trackingNumber</rdfs:label>
+        <skos:prefLabel>Tracking Number</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Tracking code assigned by the carrier to follow the shipment.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shipmentStatus">
+        <rdfs:label>shipmentStatus</rdfs:label>
+        <skos:prefLabel>Shipment Status</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indicates the current status of the shipment.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shippedAt">
+        <rdfs:label>shippedAt</rdfs:label>
+        <skos:prefLabel>Shipped At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp when the shipment left the fulfillment location.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_deliveredAt">
+        <rdfs:label>deliveredAt</rdfs:label>
+        <skos:prefLabel>Delivered At</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>Timestamp when the shipment was delivered to the customer, if applicable.</rdfs:comment>
+        <ont:propertyType>datetime</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shipCity">
+        <rdfs:label>shipCity</rdfs:label>
+        <skos:prefLabel>Ship City</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>City component of the destination shipping address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shipState">
+        <rdfs:label>shipState</rdfs:label>
+        <skos:prefLabel>Ship State</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>State or province component of the destination shipping address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_shipPostalCode">
+        <rdfs:label>shipPostalCode</rdfs:label>
+        <skos:prefLabel>Ship Postal Code</skos:prefLabel>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Postal or ZIP code component of the destination shipping address.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ============================================================
+         OBJECT PROPERTIES (RELATIONSHIPS)
+         ============================================================ -->
+
+    <!-- Relationship: orders_to_customers — Order -> Customer -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_placed_by_customer">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>placedBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:comment>An order is placed by exactly one customer.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/customer_places_order"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/customer_places_order">
+        <rdfs:label>places</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:comment>A customer places one or more orders.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/order_placed_by_customer"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>customer_id=customer_id</ont:joinKey>
+        <ont:sourceRelationship>orders_to_customers</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- Relationship: order_items_to_orders — OrderItem -> Order -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_belongs_to_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>belongsTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:comment>An order item belongs to exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/order_contains_orderItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderItem</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_contains_orderItem">
+        <rdfs:label>contains</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:comment>An order contains one or more order items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/orderItem_belongs_to_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>orderItem</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- Relationship: order_items_to_products — OrderItem -> Product -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/orderItem_refers_to_product">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>refersTo</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:comment>An order item refers to exactly one product.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/product_appears_in_orderItem"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>orderItem</ont:fromEntityId>
+        <ont:toEntityId>product</ont:toEntityId>
+        <ont:joinKey>product_id=product_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_products</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/product_appears_in_orderItem">
+        <rdfs:label>appearsIn</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <rdfs:comment>A product appears in one or more order items.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/orderItem_refers_to_product"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>product</ont:fromEntityId>
+        <ont:toEntityId>orderItem</ont:toEntityId>
+        <ont:joinKey>product_id=product_id</ont:joinKey>
+        <ont:sourceRelationship>order_items_to_products</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- Relationship: payments_to_orders — Payment -> Order -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/payment_settles_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>settles</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:comment>A payment transaction settles exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/order_paid_by_payment"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>payment</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>payments_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_paid_by_payment">
+        <rdfs:label>paidBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <rdfs:comment>An order is paid by one or more payment transactions.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/payment_settles_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>payment</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>payments_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- Relationship: shipments_to_orders — Shipment -> Order -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/shipment_delivers_order">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:label>delivers</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:comment>A shipment delivers exactly one order.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/order_fulfilled_by_shipment"/>
+        <ont:cardinality>many-to-one</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>shipment</ont:fromEntityId>
+        <ont:toEntityId>order</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>shipments_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/ecom-retail-analytics/order_fulfilled_by_shipment">
+        <rdfs:label>fulfilledBy</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <rdfs:comment>An order is fulfilled by one or more shipments.</rdfs:comment>
+        <owl:inverseOf rdf:resource="http://example.org/ontology/ecom-retail-analytics/shipment_delivers_order"/>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:cardinalitySource>declared</ont:cardinalitySource>
+        <ont:fromEntityId>order</ont:fromEntityId>
+        <ont:toEntityId>shipment</ont:toEntityId>
+        <ont:joinKey>order_id=order_id</ont:joinKey>
+        <ont:sourceRelationship>shipments_to_orders</ont:sourceRelationship>
+    </owl:ObjectProperty>
+
+    <!-- ============================================================
+         DATA BINDINGS
+         ============================================================ -->
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_customer">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/Customer"/>
+        <ont:boundEntityId>customer</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.customers</ont:table>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>customerCode=customer_code</ont:columnMapping>
+        <ont:columnMapping>firstName=first_name</ont:columnMapping>
+        <ont:columnMapping>lastName=last_name</ont:columnMapping>
+        <ont:columnMapping>email=email</ont:columnMapping>
+        <ont:columnMapping>phone=phone</ont:columnMapping>
+        <ont:columnMapping>gender=gender</ont:columnMapping>
+        <ont:columnMapping>dateOfBirth=date_of_birth</ont:columnMapping>
+        <ont:columnMapping>city=city</ont:columnMapping>
+        <ont:columnMapping>state=state</ont:columnMapping>
+        <ont:columnMapping>country=country</ont:columnMapping>
+        <ont:columnMapping>postalCode=postal_code</ont:columnMapping>
+        <ont:columnMapping>customerSegment=customer_segment</ont:columnMapping>
+        <ont:columnMapping>registrationDate=registration_date</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_order">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/Order"/>
+        <ont:boundEntityId>order</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.orders</ont:table>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>orderNumber=order_number</ont:columnMapping>
+        <ont:columnMapping>customerId=customer_id</ont:columnMapping>
+        <ont:columnMapping>orderDate=order_date</ont:columnMapping>
+        <ont:columnMapping>orderStatus=order_status</ont:columnMapping>
+        <ont:columnMapping>salesChannel=sales_channel</ont:columnMapping>
+        <ont:columnMapping>shipCity=ship_city</ont:columnMapping>
+        <ont:columnMapping>shipState=ship_state</ont:columnMapping>
+        <ont:columnMapping>shipPostalCode=ship_postal_code</ont:columnMapping>
+        <ont:columnMapping>subtotal=subtotal</ont:columnMapping>
+        <ont:columnMapping>discountAmount=discount_amount</ont:columnMapping>
+        <ont:columnMapping>taxAmount=tax_amount</ont:columnMapping>
+        <ont:columnMapping>shippingFee=shipping_fee</ont:columnMapping>
+        <ont:columnMapping>totalAmount=total_amount</ont:columnMapping>
+        <ont:columnMapping>currency=currency</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_orderItem">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/OrderItem"/>
+        <ont:boundEntityId>orderItem</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.order_items</ont:table>
+        <ont:columnMapping>orderItemId=order_item_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>lineNumber=line_number</ont:columnMapping>
+        <ont:columnMapping>productId=product_id</ont:columnMapping>
+        <ont:columnMapping>quantity=quantity</ont:columnMapping>
+        <ont:columnMapping>unitPrice=unit_price</ont:columnMapping>
+        <ont:columnMapping>discountPct=discount_pct</ont:columnMapping>
+        <ont:columnMapping>lineTotal=line_total</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_product">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/Product"/>
+        <ont:boundEntityId>product</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.products</ont:table>
+        <ont:columnMapping>productId=product_id</ont:columnMapping>
+        <ont:columnMapping>sku=sku</ont:columnMapping>
+        <ont:columnMapping>productName=product_name</ont:columnMapping>
+        <ont:columnMapping>categoryId=category_id</ont:columnMapping>
+        <ont:columnMapping>brand=brand</ont:columnMapping>
+        <ont:columnMapping>description=description</ont:columnMapping>
+        <ont:columnMapping>unitPrice=unit_price</ont:columnMapping>
+        <ont:columnMapping>costPrice=cost_price</ont:columnMapping>
+        <ont:columnMapping>currency=currency</ont:columnMapping>
+        <ont:columnMapping>stockQuantity=stock_quantity</ont:columnMapping>
+        <ont:columnMapping>isActive=is_active</ont:columnMapping>
+        <ont:columnMapping>createdAt=created_at</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_payment">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/Payment"/>
+        <ont:boundEntityId>payment</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.payments</ont:table>
+        <ont:columnMapping>paymentId=payment_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>paymentMethod=payment_method</ont:columnMapping>
+        <ont:columnMapping>paymentStatus=payment_status</ont:columnMapping>
+        <ont:columnMapping>amount=amount</ont:columnMapping>
+        <ont:columnMapping>currency=currency</ont:columnMapping>
+        <ont:columnMapping>transactionRef=transaction_ref</ont:columnMapping>
+        <ont:columnMapping>gateway=gateway</ont:columnMapping>
+        <ont:columnMapping>paidAt=paid_at</ont:columnMapping>
+    </ont:DataBinding>
+
+    <ont:DataBinding rdf:about="http://example.org/ontology/ecom-retail-analytics/binding_shipment">
+        <ont:boundClass rdf:resource="http://example.org/ontology/ecom-retail-analytics/Shipment"/>
+        <ont:boundEntityId>shipment</ont:boundEntityId>
+        <ont:source>Databricks</ont:source>
+        <ont:table>ecom_bronze.shipments</ont:table>
+        <ont:columnMapping>shipmentId=shipment_id</ont:columnMapping>
+        <ont:columnMapping>orderId=order_id</ont:columnMapping>
+        <ont:columnMapping>carrier=carrier</ont:columnMapping>
+        <ont:columnMapping>trackingNumber=tracking_number</ont:columnMapping>
+        <ont:columnMapping>shipmentStatus=shipment_status</ont:columnMapping>
+        <ont:columnMapping>shippedAt=shipped_at</ont:columnMapping>
+        <ont:columnMapping>deliveredAt=delivered_at</ont:columnMapping>
+        <ont:columnMapping>shipCity=ship_city</ont:columnMapping>
+        <ont:columnMapping>shipState=ship_state</ont:columnMapping>
+        <ont:columnMapping>shipPostalCode=ship_postal_code</ont:columnMapping>
+    </ont:DataBinding>
+
+</rdf:RDF>
