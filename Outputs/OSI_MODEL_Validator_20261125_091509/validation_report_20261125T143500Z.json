@@ -1,0 +1,37 @@
+{
+  "overall_validation_score": 98.3,
+  "accuracy_score": 100.0,
+  "efficiency_score": 95.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No completeness issues identified",
+      "recommendation": "All tables, columns, relationships, and metrics are fully documented and cross-referenced between the semantic model and data glossary."
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "-",
+      "area": "-",
+      "issue": "No accuracy issues identified",
+      "recommendation": "All metadata types, business definitions, relationship cardinalities, and naming conventions are consistent and accurate across both artifacts."
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Metadata Redundancy",
+      "issue": "System columns (_source_system, _batch_id, _loaded_at) have identical descriptions duplicated across all 7 tables in both the semantic model and data glossary.",
+      "recommendation": "Consider creating a shared metadata reference or template for common system columns to reduce maintenance overhead and ensure consistency when descriptions need to be updated."
+    },
+    {
+      "severity": "Low",
+      "area": "Metric Reusability",
+      "issue": "Multiple \"revenue by dimension\" metrics (revenue_by_customer, revenue_by_product, revenue_by_category, revenue_by_sales_channel, revenue_by_customer_segment) follow nearly identical patterns, differing only in the grouping dimension.",
+      "recommendation": "Consider implementing parameterized metric templates or a dimensional metric framework that accepts the grouping dimension as a parameter, reducing code duplication and improving maintainability."
+    }
+  ]
+}
