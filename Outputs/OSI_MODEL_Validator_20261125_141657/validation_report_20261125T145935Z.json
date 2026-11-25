@@ -1,0 +1,61 @@
+{
+  "overall_validation_score": 95.8,
+  "accuracy_score": 97.5,
+  "efficiency_score": 90.0,
+  "completeness_score": 100.0,
+  "overall_status": "PASS WITH WARNINGS",
+  "completeness_assessment": [
+    {
+      "severity": "Low",
+      "area": "Documentation Coverage",
+      "issue": "The description field for product_categories.description and products.description are present but could be more detailed for analytical context",
+      "recommendation": "Enhance product and category descriptions to include analytical use cases and business context"
+    }
+  ],
+  "accuracy_assessment": [
+    {
+      "severity": "Low",
+      "area": "Metadata Accuracy",
+      "issue": "The glossary marks orders.tax_amount as PII, but the semantic model does not flag it as PII in constraints",
+      "recommendation": "Review and align PII classification for tax_amount between glossary and semantic model; typically tax amounts are not PII unless they reveal individual financial details"
+    },
+    {
+      "severity": "Low",
+      "area": "Type Consistency",
+      "issue": "The glossary shows TIMESTAMP(29,9) with nanosecond precision, which is consistent with the semantic model sql_type declarations",
+      "recommendation": "No action required; types are accurately aligned"
+    },
+    {
+      "severity": "Medium",
+      "area": "Relationship Cardinality",
+      "issue": "The semantic model correctly documents that payments and shipments have many-to-one relationships to orders, but the ai_context warns about one-to-many from orders perspective (multiple payments/shipments per order) - this is accurate and well-documented",
+      "recommendation": "Ensure downstream query developers review the double-counting prevention guidance in ai_context when aggregating across these relationships"
+    }
+  ],
+  "efficiency_assessment": [
+    {
+      "severity": "Low",
+      "area": "Redundant Metadata",
+      "issue": "The _source_system, _batch_id, and _loaded_at fields are repeated across all 7 tables with identical descriptions and constraints",
+      "recommendation": "Consider creating a reusable metadata field definition or template to reduce duplication in documentation"
+    },
+    {
+      "severity": "Medium",
+      "area": "Duplicate Documentation",
+      "issue": "Multiple metrics compute revenue aggregations (total_revenue, total_line_revenue, revenue_by_customer, revenue_by_product, etc.) with similar patterns - while each serves a distinct grain, the expression patterns are repetitive",
+      "recommendation": "Consider documenting a standard revenue aggregation pattern or template that can be referenced across metrics to improve maintainability"
+    },
+    {
+      "severity": "Low",
+      "area": "Structural Efficiency",
+      "issue": "The semantic model includes 40+ metrics, some of which follow identical aggregation patterns (COUNT DISTINCT for counts, SUM for totals, AVG for averages)",
+      "recommendation": "Document metric calculation patterns or create metric templates for common aggregation types to streamline future metric additions"
+    },
+    {
+      "severity": "Low",
+      "area": "Reusability Opportunity",
+      "issue": "The ai_context provides excellent double-counting prevention guidance, but similar join patterns and aggregation logic are repeated across multiple metric definitions",
+      "recommendation": "Consider creating reusable SQL fragments or common table expression (CTE) templates for frequently used join patterns (e.g., orders-to-customers, order_items-to-products-to-categories)"
+    }
+  ]
+}
